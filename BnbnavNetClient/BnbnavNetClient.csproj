@@ -27,8 +27,4 @@
       <DependentUpon>EnterPopupView.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Attributes" />
-  </ItemGroup>
 </Project>
