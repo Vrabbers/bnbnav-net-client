@@ -35,7 +35,8 @@ public partial class MapView : UserControl
                 return;
 
             var pointerPos = eventArgs.GetPosition(this);
-            mapViewModel.Pan += (_pointerPrevPosition - pointerPos) * mapViewModel.Scale;
+
+            // We need to pan _more_ when scale is smaller:
             _pointerPrevPosition = pointerPos;
         };
 
