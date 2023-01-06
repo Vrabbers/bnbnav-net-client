@@ -3,16 +3,17 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="clr-namespace:BnbnavNetClient.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="330" d:DesignHeight="150"
+             mc:Ignorable="d" d:DesignWidth="330" d:DesignHeight="170"
              x:Class="BnbnavNetClient.Views.NewLandmarkView"
 			 x:DataType="vm:NewLandmarkViewModel">
 
 	<StackPanel VerticalAlignment="Center" Margin="15">
 		<TextBlock Text="New Landmark"/>
 		<TextBox MinWidth="300" Watermark="Name" Text="{CompiledBinding LandmarkName}"/>
-		<ComboBox>
+		<ComboBox MinWidth="300" SelectedIndex="0">
 			<ComboBox.Items>
-				<ComboBoxItem>Placeholder</ComboBoxItem>
+				<ComboBoxItem>AirCS Station</ComboBoxItem>
+				<!--todo: make this into ItemTemplate and populate this list from Landmark Dictionary-->
 			</ComboBox.Items>
 		</ComboBox>
 		<StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
