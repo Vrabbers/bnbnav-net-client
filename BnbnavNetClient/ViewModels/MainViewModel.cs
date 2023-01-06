@@ -13,6 +13,9 @@ public sealed class MainViewModel : ViewModel
     public bool EditModeEnabled { get; set; }
 
     [Reactive]
+    public bool HighlightTurnRestrictionsEnabled { get; set; }
+
+    [Reactive]
     public bool FollowMeEnabled { get; set; }
 
     [ObservableAsProperty]
