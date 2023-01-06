@@ -35,13 +35,19 @@ public partial class MapView : UserControl
                 return;
 
             var pointerPos = eventArgs.GetPosition(this);
-            mapViewModel.Pan += _pointerPrevPosition - pointerPos;
+            mapViewModel.Pan += (_pointerPrevPosition - pointerPos) * mapViewModel.Scale;
             _pointerPrevPosition = pointerPos;
         };
 
         PointerReleased += (_, __) =>
         {
             _pointerPressing = false;
+        };
+
+        PointerWheelChanged += (_, eventArgs) =>
+        {
+            var factor = 1.0 + 10 * (eventArgs.Delta.Y / 100.0);
+            Zoom(factor, (eventArgs.GetPosition(this)));
         };
 
         //why does this happen to me :sob:
@@ -60,6 +66,7 @@ public partial class MapView : UserControl
             return;
 
         var pan = mapViewModel.Pan;
+        var scale = mapViewModel.Scale;
         var mapService = mapViewModel.MapService;
 
         context.FillRectangle(BackgroundBrush, Bounds);
@@ -67,9 +74,9 @@ public partial class MapView : UserControl
         foreach (var edge in mapService.Edges.Values)
         {
             var fromEdge = mapService.Nodes[edge.From.Id];
-            var from = new Point(fromEdge.X, fromEdge.Z) - pan;
+            var from = (new Point(fromEdge.X, fromEdge.Z) - pan) * scale;
             var toEdge = mapService.Nodes[edge.To.Id];
-            var to = new Point(toEdge.X, toEdge.Z) - pan;
+            var to = (new Point(toEdge.X, toEdge.Z) - pan) * scale;
             if (!LineIntersects(from, to, Bounds))
                 continue;
             context.DrawLine(RoadPen, from, to);
@@ -77,7 +84,7 @@ public partial class MapView : UserControl
 
         foreach (var node in mapService.Nodes.Values)
         {
-            var rect = new Rect(node.X - 7 - pan.X, node.Z - 7 - pan.Y, 14, 14);
+            var rect = new Rect((node.X - 7 - pan.X) * scale, (node.Z - 7 - pan.Y) * scale, 14, 14);
             if (!Bounds.Intersects(rect))
                 continue;
             context.DrawRectangle(WhiteFillBrush, BlackBorderPen, rect);
@@ -90,5 +97,25 @@ public partial class MapView : UserControl
 
         // TODO: do this properly
         return false;
+    }
+
+    public Point ToWorld(Point pixelCoordinates)
+    {
+        if (DataContext is not MapViewModel mapViewModel)
+            return new Point();
+        return pixelCoordinates * mapViewModel.Scale + mapViewModel.Pan;
+    }
+
+    public void Zoom(double factor, Point origin)
+    {
+        if (DataContext is not MapViewModel mapViewModel)
+            return;
+        var newScale = mapViewModel.Scale * factor;
+        if (newScale < 0.1) newScale = 0.1;
+        if (newScale > 50) newScale = 50;
+        factor = newScale / mapViewModel.Scale;
+
+        mapViewModel.Pan = (mapViewModel.Pan - origin) * factor + origin;
+        mapViewModel.Scale = newScale;
     }
 }

@@ -46,8 +46,8 @@ public sealed class MainViewModel : ViewModel
         var mapService = await MapService.DownloadInitialMapAsync();
         MapViewModel = new(mapService);
         var panText = MapViewModel
-            .WhenAnyValue(map => map.Pan)
-            .Select(pt => $"x = {double.Round(pt.X)}; y = {double.Round(pt.Y)}");
+            .WhenAnyValue(map => map.Pan, y => y.Scale)
+            .Select(pt => $"x = {double.Round(pt.Item1.X)}; y = {double.Round(pt.Item1.Y)}; scale = {pt.Item2}");
         panText.ToPropertyEx(this, me => me.PanText);
     }
 
