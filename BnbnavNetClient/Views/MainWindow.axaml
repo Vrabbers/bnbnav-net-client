@@ -7,6 +7,8 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="BnbnavNetClient.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="BnbnavNetClient">
+        Title="BnbnavNetClient"
+        Width="800"
+        Height="600">
   <views:MainView/>
 </Window>
