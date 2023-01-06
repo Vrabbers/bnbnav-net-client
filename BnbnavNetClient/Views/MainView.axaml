@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:BnbnavNetClient.ViewModels"
+             xmlns:c="clr-namespace:BnbnavNetClient.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="BnbnavNetClient.Views.MainView"
+             x:DataType="viewModels:MainViewModel"
+             xmlns:views="clr-namespace:BnbnavNetClient.Views"
+             Loaded="ViewLoaded">
+
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <viewModels:MainViewModel />
+  </Design.DataContext>
+
+  <Grid>
+    <!-- Main UI -->
+    <Grid RowDefinitions="* Auto">
+      <views:MapRenderer/>
+      <Grid Grid.Row="1">
+        <Grid ColumnDefinitions="Auto * Auto">
+          <ToggleButton Grid.Column="0" Command="{CompiledBinding EditModePressed}" Content="Edit Mode" IsChecked="{CompiledBinding EditModeEnabled}"/>
+          <ToggleButton Grid.Column="2" Command="{CompiledBinding FollowMePressed}" Content="{CompiledBinding FollowMeText}" IsChecked="{CompiledBinding FollowMeEnabled}"/>
+        </Grid>
+        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{CompiledBinding PanText}"/>
+      </Grid>
+    </Grid>
+
+    <!-- Popup -->
+    <Grid IsVisible="{CompiledBinding Popup, Converter={x:Static ObjectConverters.IsNotNull}}" ColumnDefinitions="* Auto *" RowDefinitions="* Auto *" Background="#7f000000">
+      <Border CornerRadius="3" Grid.Column="1" Grid.Row="1" BoxShadow="0 0 200 0 Black" Background="White">
+        <UserControl Content="{CompiledBinding Popup}"/>
+      </Border>
+    </Grid>
+  </Grid>
+</UserControl>
