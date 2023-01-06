@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -40,6 +42,68 @@ public sealed class MapService : ReactiveObject
         _annotations = new Dictionary<string, Annotation>(annotations.ToDictionary(a => a.Id));
     }
 
+    private async Task Submit(string path, object json)
+    {
+        await HttpClient.PostAsync($"/api/{path}", JsonContent.Create(json, MediaTypeHeaderValue.Parse("application/json"), new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }));
+    }
+
+    private async Task Delete(string path)
+    {
+        await HttpClient.DeleteAsync($"/api/{path}");
+    }
+
+    public async Task DeleteNode(Node node)
+    {
+        await Delete($"/nodes/{node.Id}");
+    }
+
+    public async Task UpsertRoad(Road? road, string name, string type)
+    {
+        await Submit($"/roads/{road?.Id ?? "add"}", new
+        {
+            Name = name,
+            Type = type
+        });
+    }
+
+    public async Task AddEdge(Node first, Node second, Road road)
+    {
+        await Submit("/edges/add", new
+        {
+            Road = road.Id,
+            Node1 = first.Id,
+            Node2 = second.Id
+        });
+    }
+
+    public async Task AddTwoWayEdge(Node first, Node second, Road road)
+    {
+        await Task.WhenAll(AddEdge(first, second, road), AddEdge(second, first, road));
+    }
+
+    public async Task DeleteEdge(Edge edge)
+    {
+        await Delete($"/edges/{edge.Id}");
+    }
+
+    public async Task AttachLandmark(Node node, string name, string type)
+    {
+        await Submit("/landmarks/add", new
+        {
+            Node = node.Id,
+            Name = name,
+            Type = type
+        });
+    }
+    
+    public async Task DetachLandmark(Landmark landmark)
+    {
+        await Delete($"/landmarks/{landmark.Id}");
+    }
+
     public static async Task<MapService> DownloadInitialMapAsync()
     {
         var content = await HttpClient.GetStringAsync("/api/data");
@@ -48,6 +112,8 @@ public sealed class MapService : ReactiveObject
         if (jsonDom is null)
             throw new NullReferenceException(nameof(jsonDom));
 
+        //TODO: Gracefully fail if there is no such property - this might be a new server w/o landmarks, nodes, etc.
+        
         var root = jsonDom.RootElement;
         var jsonNodes = root.GetProperty("nodes"u8);
         var nodes = new Dictionary<string, Node>();
