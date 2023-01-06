@@ -19,7 +19,7 @@
   <Grid>
     <!-- Main UI -->
     <Grid RowDefinitions="* Auto">
-      <views:MapRenderer/>
+      <UserControl Content="{CompiledBinding MapViewModel}"/>
       <Grid Grid.Row="1">
         <Grid ColumnDefinitions="Auto * Auto">
           <ToggleButton Grid.Column="0" Command="{CompiledBinding EditModePressed}" Content="Edit Mode" IsChecked="{CompiledBinding EditModeEnabled}"/>

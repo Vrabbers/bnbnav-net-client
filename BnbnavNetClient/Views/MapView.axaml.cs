@@ -1,29 +1,28 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Shapes;
-using Avalonia.Input;
 using Avalonia.Media;
-using BnbnavNetClient.Services;
 using BnbnavNetClient.ViewModels;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using System;
-using System.Reactive.Linq;
+using DynamicData.Binding;
+using System.Reactive;
 
 namespace BnbnavNetClient.Views;
-public class MapRenderer : UserControl
+public partial class MapView : UserControl
 {
     bool _pointerPressing;
     Point _pointerPrevPosition;
 
-    MapService? _mapService;
+    public MapView()
+    {
+        InitializeComponent();
+    }
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        if (DataContext is not MainViewModel mvm)
+        if (DataContext is not MapViewModel mapViewModel)
             return;
-
+        
         PointerPressed += (_, eventArgs) =>
         {
             _pointerPressing = true;
@@ -36,7 +35,7 @@ public class MapRenderer : UserControl
                 return;
 
             var pointerPos = eventArgs.GetPosition(this);
-            _mapService!.Pan += _pointerPrevPosition - pointerPos;
+            mapViewModel.Pan += _pointerPrevPosition - pointerPos;
             _pointerPrevPosition = pointerPos;
         };
 
@@ -45,13 +44,8 @@ public class MapRenderer : UserControl
             _pointerPressing = false;
         };
 
-        mvm.WhenAnyValue(x => x.MapService).Subscribe(ms =>
-        {
-            _mapService = ms;
-            InvalidateVisual();
-            ms.WhenAnyValue(x => x.Pan).Subscribe(_ => InvalidateVisual());
-        });
-
+        //why does this happen to me :sob:
+        mapViewModel.WhenAnyPropertyChanged().Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
     }
 
     static readonly IPen BlackBorderPen = new Pen(new SolidColorBrush(Colors.Black), thickness: 2);
@@ -61,24 +55,27 @@ public class MapRenderer : UserControl
     public override void Render(DrawingContext context)
     {
         base.Render(context);
-        if (_mapService is null)
+
+        if (DataContext is not MapViewModel mapViewModel)
             return;
-        var pan = _mapService.Pan;
+
+        var pan = mapViewModel.Pan;
+        var mapService = mapViewModel.MapService;
 
         context.FillRectangle(BackgroundBrush, Bounds);
 
-        foreach (var edge in _mapService.Edges.Values)
+        foreach (var edge in mapService.Edges.Values)
         {
-            var fromEdge = _mapService.Nodes[edge.From.Id];
+            var fromEdge = mapService.Nodes[edge.From.Id];
             var from = new Point(fromEdge.X, fromEdge.Z) - pan;
-            var toEdge = _mapService.Nodes[edge.To.Id];
+            var toEdge = mapService.Nodes[edge.To.Id];
             var to = new Point(toEdge.X, toEdge.Z) - pan;
             if (!LineIntersects(from, to, Bounds))
                 continue;
             context.DrawLine(RoadPen, from, to);
         }
 
-        foreach (var node in _mapService.Nodes.Values)
+        foreach (var node in mapService.Nodes.Values)
         {
             var rect = new Rect(node.X - 7 - pan.X, node.Z - 7 - pan.Y, 14, 14);
             if (!Bounds.Intersects(rect))
@@ -90,6 +87,7 @@ public class MapRenderer : UserControl
     static bool LineIntersects(Point from, Point to, Rect Bounds)
     {
         if (Bounds.Contains(from) || Bounds.Contains(to)) return true;
+
         // TODO: do this properly
         return false;
     }

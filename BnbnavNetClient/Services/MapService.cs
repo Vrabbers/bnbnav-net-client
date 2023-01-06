@@ -1,17 +1,10 @@
-﻿using Avalonia;
-using BnbnavNetClient.Models;
-using DynamicData;
-using Microsoft.AspNetCore.Components.WebAssembly.Http;
+﻿using BnbnavNetClient.Models;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -19,7 +12,7 @@ namespace BnbnavNetClient.Services;
 public sealed class MapService : ReactiveObject
 {
 
-    static readonly string BaseUrl = "http://localhost:4000";
+    static readonly string BaseUrl = Environment.GetEnvironmentVariable("BNBNAV_BASEURL") ?? "https://bnbnav.aircs.racing/";
 
     static readonly HttpClient HttpClient = new() { BaseAddress = new(BaseUrl) };
 
@@ -33,9 +26,6 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Edge> Edges { get; }
     public ReadOnlyDictionary<string, Road> Roads { get; }
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
-
-    [Reactive]
-    public Point Pan { get; set; }
 
     MapService(IEnumerable<Node> nodes, IEnumerable<Edge> edges, IEnumerable<Road> roads, IEnumerable<Landmark> landmarks, IEnumerable<Annotation> annotations)
     {
@@ -52,9 +42,7 @@ public sealed class MapService : ReactiveObject
 
     public static async Task<MapService> DownloadInitialMapAsync()
     {
-        var req = new HttpRequestMessage(HttpMethod.Get, "/api/data");
-        var resp = await HttpClient.SendAsync(req);
-        var content = await resp.Content.ReadAsStringAsync();
+        var content = await HttpClient.GetStringAsync("/api/data");
         using var jsonDom = JsonDocument.Parse(content);
 
         if (jsonDom is null)

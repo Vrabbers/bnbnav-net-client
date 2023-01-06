@@ -28,7 +28,7 @@ public sealed class MainViewModel : ViewModel
     public ViewModel? Popup { get; set; }
 
     [Reactive]
-    public MapService? MapService { get; private set; }
+    public MapViewModel? MapViewModel { get; private set; }
 
     [ObservableAsProperty]
     public string PanText { get; } = "x = 0; y = 0";
@@ -43,10 +43,11 @@ public sealed class MainViewModel : ViewModel
 
     public async Task InitMapService()
     {
-        MapService = await MapService.DownloadInitialMapAsync();
-        var panText = this
-            .WhenAnyValue(me => me.MapService!.Pan)
-            .Select(pt => $"x = {pt.X}; y = {pt.Y}");
+        var mapService = await MapService.DownloadInitialMapAsync();
+        MapViewModel = new(mapService);
+        var panText = MapViewModel
+            .WhenAnyValue(map => map.Pan)
+            .Select(pt => $"x = {double.Round(pt.X)}; y = {double.Round(pt.Y)}");
         panText.ToPropertyEx(this, me => me.PanText);
     }
 

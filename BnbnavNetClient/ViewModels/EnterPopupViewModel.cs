@@ -1,7 +1,5 @@
-﻿using JetBrains.Annotations;
-using ReactiveUI;
+﻿using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System.Data;
 using System.Reactive;
 
 namespace BnbnavNetClient.ViewModels;
