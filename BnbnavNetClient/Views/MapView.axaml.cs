@@ -82,7 +82,7 @@ public partial class MapView : UserControl
             context.DrawLine(RoadPen, from, to);
         }
 
-        if (mapViewModel.IsInEditMode)
+        if (MapViewModel.IsInEditMode)
         {
             foreach (var node in mapService.Nodes.Values)
             {
