@@ -3,6 +3,8 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using BnbnavNetClient.ViewModels;
 using DynamicData.Binding;
+using ReactiveUI;
+using System;
 using System.Reactive;
 
 namespace BnbnavNetClient.Views;
@@ -12,6 +14,8 @@ public partial class MapView : UserControl
     Point _pointerPrevPosition;
     MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
+    Matrix _toScreenMtx = Matrix.Identity;
+    Matrix _toWorldMtx = Matrix.Identity;
 
     public MapView()
     {
@@ -52,7 +56,34 @@ public partial class MapView : UserControl
         };
 
         //why does this happen to me :sob:
-        MapViewModel.WhenAnyPropertyChanged().Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
+        MapViewModel
+            .WhenAnyValue(x => x.Pan, x => x.Scale, x => x.Rotation)
+            .Subscribe(Observer.Create<ValueTuple<Point, double, double>>(tuple =>
+            {
+                var pan = tuple.Item1;
+                var scale = tuple.Item2;
+                var rotate = tuple.Item3;
+
+                var matrix =
+                    Matrix.CreateTranslation(-pan) *
+                    Matrix.CreateScale(scale, scale);
+
+                if (rotate != 0)
+                {
+                    var centerOfBounds = new Vector(Bounds.Width, Bounds.Height) / (scale * 2);
+                    
+                    matrix *=
+                        Matrix.CreateTranslation(-centerOfBounds) *
+                        Matrix.CreateRotation(rotate) * 
+                        Matrix.CreateTranslation(centerOfBounds);
+                }
+
+                _toScreenMtx = matrix;
+                _toWorldMtx = matrix.Invert();
+            }));
+        MapViewModel
+            .WhenAnyPropertyChanged()
+            .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
     }
 
     static readonly double NodeSize = 14;
@@ -62,20 +93,17 @@ public partial class MapView : UserControl
     static readonly Pen RoadPen = new Pen(new SolidColorBrush(Colors.DarkBlue), thickness: 20, lineCap: PenLineCap.Round);
     public override void Render(DrawingContext context)
     {
-        base.Render(context);
-
-        var pan = MapViewModel.Pan;
-        var scale = MapViewModel.Scale;
         var mapService = MapViewModel.MapService;
+        var scale = MapViewModel.Scale;
 
         context.FillRectangle(BackgroundBrush, Bounds);
 
         foreach (var edge in mapService.Edges.Values)
         {
             var fromEdge = mapService.Nodes[edge.From.Id];
-            var from = (new Point(fromEdge.X, fromEdge.Z) - pan) * scale;
+            var from = ToScreen(new(fromEdge.X, fromEdge.Z));
             var toEdge = mapService.Nodes[edge.To.Id];
-            var to = (new Point(toEdge.X, toEdge.Z) - pan) * scale;
+            var to = ToScreen(new (toEdge.X, toEdge.Z));
             if (!LineIntersects(from, to, Bounds))
                 continue;
             RoadPen.Thickness = 20 * scale;
@@ -86,15 +114,18 @@ public partial class MapView : UserControl
         {
             foreach (var node in mapService.Nodes.Values)
             {
+                var pos = ToScreen(new(node.X, node.Z));
                 var rect = new Rect(
-                    (node.X - pan.X) * scale - NodeSize / 2, 
-                    (node.Z - pan.Y) * scale - NodeSize / 2,
+                    pos.X - NodeSize / 2, 
+                    pos.Y - NodeSize / 2,
                     NodeSize, NodeSize);
                 if (!Bounds.Intersects(rect))
                     continue;
                 context.DrawRectangle(WhiteFillBrush, BlackBorderPen, rect);
             }
         }
+
+        base.Render(context);
     }
 
     static bool LineIntersects(Point from, Point to, Rect Bounds)
@@ -111,26 +142,21 @@ public partial class MapView : UserControl
         return false;
     }
 
-    static Point ToStaticWorld(Point screenCoords, Point pan, double scale) =>
-        screenCoords / scale + pan;
-
-    static Point ToStaticScreen(Point worldCoords, Point pan, double scale) =>
-        scale * (worldCoords - pan);
-
     Point ToWorld(Point screenCoords) =>
-         ToStaticWorld(screenCoords, MapViewModel.Pan, MapViewModel.Scale);
+         _toWorldMtx.Transform(screenCoords);
 
     Point ToScreen(Point worldCoords) =>
-        ToStaticScreen(worldCoords, MapViewModel.Pan, MapViewModel.Scale);
+        _toScreenMtx.Transform(worldCoords);
 
     public void Zoom(double deltaScale, Point origin)
     {
         var newScale = double.Clamp(MapViewModel.Scale + deltaScale, 0.1, 5.0);
         
         var worldPrevPos = ToWorld(origin);
-        var worldFutureIncorrectPos = ToStaticWorld(origin, MapViewModel.Pan, newScale);
+        MapViewModel.Scale = newScale;
+        var worldFutureIncorrectPos = ToWorld(origin);
         var correction = worldFutureIncorrectPos - worldPrevPos;
         MapViewModel.Pan -= correction;
-        MapViewModel.Scale = newScale;
+
     }
 }

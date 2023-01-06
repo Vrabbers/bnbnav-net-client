@@ -17,6 +17,10 @@ public class MapViewModel : ViewModel
     [ObservableAsProperty]
     public bool IsInEditMode { get; }
 
+    [Reactive]
+    // in radians!
+    public double Rotation { get; set; } = 0;
+
     public MapViewModel(MapService mapService, MainViewModel mainViewModel)
     {
         MapService = mapService;
