@@ -10,6 +10,8 @@ public partial class MapView : UserControl
 {
     bool _pointerPressing;
     Point _pointerPrevPosition;
+    MapViewModel MapViewModel => (MapViewModel)DataContext!;
+
 
     public MapView()
     {
@@ -19,9 +21,6 @@ public partial class MapView : UserControl
     protected override void OnInitialized()
     {
         base.OnInitialized();
-
-        if (DataContext is not MapViewModel mapViewModel)
-            return;
         
         PointerPressed += (_, eventArgs) =>
         {
@@ -37,7 +36,7 @@ public partial class MapView : UserControl
             var pointerPos = eventArgs.GetPosition(this);
 
             // We need to pan _more_ when scale is smaller:
-            mapViewModel.Pan += (_pointerPrevPosition - pointerPos) / mapViewModel.Scale;
+            MapViewModel.Pan += (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
             _pointerPrevPosition = pointerPos;
         };
 
@@ -48,29 +47,26 @@ public partial class MapView : UserControl
 
         PointerWheelChanged += (_, eventArgs) =>
         {
-            var factor = 1.0 + 10 * (eventArgs.Delta.Y / 100.0);
-            Zoom(factor, (eventArgs.GetPosition(this)));
+            var deltaScale = eventArgs.Delta.Y / 10.0;
+            Zoom(deltaScale, (eventArgs.GetPosition(this)));
         };
 
         //why does this happen to me :sob:
-        mapViewModel.WhenAnyPropertyChanged().Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
+        MapViewModel.WhenAnyPropertyChanged().Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
     }
 
     static readonly double NodeSize = 14;
     static readonly IPen BlackBorderPen = new Pen(new SolidColorBrush(Colors.Black), thickness: 2);
     static readonly IBrush BackgroundBrush = new SolidColorBrush(Colors.WhiteSmoke);
     static readonly IBrush WhiteFillBrush = new SolidColorBrush(Colors.White);
-    static readonly IPen RoadPen = new Pen(new SolidColorBrush(Colors.DarkBlue), thickness: 20, lineCap: PenLineCap.Round);
+    static readonly Pen RoadPen = new Pen(new SolidColorBrush(Colors.DarkBlue), thickness: 20, lineCap: PenLineCap.Round);
     public override void Render(DrawingContext context)
     {
         base.Render(context);
 
-        if (DataContext is not MapViewModel mapViewModel)
-            return;
-
-        var pan = mapViewModel.Pan;
-        var scale = mapViewModel.Scale;
-        var mapService = mapViewModel.MapService;
+        var pan = MapViewModel.Pan;
+        var scale = MapViewModel.Scale;
+        var mapService = MapViewModel.MapService;
 
         context.FillRectangle(BackgroundBrush, Bounds);
 
@@ -82,6 +78,7 @@ public partial class MapView : UserControl
             var to = (new Point(toEdge.X, toEdge.Z) - pan) * scale;
             if (!LineIntersects(from, to, Bounds))
                 continue;
+            RoadPen.Thickness = 20 * scale;
             context.DrawLine(RoadPen, from, to);
         }
 
@@ -99,29 +96,38 @@ public partial class MapView : UserControl
 
     static bool LineIntersects(Point from, Point to, Rect Bounds)
     {
-        if (Bounds.Contains(from) || Bounds.Contains(to)) return true;
+        if (Bounds.Contains(from) || Bounds.Contains(to)) 
+            return true;
 
+        //If the line is bigger than the smallest edge of the bounds, draw it, as both points may lie outside the view;
+        var minDistSqr = double.Pow(double.Min(Bounds.Width, Bounds.Height), 2);
+        var lengthSqr = double.Pow(from.X - to.X, 2) + double.Pow(from.Y - to.Y, 2);
+        if (lengthSqr > minDistSqr) 
+            return true;
         // TODO: do this properly
         return false;
     }
 
-    public Point ToWorld(Point pixelCoordinates)
-    {
-        if (DataContext is not MapViewModel mapViewModel)
-            return new Point();
-        return pixelCoordinates * mapViewModel.Scale + mapViewModel.Pan;
-    }
+    static Point ToStaticWorld(Point screenCoords, Point pan, double scale) =>
+        screenCoords / scale + pan;
 
-    public void Zoom(double factor, Point origin)
-    {
-        if (DataContext is not MapViewModel mapViewModel)
-            return;
-        var newScale = mapViewModel.Scale * factor;
-        if (newScale < 0.1) newScale = 0.1;
-        if (newScale > 50) newScale = 50;
-        factor = newScale / mapViewModel.Scale;
+    static Point ToStaticScreen(Point worldCoords, Point pan, double scale) =>
+        scale * (worldCoords - pan);
 
-        mapViewModel.Pan = (mapViewModel.Pan - origin) * factor + origin;
-        mapViewModel.Scale = newScale;
+    Point ToWorld(Point screenCoords) =>
+         ToStaticWorld(screenCoords, MapViewModel.Pan, MapViewModel.Scale);
+
+    Point ToScreen(Point worldCoords) =>
+        ToStaticScreen(worldCoords, MapViewModel.Pan, MapViewModel.Scale);
+
+    public void Zoom(double deltaScale, Point origin)
+    {
+        var newScale = double.Clamp(MapViewModel.Scale + deltaScale, 0.1, 5.0);
+        
+        var worldPrevPos = ToWorld(origin);
+        var worldFutureIncorrectPos = ToStaticWorld(origin, MapViewModel.Pan, newScale);
+        var correction = worldFutureIncorrectPos - worldPrevPos;
+        MapViewModel.Pan -= correction;
+        MapViewModel.Scale = newScale;
     }
 }
