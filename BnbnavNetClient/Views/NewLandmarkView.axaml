@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:BnbnavNetClient.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="330" d:DesignHeight="150"
+             x:Class="BnbnavNetClient.Views.NewLandmarkView"
+			 x:DataType="vm:NewLandmarkViewModel">
+
+	<StackPanel VerticalAlignment="Center" Margin="15">
+		<TextBlock Text="New Landmark"/>
+		<TextBox MinWidth="300" Watermark="Name" Text="{CompiledBinding LandmarkName}"/>
+		<ComboBox>
+			<ComboBox.Items>
+				<ComboBoxItem>Placeholder</ComboBoxItem>
+			</ComboBox.Items>
+		</ComboBox>
+		<StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+			<Button Command="{CompiledBinding Cancel}">Cancel</Button>
+			<Button Command="{CompiledBinding Ok}" IsDefault="True">OK</Button>
+		</StackPanel>
+	</StackPanel>
+</UserControl>
