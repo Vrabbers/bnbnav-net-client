@@ -23,11 +23,22 @@ public sealed class MapService : ReactiveObject
     readonly Dictionary<string, Road> _roads;
     readonly Dictionary<string, Landmark> _landmarks;
     readonly Dictionary<string, Annotation> _annotations;
+    private static string _authenticationToken;
 
     public ReadOnlyDictionary<string, Node> Nodes { get; }
     public ReadOnlyDictionary<string, Edge> Edges { get; }
     public ReadOnlyDictionary<string, Road> Roads { get; }
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
+
+    public static string AuthenticationToken
+    {
+        get => _authenticationToken;
+        set
+        {
+            _authenticationToken = value;
+            HttpClient.DefaultRequestHeaders.Authorization = new("Bearer", value);
+        }
+    }
 
     MapService(IEnumerable<Node> nodes, IEnumerable<Edge> edges, IEnumerable<Road> roads, IEnumerable<Landmark> landmarks, IEnumerable<Annotation> annotations)
     {
