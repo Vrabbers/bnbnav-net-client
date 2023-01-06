@@ -75,12 +75,15 @@ public partial class MapView : UserControl
             context.DrawLine(RoadPen, from, to);
         }
 
-        foreach (var node in mapService.Nodes.Values)
+        if (mapViewModel.IsInEditMode)
         {
-            var rect = new Rect(node.X - 7 - pan.X, node.Z - 7 - pan.Y, 14, 14);
-            if (!Bounds.Intersects(rect))
-                continue;
-            context.DrawRectangle(WhiteFillBrush, BlackBorderPen, rect);
+            foreach (var node in mapService.Nodes.Values)
+            {
+                var rect = new Rect(node.X - 7 - pan.X, node.Z - 7 - pan.Y, 14, 14);
+                if (!Bounds.Intersects(rect))
+                    continue;
+                context.DrawRectangle(WhiteFillBrush, BlackBorderPen, rect);
+            }
         }
     }
 
