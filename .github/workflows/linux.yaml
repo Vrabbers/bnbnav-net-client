@@ -27,7 +27,7 @@ jobs:
       - name: "Create AppDir"
         run: |
           mkdir -p bnbnav.AppDir
-          cp -r BnbnavNetClient.Desktop/bin/Debug/net7.0/publish/* bnbnav.AppDir
+          cp -r BnbnavNetClient.Desktop/bin/Release/net7.0/publish/* bnbnav.AppDir
           cp dist/io.github.Vrabbers.bnbnav.desktop bnbnav.AppDir
           cp dist/io.github.Vrabbers.bnbnav.svg bnbnav.AppDir
           ln -s BnbnavNetClient.Desktop bnbnav.AppDir/AppRun
