@@ -35,7 +35,7 @@ jobs:
         run: |
           curl https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool-x86_64.AppImage -L
           chmod +x appimagetool-x86_64.AppImage
-          ./appimagetool-x86_64.AppImage bnbnav.AppDir
+          ./appimagetool-x86_64.AppImage --appimage-extract-and-run bnbnav.AppDir
       - uses: actions/upload-artifact@v1
         name: "Upload Artifact"
         with:
