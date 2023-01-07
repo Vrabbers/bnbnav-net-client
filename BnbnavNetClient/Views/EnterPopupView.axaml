@@ -5,14 +5,15 @@
              xmlns:vm="clr-namespace:BnbnavNetClient.ViewModels"
              mc:Ignorable="d" d:DesignWidth="330" d:DesignHeight="150"
              x:Class="BnbnavNetClient.Views.EnterPopupView"
-             x:DataType="vm:EnterPopupViewModel">
+             x:DataType="vm:EnterPopupViewModel"
+             x:CompileBindings="True">
 
   <StackPanel VerticalAlignment="Center" Margin="15">
-    <TextBlock Text="{CompiledBinding Title}"/>
-    <TextBox MinWidth="300" Watermark="{CompiledBinding Watermark}" Text="{CompiledBinding Input}"/>
+    <TextBlock Text="{Binding Title}"/>
+    <TextBox MinWidth="300" Watermark="{Binding Watermark}" Text="{Binding Input}"/>
     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-      <Button Command="{CompiledBinding Cancel}">Cancel</Button>
-      <Button Command="{CompiledBinding Ok}" IsDefault="True">OK</Button>
+      <Button Command="{Binding Cancel}">Cancel</Button>
+      <Button Command="{Binding Ok}" IsDefault="True">OK</Button>
     </StackPanel>
   </StackPanel>
 </UserControl>

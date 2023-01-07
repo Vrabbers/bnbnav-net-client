@@ -8,6 +8,7 @@
              x:Class="BnbnavNetClient.Views.MainView"
              x:DataType="viewModels:MainViewModel"
              xmlns:views="clr-namespace:BnbnavNetClient.Views"
+             x:CompileBindings="True"
              Loaded="ViewLoaded">
 
   <Design.DataContext>
@@ -19,27 +20,27 @@
   <Grid>
     <!-- Main UI -->
     <Grid RowDefinitions="* Auto">
-      <UserControl Content="{CompiledBinding MapViewModel}"/>
+      <UserControl Content="{Binding MapViewModel}"/>
       <Grid Grid.Row="1">
         <Grid ColumnDefinitions="Auto Auto * Auto">
-          <ToggleButton Grid.Column="0" Command="{CompiledBinding EditModePressed}" Content="Edit Mode" IsChecked="{CompiledBinding EditModeEnabled}"/>
-          <Button Grid.Column="1" IsVisible="{CompiledBinding EditModeEnabled}" Content="Spy options">
+          <ToggleButton Grid.Column="0" Command="{Binding EditModePressed}" Content="Edit Mode" IsChecked="{Binding EditModeEnabled}"/>
+          <Button Grid.Column="1" IsVisible="{Binding EditModeEnabled}" Content="Spy options">
             <Button.Flyout>
               <Flyout>
-                  <CheckBox Content="Highlight nodes with turn restrictions" IsChecked="{CompiledBinding HighlightTurnRestrictionsEnabled}"/>
+                  <CheckBox Content="Highlight nodes with turn restrictions" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
               </Flyout>
             </Button.Flyout>
           </Button>
-          <ToggleButton Grid.Column="3" Command="{CompiledBinding FollowMePressed}" Content="{CompiledBinding FollowMeText}" IsChecked="{CompiledBinding FollowMeEnabled}"/>
+          <ToggleButton Grid.Column="3" Command="{Binding FollowMePressed}" Content="{Binding FollowMeText}" IsChecked="{Binding FollowMeEnabled}"/>
         </Grid>
-        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{CompiledBinding PanText}"/>
+        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
       </Grid>
     </Grid>
 
     <!-- Popup -->
-    <Grid IsVisible="{CompiledBinding Popup, Converter={x:Static ObjectConverters.IsNotNull}}" ColumnDefinitions="* Auto *" RowDefinitions="* Auto *" Background="#7f000000">
+    <Grid IsVisible="{Binding Popup, Converter={x:Static ObjectConverters.IsNotNull}}" ColumnDefinitions="* Auto *" RowDefinitions="* Auto *" Background="#7f000000">
       <Border CornerRadius="3" Grid.Column="1" Grid.Row="1" BoxShadow="0 0 200 0 Black" Background="White">
-        <UserControl Content="{CompiledBinding Popup}"/>
+        <UserControl Content="{Binding Popup}"/>
       </Border>
     </Grid>
   </Grid>
