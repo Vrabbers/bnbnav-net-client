@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using BnbnavNetClient.ViewModels;
 using DynamicData.Binding;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using ReactiveUI;
 using System;
 using System.Reactive;
