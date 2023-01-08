@@ -23,7 +23,7 @@ jobs:
       - name: "Build Project"
         run: dotnet build BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj
       - name: "Publish Project"
-        run: dotnet publish BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj -c Release -r win-x64
+        run: dotnet publish BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj -c Release -r win-x64 --self-contained
       - uses: actions/upload-artifact@v1
         name: "Upload Artifact"
         with:
