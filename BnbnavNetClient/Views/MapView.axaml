@@ -6,8 +6,4 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="BnbnavNetClient.Views.MapView"
              x:DataType="vm:MapViewModel">
-  <UserControl.Resources>
-    <ResourceInclude x:Key="Night" Source="/Assets/MapNight.axaml"/>
-    <ResourceInclude x:Key="Day" Source="/Assets/MapDay.axaml"/>
-  </UserControl.Resources>
 </UserControl>

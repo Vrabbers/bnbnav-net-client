@@ -20,7 +20,7 @@
   <Grid>
     <!-- Main UI -->
     <Grid RowDefinitions="* Auto">
-      <UserControl x:Name="Map" Content="{Binding MapViewModel}"/>
+      <UserControl Content="{Binding MapViewModel}"/>
       <Grid Grid.Row="1">
         <Grid ColumnDefinitions="Auto Auto * Auto Auto">
           <ToggleButton Grid.Column="0" Command="{Binding EditModePressed}" Content="Edit Mode" IsChecked="{Binding EditModeEnabled}"/>
