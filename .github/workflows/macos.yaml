@@ -34,5 +34,5 @@ jobs:
       - uses: actions/upload-artifact@v1
         name: "Upload Artifact"
         with:
-          name: "bnbnav-${{ matrix.arch }}.dmg"
+          name: "bnbnav-mac-${{ matrix.arch }}.dmg"
           path: "./bnbnav.dmg"

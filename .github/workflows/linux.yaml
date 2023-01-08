@@ -39,5 +39,5 @@ jobs:
       - uses: actions/upload-artifact@v1
         name: "Upload Artifact"
         with:
-          name: "bnbnav.AppImage"
+          name: "bnbnav-linux.AppImage"
           path: "./bnbnav-x86_64.AppImage"
