@@ -32,9 +32,10 @@ public partial class MainView : UserControl
     public void ColorModeSwitch(object sender, RoutedEventArgs e)
     {
         var toggle = (ToggleButton)sender;
-        ((FluentTheme)App.Current!.Styles[0]).Mode = toggle.IsChecked ?? false ? FluentThemeMode.Dark : FluentThemeMode.Light;
+        var night = toggle.IsChecked ?? false;
+        ((FluentTheme)App.Current!.Styles[0]).Mode = night ? FluentThemeMode.Dark : FluentThemeMode.Light;
     
-        if (toggle.IsChecked ?? false)
+        if (night)
         {
             //WASM seems to need a little help setting the textblock styles. hopefully they fix this sometime!
             App.Current!.Styles.Add(_whiteTextStyle);
@@ -43,6 +44,11 @@ public partial class MainView : UserControl
         {
             App.Current!.Styles.Remove(_whiteTextStyle);
         }
+
+        var mvm = (DataContext as MainViewModel)?.MapViewModel;
+
+        if (mvm is not null)
+            mvm.NightMode = night;
     }
 
 }
