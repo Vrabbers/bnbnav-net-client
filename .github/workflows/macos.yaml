@@ -1,0 +1,38 @@
+name: macOS CI
+
+on:
+  push:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macOS-latest]
+        arch: [x64, arm64]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: "Install Dependencies"
+        run: |
+          npm install -g appdmg
+      - name: "Install .NET"
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+      - uses: actions/checkout@v1
+        with:
+          submodules: 'recursive'
+      - name: "Build Project"
+        run: ./build-macos.sh
+        env:
+          BUILD_ARCH: ${{ matrix.arch }}
+        working-directory: dist
+      - name: "Create Disk Image"
+        run: appdmg dist/app-dmg-spec.json ./bnbnav.dmg
+      - uses: actions/upload-artifact@v1
+        name: "Upload Artifact"
+        with:
+          name: "bnbnav-mac-${{ matrix.arch }}.dmg"
+          path: "./bnbnav.dmg"
