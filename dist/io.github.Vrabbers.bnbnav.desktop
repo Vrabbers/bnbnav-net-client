@@ -1,0 +1,11 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=bnbnav
+GenericName=Satellite Navigation
+Categories=Utility;
+Exec=fmp %U
+Icon=io.github.Vrabbers.bnbnav
+Keywords=navigation;
+StartupWMClass=BnbnavNetClient.Desktop

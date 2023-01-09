@@ -1,0 +1,24 @@
+{
+  "title": "bnbnav",
+  "icon-size": 48,
+  "window": {
+    "size": {
+      "width": 599,
+      "height": 420
+    }
+  },
+  "contents": [
+    {
+      "x": 125,
+      "y": 225,
+      "type": "file",
+      "path": "bnbnav.app"
+    },
+    {
+      "x": 470,
+      "y": 225,
+      "type": "link",
+      "path": "/Applications"
+    }
+  ]
+}
