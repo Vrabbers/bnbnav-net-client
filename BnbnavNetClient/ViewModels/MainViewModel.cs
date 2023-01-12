@@ -77,6 +77,7 @@ public sealed class MainViewModel : ViewModel
                 Popup = null;
             });
             Popup = editModePopup;
+
         }
         else
         {
