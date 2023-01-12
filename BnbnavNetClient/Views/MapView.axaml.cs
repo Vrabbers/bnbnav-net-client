@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using BnbnavNetClient.Models;
 using BnbnavNetClient.ViewModels;
 using DynamicData.Binding;
 using ReactiveUI;
@@ -107,14 +108,28 @@ public partial class MapView : UserControl
 
         foreach (var edge in mapService.Edges.Values)
         {
-            var pen = (Pen)this.FindResource("PlaceholderRoad")!;
+            var pen = edge.Road.RoadType switch
+            {
+                RoadType.Unknown => (Pen)this.FindResource("UnknownRoadPen")!,
+                RoadType.Local => (Pen)this.FindResource("LocalRoadPen")!,
+                RoadType.Main => (Pen)this.FindResource("MainRoadPen")!,
+                RoadType.Highway => (Pen)this.FindResource("HighwayRoadPen")!,
+                RoadType.Expressway => (Pen)this.FindResource("ExpresswayRoadPen")!,
+                RoadType.Motorway => (Pen)this.FindResource("MotorwayRoadPen")!,
+                RoadType.Footpath => (Pen)this.FindResource("FootpathRoadPen")!,
+                RoadType.Waterway => (Pen)this.FindResource("WaterwayRoadPen")!,
+                RoadType.Private => (Pen)this.FindResource("PrivateRoadPen")!,
+                RoadType.Roundabout => (Pen)this.FindResource("RoundaboutRoadPen")!,
+                RoadType.DuongWarp => (Pen)this.FindResource("DuongWarpRoadPen")!,
+                _ => throw new ArgumentOutOfRangeException()
+            };  
             var fromEdge = mapService.Nodes[edge.From.Id];
             var from = ToScreen(new(fromEdge.X, fromEdge.Z));
             var toEdge = mapService.Nodes[edge.To.Id];
             var to = ToScreen(new (toEdge.X, toEdge.Z));
             if (!LineIntersects(from, to, Bounds))
                 continue;
-            pen.Thickness = 20 * scale;
+            pen.Thickness = edge.Road.RoadType == RoadType.Motorway ? 10 : 5 * scale;
             context.DrawLine(pen, from, to);
         }
 

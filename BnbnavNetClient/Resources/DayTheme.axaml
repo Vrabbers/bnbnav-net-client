@@ -7,9 +7,59 @@
 			<SolidColorBrush Color="Black"/>
 		</Pen.Brush>
 	</Pen>
-	<Pen x:Key="PlaceholderRoad" Thickness="20" LineCap="Round">
+	<Pen x:Key="UnknownRoadPen" Thickness="5" LineCap="Round">
 		<Pen.Brush>
 			<SolidColorBrush Color="DarkBlue"/>	
+		</Pen.Brush>
+	</Pen>
+	<Pen x:Key="LocalRoadPen" Thickness="5" LineCap="Round">
+		<Pen.Brush>
+			<SolidColorBrush Color="Black"/>
+		</Pen.Brush>
+	</Pen>
+	<Pen x:Key="MainRoadPen" Thickness="5" LineCap="Round">
+		<Pen.Brush>
+			<SolidColorBrush Color="#f5b342"/>
+		</Pen.Brush>
+	</Pen>
+	<Pen x:Key="HighwayRoadPen" Thickness="5" LineCap="Round">
+		<Pen.Brush>
+			<SolidColorBrush Color="#ad1909"/>
+		</Pen.Brush>
+	</Pen>
+	<Pen x:Key="ExpresswayRoadPen" Thickness="5" LineCap="Round">
+		<Pen.Brush>
+			<SolidColorBrush Color="#194211"/>
+		</Pen.Brush>
+	</Pen>
+	<Pen x:Key="MotorwayRoadPen" Thickness="15" LineCap="Round">
+		<Pen.Brush>
+			<SolidColorBrush Color="#6909ad"/>
+		</Pen.Brush>
+	</Pen>
+	<Pen x:Key="FootpathRoadPen" Thickness="5" LineCap="Round">
+		<Pen.Brush>
+			<SolidColorBrush Color="#969696"/>
+		</Pen.Brush>
+	</Pen>
+	<Pen x:Key="WaterwayRoadPen" Thickness="5" LineCap="Round">
+		<Pen.Brush>
+			<SolidColorBrush Color="#006e96"/>
+		</Pen.Brush>
+	</Pen>
+	<Pen x:Key="PrivateRoadPen" Thickness="5" LineCap="Round">
+		<Pen.Brush>
+			<SolidColorBrush Color="#646464"/>
+		</Pen.Brush>
+	</Pen>
+	<Pen x:Key="RoundaboutRoadPen" Thickness="5" LineCap="Round">
+		<Pen.Brush>
+			<SolidColorBrush Color="Black"/>
+		</Pen.Brush>
+	</Pen>
+	<Pen x:Key="DuongWarpRoadPen" Thickness="5" LineCap="Round">
+		<Pen.Brush>
+			<SolidColorBrush Color="Transparent"/>
 		</Pen.Brush>
 	</Pen>
 </ResourceDictionary>
