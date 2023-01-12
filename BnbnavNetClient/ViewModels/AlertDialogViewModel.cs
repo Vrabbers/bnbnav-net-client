@@ -10,7 +10,7 @@ public sealed class AlertDialogViewModel : ViewModel
         Ok = ReactiveCommand.Create(() => { });
     }
 
-    public string Title { get; init; }
-    public string Message { get; init; }
+    public string? Title { get; init; }
+    public string? Message { get; init; }
     public ReactiveCommand<Unit, Unit> Ok { get; }
 }
