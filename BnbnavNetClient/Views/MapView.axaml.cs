@@ -123,42 +123,43 @@ public partial class MapView : UserControl
             context.DrawLine(RoadPen, from, to);
         }
         
-        foreach (var landmark in mapService.Landmarks.Values)
-        {
-            
-            var pos = ToScreen(new(landmark.Node.X, landmark.Node.Z));
-            var rect = new Rect(
-                pos.X - LandmarkSize * scale / 2, 
-                pos.Y - LandmarkSize * scale / 2,
-                LandmarkSize * scale, LandmarkSize * scale);
-            if (!Bounds.Intersects(rect))
-                continue;
-
-            try
+        if (scale >= 0.8)
+            foreach (var landmark in mapService.Landmarks.Values)
             {
-                var asset = _assetLoader.Open(new($"avares://BnbnavNetClient/Assets/Landmarks/{landmark.Type}.svg"));
+            
+                var pos = ToScreen(new(landmark.Node.X, landmark.Node.Z));
+                var rect = new Rect(
+                    pos.X - LandmarkSize * scale / 2, 
+                    pos.Y - LandmarkSize * scale / 2,
+                    LandmarkSize * scale, LandmarkSize * scale);
+                if (!Bounds.Intersects(rect))
+                    continue;
 
-                var svg = new SKSvg();
-                svg.Load(asset);
-                if (svg.Picture is null) continue;
+                try
+                {
+                    var asset = _assetLoader.Open(new($"avares://BnbnavNetClient/Assets/Landmarks/{landmark.Type}.svg"));
+
+                    var svg = new SKSvg();
+                    svg.Load(asset);
+                    if (svg.Picture is null) continue;
                 
-                var sourceSize = new Size(svg.Picture.CullRect.Width, svg.Picture.CullRect.Height);
-                var scaleMatrix = Matrix.CreateScale(
+                    var sourceSize = new Size(svg.Picture.CullRect.Width, svg.Picture.CullRect.Height);
+                    var scaleMatrix = Matrix.CreateScale(
                         rect.Width / sourceSize.Width,
                         rect.Height / sourceSize.Height);
-                var translateMatrix = Matrix.CreateTranslation(
-                    rect.X * sourceSize.Width / rect.Width,
-                    rect.Y * sourceSize.Height / rect.Height);
+                    var translateMatrix = Matrix.CreateTranslation(
+                        rect.X * sourceSize.Width / rect.Width,
+                        rect.Y * sourceSize.Height / rect.Height);
                 
-                using (context.PushClip(rect))
-                using (context.PushPreTransform(translateMatrix * scaleMatrix))
-                    context.Custom(new SvgCustomDrawOperation(rect, svg));
+                    using (context.PushClip(rect))
+                    using (context.PushPreTransform(translateMatrix * scaleMatrix))
+                        context.Custom(new SvgCustomDrawOperation(rect, svg));
+                }
+                catch (FileNotFoundException)
+                {
+                    //Ignore
+                }
             }
-            catch (FileNotFoundException)
-            {
-                //Ignore
-            }
-        }
 
         if (MapViewModel.IsInEditMode)
         {
