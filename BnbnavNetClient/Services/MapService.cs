@@ -39,6 +39,8 @@ public sealed class MapService : ReactiveObject
         Landmarks = _landmarks.AsReadOnly();
         _annotations = new Dictionary<string, Annotation>(annotations.ToDictionary(a => a.Id));
     }
+    
+    
 
     public static async Task<MapService> DownloadInitialMapAsync()
     {

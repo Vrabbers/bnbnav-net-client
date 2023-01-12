@@ -4,11 +4,14 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using BnbnavNetClient.Models;
 
 namespace BnbnavNetClient.ViewModels;
 
 public sealed class MainViewModel : ViewModel
 {
+    private MapService _mapService;
+
     [Reactive]
     public bool EditModeEnabled { get; set; }
 
@@ -36,18 +39,40 @@ public sealed class MainViewModel : ViewModel
     [ObservableAsProperty]
     public string PanText { get; } = "x = 0; y = 0";
 
+    [Reactive]
+    public EditModeControl CurrentEditMode { get; set; } = EditModeControl.Select;
+
+    //TODO: make this better
+    [ObservableAsProperty] public bool IsInSelectMode => CurrentEditMode == EditModeControl.Select;
+    [ObservableAsProperty] public bool IsInJoinMode => CurrentEditMode == EditModeControl.Join;
+    [ObservableAsProperty] public bool IsInJoinTwoWayMode => CurrentEditMode == EditModeControl.JoinTwoWay;
+    [ObservableAsProperty] public bool RoadControlsRequired => false;
+    
+
     public MainViewModel()
     {
         var followMeText = this
             .WhenAnyValue(me => me.FollowMeEnabled, me => me.FollowMeUsername)
             .Select(x => x.Item1 ? $"Following {x.Item2}" : "Follow Me");
         followMeText.ToPropertyEx(this, me => me.FollowMeText);
+
+        this.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Select)
+            .ToPropertyEx(this, x => x.IsInSelectMode);
+        this.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Join)
+            .ToPropertyEx(this, x => x.IsInJoinMode);
+        this.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.JoinTwoWay)
+            .ToPropertyEx(this, x => x.IsInJoinTwoWayMode);
+        this.WhenAnyValue(x => x.CurrentEditMode, x => x.EditModeEnabled).Select(x =>
+        {
+            if (!x.Item2) return false;
+            return x.Item1 is EditModeControl.Join or EditModeControl.JoinTwoWay;
+        }).ToPropertyEx(this, x => x.RoadControlsRequired);
     }
 
     public async Task InitMapService()
     {
-        var mapService = await MapService.DownloadInitialMapAsync();
-        MapViewModel = new(mapService, this);
+        _mapService = await MapService.DownloadInitialMapAsync();
+        MapViewModel = new(_mapService, this);
         var panText = MapViewModel
             .WhenAnyValue(map => map.Pan)
             .Select(pt => $"x = {double.Round(pt.X)}; y = {double.Round(pt.Y)}");
@@ -82,6 +107,21 @@ public sealed class MainViewModel : ViewModel
         {
             EditModeEnabled = false;
         }
+    }
+
+    public void SelectModePressed()
+    {
+        CurrentEditMode = EditModeControl.Select;
+    }
+
+    public void JoinModePressed()
+    {
+        CurrentEditMode = EditModeControl.Join;
+    }
+
+    public void JoinTwoWayModePressed()
+    {
+        CurrentEditMode = EditModeControl.JoinTwoWay;
     }
 
     public void FollowMePressed()

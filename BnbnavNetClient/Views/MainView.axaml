@@ -19,19 +19,41 @@
 
   <Grid>
     <!-- Main UI -->
-    <Grid RowDefinitions="* Auto">
+    <Grid RowDefinitions="* Auto Auto Auto">
+      <!-- Map -->
       <UserControl Content="{Binding MapViewModel}"/>
-      <Grid Grid.Row="1">
-        <Grid ColumnDefinitions="Auto Auto * Auto">
-          <ToggleButton Grid.Column="0" Command="{Binding EditModePressed}" Content="Edit Mode" IsChecked="{Binding EditModeEnabled}"/>
-          <Button Grid.Column="1" IsVisible="{Binding EditModeEnabled}" Content="Spy options">
+      
+      <!-- Road Controls -->
+      <Grid Grid.Row="1" IsVisible="{Binding RoadControlsRequired}">
+        <Grid ColumnDefinitions="Auto Auto Auto Auto">
+          <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Text="Road:" />
+          <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Text="Regobbldegook Street [Motorway]" />
+          <Button Grid.Column="2" Content="Syringe Road" />
+          <Button Grid.Column="3" Content="Define New Road" />
+        </Grid>
+      </Grid>
+      
+      <!-- Edit Controls -->
+      <Grid Grid.Row="2" IsVisible="{Binding EditModeEnabled}">
+        <Grid ColumnDefinitions="Auto Auto Auto * Auto">
+          <ToggleButton Grid.Column="0" Command="{Binding SelectModePressed}" Content="Select" IsChecked="{Binding IsInSelectMode}"/>
+          <ToggleButton Grid.Column="1" Command="{Binding JoinModePressed}" Content="Join" IsChecked="{Binding IsInJoinMode}"/>
+          <ToggleButton Grid.Column="2" Command="{Binding JoinTwoWayModePressed}" Content="Join Bidirectional" IsChecked="{Binding IsInJoinTwoWayMode}"/>
+          <Button Grid.Column="4" IsVisible="{Binding EditModeEnabled}" Content="Spy options">
             <Button.Flyout>
               <Flyout>
-                  <CheckBox Content="Highlight nodes with turn restrictions" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
+                <CheckBox Content="Highlight nodes with turn restrictions" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
               </Flyout>
             </Button.Flyout>
           </Button>
-          <ToggleButton Grid.Column="3" Command="{Binding FollowMePressed}" Content="{Binding FollowMeText}" IsChecked="{Binding FollowMeEnabled}"/>
+        </Grid>
+      </Grid>
+      
+      <!-- Main Bar -->
+      <Grid Grid.Row="3">
+        <Grid ColumnDefinitions="Auto * Auto">
+          <ToggleButton Grid.Column="0" Command="{Binding EditModePressed}" Content="Edit Mode" IsChecked="{Binding EditModeEnabled}"/>
+          <ToggleButton Grid.Column="2" Command="{Binding FollowMePressed}" Content="{Binding FollowMeText}" IsChecked="{Binding FollowMeEnabled}"/>
         </Grid>
         <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
       </Grid>
