@@ -1,15 +1,15 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 	<SolidColorBrush x:Key="BackgroundBrush" Color="Black"/>
-	<SolidColorBrush x:Key="NodeFill" Color="White"/>
+	<SolidColorBrush x:Key="NodeFill" Color="Black"/>
 	<Pen x:Key="NodeBorder" Thickness="2">
 		<Pen.Brush>
-			<SolidColorBrush Color="Black"/>
+			<SolidColorBrush Color="White"/>
 		</Pen.Brush>
 	</Pen>
 	<Pen x:Key="PlaceholderRoad" Thickness="20" LineCap="Round">
 		<Pen.Brush>
-			<SolidColorBrush Color="DarkBlue"/>
+			<SolidColorBrush Color="Blue"/>
 		</Pen.Brush>
 	</Pen>
 </ResourceDictionary>

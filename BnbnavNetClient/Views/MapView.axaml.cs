@@ -103,11 +103,11 @@ public partial class MapView : UserControl
         var mapService = MapViewModel.MapService;
         var scale = MapViewModel.Scale;
 
-        context.FillRectangle(_currentTheme.BackgroundBrush, Bounds);
+        context.FillRectangle((Brush)this.FindResource("BackgroundBrush")!, Bounds);
 
         foreach (var edge in mapService.Edges.Values)
         {
-            var pen = _currentTheme.PlaceholderRoad;
+            var pen = (Pen)this.FindResource("PlaceholderRoad")!;
             var fromEdge = mapService.Nodes[edge.From.Id];
             var from = ToScreen(new(fromEdge.X, fromEdge.Z));
             var toEdge = mapService.Nodes[edge.To.Id];
@@ -130,7 +130,7 @@ public partial class MapView : UserControl
                     nodeSize, nodeSize);
                 if (!Bounds.Intersects(rect))
                     continue;
-                context.DrawRectangle(_currentTheme.NodeFill, _currentTheme.NodeBorder, rect);
+                context.DrawRectangle(_currentTheme.NodeFill, (Pen)this.FindResource("NodeBorder")!, rect);
             }
         }
 
