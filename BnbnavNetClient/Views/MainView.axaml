@@ -25,11 +25,13 @@
       
       <!-- Road Controls -->
       <Grid Grid.Row="1" IsVisible="{Binding RoadControlsRequired}">
-        <Grid ColumnDefinitions="Auto Auto Auto Auto">
-          <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Text="Road:" />
-          <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Text="Regobbldegook Street [Motorway]" />
-          <Button Grid.Column="2" Content="Syringe Road" />
-          <Button Grid.Column="3" Content="Define New Road" />
+        <Grid ColumnDefinitions="Auto Auto Auto Auto Auto * Auto">
+          <ToggleButton Grid.Column="0" Content="Regobbldegook Street [Motorway]"/>
+          <ToggleButton Grid.Column="1" Content="Road Syringe..."/>
+          <ToggleButton Grid.Column="2" Content="Local Road"/>
+          <ToggleButton Grid.Column="3" Content="Motorway"/>
+          <ToggleButton Grid.Column="4" Content="Highway"/>
+          <ToggleButton Grid.Column="6" Content="Autobuild" IsEnabled="False"/>
         </Grid>
       </Grid>
       
