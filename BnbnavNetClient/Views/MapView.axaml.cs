@@ -7,13 +7,8 @@ using ReactiveUI;
 using System;
 using System.IO;
 using System.Reactive;
-using System.Xml;
-using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Avalonia.Skia;
 using Avalonia.Svg.Skia;
-using SkiaSharp;
-using Svg;
 using Svg.Skia;
 
 namespace BnbnavNetClient.Views;
@@ -21,12 +16,13 @@ public partial class MapView : UserControl
 {
     bool _pointerPressing;
     Point _pointerPrevPosition;
-    MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
     Matrix _toScreenMtx = Matrix.Identity;
     Matrix _toWorldMtx = Matrix.Identity;
 
-    private IAssetLoader _assetLoader;
+    readonly IAssetLoader _assetLoader;
+
+    MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
     public MapView()
     {
@@ -99,7 +95,7 @@ public partial class MapView : UserControl
     }
 
     static readonly double NodeSize = 14;
-    private static readonly double LandmarkSize = 10;
+    static readonly double LandmarkSize = 10;
     static readonly IPen BlackBorderPen = new Pen(new SolidColorBrush(Colors.Black), thickness: 2);
     static readonly IBrush BackgroundBrush = new SolidColorBrush(Colors.WhiteSmoke);
     static readonly IBrush WhiteFillBrush = new SolidColorBrush(Colors.White);
@@ -126,7 +122,6 @@ public partial class MapView : UserControl
         if (scale >= 0.8)
             foreach (var landmark in mapService.Landmarks.Values)
             {
-            
                 var pos = ToScreen(new(landmark.Node.X, landmark.Node.Z));
                 var rect = new Rect(
                     pos.X - LandmarkSize * scale / 2, 
@@ -135,14 +130,17 @@ public partial class MapView : UserControl
                 if (!Bounds.Intersects(rect))
                     continue;
 
-                try
+                var uri = new Uri($"avares://BnbnavNetClient/Assets/Landmarks/{landmark.Type}.svg");
+
+                if (_assetLoader.Exists(uri))
                 {
-                    var asset = _assetLoader.Open(new($"avares://BnbnavNetClient/Assets/Landmarks/{landmark.Type}.svg"));
+                    var asset = _assetLoader.Open(uri);
 
                     var svg = new SKSvg();
                     svg.Load(asset);
-                    if (svg.Picture is null) continue;
-                
+                    if (svg.Picture is null) 
+                        continue;
+
                     var sourceSize = new Size(svg.Picture.CullRect.Width, svg.Picture.CullRect.Height);
                     var scaleMatrix = Matrix.CreateScale(
                         rect.Width / sourceSize.Width,
@@ -150,15 +148,12 @@ public partial class MapView : UserControl
                     var translateMatrix = Matrix.CreateTranslation(
                         rect.X * sourceSize.Width / rect.Width,
                         rect.Y * sourceSize.Height / rect.Height);
-                
+
                     using (context.PushClip(rect))
                     using (context.PushPreTransform(translateMatrix * scaleMatrix))
                         context.Custom(new SvgCustomDrawOperation(rect, svg));
-                }
-                catch (FileNotFoundException)
-                {
-                    //Ignore
-                }
+                } // ignore if doesn't exist;
+
             }
 
         if (MapViewModel.IsInEditMode)
