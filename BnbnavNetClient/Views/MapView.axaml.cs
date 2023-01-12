@@ -84,6 +84,7 @@ public partial class MapView : UserControl
                 _toWorldMtx = matrix.Invert();
             }));
 
+
         MapViewModel
             .WhenAnyPropertyChanged()
             .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
@@ -119,7 +120,7 @@ public partial class MapView : UserControl
             var to = ToScreen(new (toEdge.X, toEdge.Z));
             if (!LineIntersects(from, to, Bounds))
                 continue;
-            pen.Thickness = edge.Road.RoadType == RoadType.Motorway ? 10 : 5 * scale;
+            pen.Thickness = (edge.Road.RoadType == RoadType.Motorway ? 10 : 5) * scale;
             context.DrawLine(pen, from, to);
         }
 
