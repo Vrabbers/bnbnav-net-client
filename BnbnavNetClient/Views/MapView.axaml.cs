@@ -14,8 +14,6 @@ public partial class MapView : UserControl
     bool _pointerPressing;
     Point _pointerPrevPosition;
 
-    MapTheme _currentTheme;
-
     MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
     Matrix _toScreenMtx = Matrix.Identity;
@@ -24,7 +22,6 @@ public partial class MapView : UserControl
     public MapView()
     {
         InitializeComponent();
-        _currentTheme = new DayTheme();
     }
 
     protected override void OnInitialized()
@@ -88,13 +85,6 @@ public partial class MapView : UserControl
             }));
 
         MapViewModel
-            .WhenAnyValue(x => x.NightMode)
-            .Subscribe(night =>
-            {
-                _currentTheme = night ? new NightTheme() : new DayTheme();
-            });
-
-        MapViewModel
             .WhenAnyPropertyChanged()
             .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
     }
@@ -135,7 +125,7 @@ public partial class MapView : UserControl
 
         if (MapViewModel.IsInEditMode)
         {
-            var nodeSize = _currentTheme.NodeSize;
+            var nodeSize = 14;
             foreach (var node in mapService.Nodes.Values)
             {
                 var pos = ToScreen(new(node.X, node.Z));
@@ -145,7 +135,7 @@ public partial class MapView : UserControl
                     nodeSize, nodeSize);
                 if (!Bounds.Intersects(rect))
                     continue;
-                context.DrawRectangle(_currentTheme.NodeFill, (Pen)this.FindResource("NodeBorder")!, rect);
+                context.DrawRectangle((Brush)this.FindResource("NodeFill")!, (Pen)this.FindResource("NodeBorder")!, rect);
             }
         }
 
@@ -182,31 +172,4 @@ public partial class MapView : UserControl
         var correction = worldFutureIncorrectPos - worldPrevPos;
         MapViewModel.Pan -= correction;
     }
-}
-
-
-//TODO: use resources?
-abstract class MapTheme
-{
-    public virtual double NodeSize => 14;
-    public abstract Brush BackgroundBrush { get; }
-    public abstract Brush NodeFill { get; }
-    public abstract Pen NodeBorder { get; }
-    public abstract Pen PlaceholderRoad { get; }
-}
-
-sealed class DayTheme : MapTheme
-{
-    public override Brush BackgroundBrush => new SolidColorBrush(Colors.WhiteSmoke);
-    public override Brush NodeFill => new SolidColorBrush(Colors.White);
-    public override Pen NodeBorder => new(new SolidColorBrush(Colors.Black), thickness: 2);
-    public override Pen PlaceholderRoad => new(new SolidColorBrush(Colors.DarkBlue), thickness: 20, lineCap: PenLineCap.Round);
-}
-
-sealed class NightTheme : MapTheme
-{
-    public override Brush BackgroundBrush => new SolidColorBrush(Colors.Black);
-    public override Brush NodeFill => new SolidColorBrush(Colors.Black);
-    public override Pen NodeBorder => new(new SolidColorBrush(Colors.White), thickness: 2);
-    public override Pen PlaceholderRoad => new(new SolidColorBrush(Colors.Blue), thickness: 20, lineCap: PenLineCap.Round);
 }
