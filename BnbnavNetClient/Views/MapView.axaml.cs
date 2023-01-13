@@ -110,29 +110,44 @@ public partial class MapView : UserControl
 
         foreach (var edge in mapService.Edges.Values)
         {
-            var pen = edge.Road.RoadType switch
+            var pen = (Pen)(edge.Road.RoadType switch
             {
-                RoadType.Unknown => (Pen)this.FindResource("UnknownRoadPen")!,
-                RoadType.Local => (Pen)this.FindResource("LocalRoadPen")!,
-                RoadType.Main => (Pen)this.FindResource("MainRoadPen")!,
-                RoadType.Highway => (Pen)this.FindResource("HighwayRoadPen")!,
-                RoadType.Expressway => (Pen)this.FindResource("ExpresswayRoadPen")!,
-                RoadType.Motorway => (Pen)this.FindResource("MotorwayRoadPen")!,
-                RoadType.Footpath => (Pen)this.FindResource("FootpathRoadPen")!,
-                RoadType.Waterway => (Pen)this.FindResource("WaterwayRoadPen")!,
-                RoadType.Private => (Pen)this.FindResource("PrivateRoadPen")!,
-                RoadType.Roundabout => (Pen)this.FindResource("RoundaboutRoadPen")!,
-                RoadType.DuongWarp => (Pen)this.FindResource("DuongWarpRoadPen")!,
-                _ => throw new ArgumentOutOfRangeException()
-            };  
+                RoadType.Local => this.FindResource("LocalRoadPen")!,
+                RoadType.Main => this.FindResource("MainRoadPen")!,
+                RoadType.Highway => this.FindResource("HighwayRoadPen")!,
+                RoadType.Expressway => this.FindResource("ExpresswayRoadPen")!,
+                RoadType.Motorway => this.FindResource("MotorwayRoadPen")!,
+                RoadType.Footpath => this.FindResource("FootpathRoadPen")!,
+                RoadType.Waterway => this.FindResource("WaterwayRoadPen")!,
+                RoadType.Private => this.FindResource("PrivateRoadPen")!,
+                RoadType.Roundabout => this.FindResource("RoundaboutRoadPen")!,
+                RoadType.DuongWarp => this.FindResource("DuongWarpRoadPen")!,
+                _ => this.FindResource("UnknownRoadPen")!,
+            });  
             var fromEdge = mapService.Nodes[edge.From.Id];
             var from = ToScreen(new(fromEdge.X, fromEdge.Z));
             var toEdge = mapService.Nodes[edge.To.Id];
             var to = ToScreen(new (toEdge.X, toEdge.Z));
+
+            static double Angle(Point a, Point b)
+            {
+                var pt = b - a;
+                return double.Atan2(pt.Y, pt.X);
+            }
+
+            static double Length(Point a, Point b) =>
+                double.Sqrt(double.Pow(a.X - b.X, 2) + double.Pow(a.Y - b.Y, 2));
+
+
+            var len = Length(from, to);
+            var matrix = Matrix.Identity *
+                Matrix.CreateRotation(Angle(from, to)) *
+                Matrix.CreateTranslation(from);
             if (!LineIntersects(from, to, Bounds))
                 continue;
             pen.Thickness = 5 * scale;
-            context.DrawLine(pen, from, to);
+            using (context.PushPreTransform(matrix))
+                context.DrawLine(pen, new(0, 0), new(len, 0));
         }
 
         if (scale >= 0.8)
