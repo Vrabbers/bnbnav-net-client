@@ -11,6 +11,8 @@ using Avalonia.Platform;
 using Avalonia.Svg.Skia;
 using Svg.Skia;
 using System.Collections.Generic;
+using System.Linq;
+using BnbnavNetClient.Models;
 
 namespace BnbnavNetClient.Views;
 public partial class MapView : UserControl
@@ -53,9 +55,22 @@ public partial class MapView : UserControl
             _pointerPrevPosition = pointerPos;
         };
 
-        PointerReleased += (_, __) =>
+        PointerReleased += (_, eventArgs) =>
         {
             _pointerPressing = false;
+
+            foreach (var item in HitTest(eventArgs.GetPosition(this)))
+            {
+                switch (item)
+                {
+                    case Node node:
+                        Console.WriteLine($"Clicked on Node   x: {node.X}  y: {node.Y}  z: {node.Z}");
+                        break;
+                    case Landmark landmark:
+                        Console.WriteLine($"Clicked on Landmark  type: {landmark.Type}  name: {landmark.Name}");
+                        break;
+                }
+            }
         };
 
         PointerWheelChanged += (_, eventArgs) =>
@@ -78,7 +93,7 @@ public partial class MapView : UserControl
                     Matrix.CreateScale(scale, scale);
 
                 if (rotate != 0)
-                {
+                {\
                     var centerOfBounds = new Vector(Bounds.Width, Bounds.Height) / (scale * 2);
                     
                     matrix *=
@@ -89,6 +104,8 @@ public partial class MapView : UserControl
 
                 _toScreenMtx = matrix;
                 _toWorldMtx = matrix.Invert();
+                
+                UpdateDrawnItems();
             }));
         MapViewModel
             .WhenAnyPropertyChanged()
@@ -104,37 +121,74 @@ public partial class MapView : UserControl
 
     readonly Dictionary<string, SKSvg> _svgCache = new();
 
-    public override void Render(DrawingContext context)
+    private IReadOnlyList<(Point, Point, Edge)> _drawnEdges = new List<(Point, Point, Edge)>();
+    private IReadOnlyList<(Rect, Landmark)> _drawnLandmarks = new List<(Rect, Landmark)>();
+    private IReadOnlyList<(Rect, Node)> _drawnNodes = new List<(Rect, Node)>();
+
+    private IEnumerable<MapItem> HitTest(Point point)
+    {
+        foreach (var (rect, landmark) in _drawnLandmarks)
+        {
+            if (rect.Contains(point)) yield return landmark;
+        }
+        
+        foreach (var (rect, node) in _drawnNodes)
+        {
+            if (rect.Contains(point)) yield return node;
+        }
+    }
+
+    private void UpdateDrawnItems()
     {
         var mapService = MapViewModel.MapService;
         var scale = MapViewModel.Scale;
 
-        context.FillRectangle(BackgroundBrush, Bounds);
-
-        foreach (var edge in mapService.Edges.Values)
+        _drawnEdges = mapService.Edges.Values.Select(edge =>
         {
             var fromEdge = mapService.Nodes[edge.From.Id];
             var from = ToScreen(new(fromEdge.X, fromEdge.Z));
             var toEdge = mapService.Nodes[edge.To.Id];
             var to = ToScreen(new (toEdge.X, toEdge.Z));
-            if (!LineIntersects(from, to, Bounds))
-                continue;
+            return (from, to, edge);
+        }).Where(edge => LineIntersects(edge.from, edge.to, Bounds)).ToList();
+
+        _drawnLandmarks = mapService.Landmarks.Values.Select(landmark =>
+        {
+            var pos = ToScreen(new(landmark.Node.X, landmark.Node.Z));
+            var rect = new Rect(
+                pos.X - LandmarkSize * scale / 2,
+                pos.Y - LandmarkSize * scale / 2,
+                LandmarkSize * scale, LandmarkSize * scale);
+            return (rect, landmark);
+        }).Where(landmark => Bounds.Intersects(landmark.rect)).ToList().AsReadOnly();
+
+        _drawnNodes = mapService.Nodes.Values.Select(node =>
+        {
+            var pos = ToScreen(new(node.X, node.Z));
+            var rect = new Rect(
+                pos.X - NodeSize / 2, 
+                pos.Y - NodeSize / 2,
+                NodeSize, NodeSize);
+            return (rect, node);
+        }).Where(node => Bounds.Intersects(node.rect)).ToList().AsReadOnly();
+    }
+
+    public override void Render(DrawingContext context)
+    {
+        var scale = MapViewModel.Scale;
+
+        context.FillRectangle(BackgroundBrush, Bounds);
+
+        foreach (var (from, to, _) in _drawnEdges)
+        {
             RoadPen.Thickness = 20 * scale;
             context.DrawLine(RoadPen, from, to);
         }
 
         if (scale >= 0.8)
         {
-            foreach (var landmark in mapService.Landmarks.Values)
+            foreach (var (rect, landmark) in _drawnLandmarks)
             {
-                var pos = ToScreen(new(landmark.Node.X, landmark.Node.Z));
-                var rect = new Rect(
-                    pos.X - LandmarkSize * scale / 2,
-                    pos.Y - LandmarkSize * scale / 2,
-                    LandmarkSize * scale, LandmarkSize * scale);
-                if (!Bounds.Intersects(rect))
-                    continue;
-
                 SKSvg? svg = null;
 
                 if (_svgCache.TryGetValue(landmark.Type, out var outSvg))
@@ -148,7 +202,7 @@ public partial class MapView : UserControl
                     {
                         var asset = _assetLoader.Open(uri);
 
-                        svg = new SKSvg();
+                        svg = new();
                         svg.Load(asset);
                         if (svg.Picture is null)
                             continue;
@@ -170,21 +224,13 @@ public partial class MapView : UserControl
                 using (context.PushClip(rect))
                 using (context.PushPreTransform(translateMatrix * scaleMatrix))
                     context.Custom(new SvgCustomDrawOperation(rect, svg));
-
             }
         }
 
         if (MapViewModel.IsInEditMode)
         {
-            foreach (var node in mapService.Nodes.Values)
+            foreach (var (rect, _) in _drawnNodes)
             {
-                var pos = ToScreen(new(node.X, node.Z));
-                var rect = new Rect(
-                    pos.X - NodeSize / 2, 
-                    pos.Y - NodeSize / 2,
-                    NodeSize, NodeSize);
-                if (!Bounds.Intersects(rect))
-                    continue;
                 context.DrawRectangle(WhiteFillBrush, BlackBorderPen, rect);
             }
         }
@@ -192,13 +238,13 @@ public partial class MapView : UserControl
         base.Render(context);
     }
 
-    static bool LineIntersects(Point from, Point to, Rect Bounds)
+    private static bool LineIntersects(Point from, Point to, Rect bounds)
     {
-        if (Bounds.Contains(from) || Bounds.Contains(to)) 
+        if (bounds.Contains(from) || bounds.Contains(to)) 
             return true;
 
         //If the line is bigger than the smallest edge of the bounds, draw it, as both points may lie outside the view;
-        var minDistSqr = double.Pow(double.Min(Bounds.Width, Bounds.Height), 2);
+        var minDistSqr = double.Pow(double.Min(bounds.Width, bounds.Height), 2);
         var lengthSqr = double.Pow(from.X - to.X, 2) + double.Pow(from.Y - to.Y, 2);
         if (lengthSqr > minDistSqr) 
             return true;
@@ -206,10 +252,10 @@ public partial class MapView : UserControl
         return false;
     }
 
-    Point ToWorld(Point screenCoords) =>
+    private Point ToWorld(Point screenCoords) =>
          _toWorldMtx.Transform(screenCoords);
 
-    Point ToScreen(Point worldCoords) =>
+    private Point ToScreen(Point worldCoords) =>
         _toScreenMtx.Transform(worldCoords);
 
     public void Zoom(double deltaScale, Point origin)

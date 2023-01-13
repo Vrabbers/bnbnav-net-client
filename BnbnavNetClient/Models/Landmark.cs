@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace BnbnavNetClient.Models;
-public sealed record Landmark(string Id, Node Node, string Name, string Type)
+public sealed record Landmark(string Id, Node Node, string Name, string Type) : MapItem
 {
     public readonly static Dictionary<string, string> LandmarkTypes = new()
     {
