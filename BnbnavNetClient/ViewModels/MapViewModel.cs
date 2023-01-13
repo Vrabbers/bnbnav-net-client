@@ -2,6 +2,7 @@
 using BnbnavNetClient.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Reactive;
 
 namespace BnbnavNetClient.ViewModels;
 public class MapViewModel : ViewModel
@@ -17,8 +18,8 @@ public class MapViewModel : ViewModel
     [ObservableAsProperty]
     public bool IsInEditMode { get; }
 
+    // In radians!
     [Reactive]
-    // in radians!
     public double Rotation { get; set; } = 0;
 
     public MapViewModel(MapService mapService, MainViewModel mainViewModel)
@@ -26,6 +27,4 @@ public class MapViewModel : ViewModel
         MapService = mapService;
         mainViewModel.WhenAnyValue(x => x.EditModeEnabled).ToPropertyEx(this, x => x.IsInEditMode);
     }
-
-
 }

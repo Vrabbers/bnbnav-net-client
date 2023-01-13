@@ -4,9 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -23,20 +26,22 @@ public sealed class MapService : ReactiveObject
     readonly Dictionary<string, Road> _roads;
     readonly Dictionary<string, Landmark> _landmarks;
     readonly Dictionary<string, Annotation> _annotations;
-    private static string _authenticationToken;
+    static string? _authenticationToken;
 
     public ReadOnlyDictionary<string, Node> Nodes { get; }
     public ReadOnlyDictionary<string, Edge> Edges { get; }
     public ReadOnlyDictionary<string, Road> Roads { get; }
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
 
-    public static string AuthenticationToken
+    public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
+
+    public static string? AuthenticationToken
     {
         get => _authenticationToken;
         set
         {
             _authenticationToken = value;
-            HttpClient.DefaultRequestHeaders.Authorization = new("Bearer", value);
+            HttpClient.DefaultRequestHeaders.Authorization = value is not null ? new("Bearer", value) : null;
         }
     }
 
@@ -53,17 +58,26 @@ public sealed class MapService : ReactiveObject
         _annotations = new Dictionary<string, Annotation>(annotations.ToDictionary(a => a.Id));
     }
 
-    private async Task Submit(string path, object json)
+    async Task Submit(string path, object json)
     {
-        await HttpClient.PostAsync($"/api/{path}", JsonContent.Create(json, MediaTypeHeaderValue.Parse("application/json"), new()
+        var resp = await HttpClient.PostAsync($"/api/{path}", JsonContent.Create(json, MediaTypeHeaderValue.Parse("application/json"), new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         }));
+
+        if (resp.StatusCode == HttpStatusCode.Unauthorized && AuthTokenInteraction is not null)
+        {
+            AuthenticationToken = await AuthTokenInteraction.Handle(Unit.Default);
+        }
     }
 
-    private async Task Delete(string path)
+    async Task Delete(string path)
     {
-        await HttpClient.DeleteAsync($"/api/{path}");
+        var resp = await HttpClient.DeleteAsync($"/api/{path}");
+        if (resp.StatusCode == HttpStatusCode.Unauthorized && AuthTokenInteraction is not null)
+        {
+            AuthenticationToken = await AuthTokenInteraction.Handle(Unit.Default);
+        }
     }
 
     public async Task DeleteNode(Node node)
