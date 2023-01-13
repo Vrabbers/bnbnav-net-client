@@ -127,21 +127,14 @@ public partial class MapView : UserControl
             var fromEdge = mapService.Nodes[edge.From.Id];
             var from = ToScreen(new(fromEdge.X, fromEdge.Z));
             var toEdge = mapService.Nodes[edge.To.Id];
-            var to = ToScreen(new (toEdge.X, toEdge.Z));
+            var to = ToScreen(new (toEdge.X, toEdge.Z));      
 
-            static double Angle(Point a, Point b)
-            {
-                var pt = b - a;
-                return double.Atan2(pt.Y, pt.X);
-            }
-
-            static double Length(Point a, Point b) =>
-                double.Sqrt(double.Pow(a.X - b.X, 2) + double.Pow(a.Y - b.Y, 2));
-
-
-            var len = Length(from, to);
+            var length = double.Sqrt(double.Pow(from.X - to.X, 2) + double.Pow(from.Y - to.Y, 2));
+            var diffPoint = to - from;
+            var angle = double.Atan2(diffPoint.Y, diffPoint.X);
+            
             var matrix = Matrix.Identity *
-                Matrix.CreateRotation(Angle(from, to)) *
+                Matrix.CreateRotation(angle) *
                 Matrix.CreateTranslation(from);
             if (!LineIntersects(from, to, Bounds))
                 continue;
@@ -153,7 +146,7 @@ public partial class MapView : UserControl
                 gradBrush.EndPoint = new RelativePoint(0, pen.Thickness / 2, RelativeUnit.Absolute);
             }
             using (context.PushPreTransform(matrix))
-                context.DrawLine(pen, new(0, 0), new(len, 0));
+                context.DrawLine(pen, new(0, 0), new(length, 0));
             pen.Thickness /= scale;
         }
 
