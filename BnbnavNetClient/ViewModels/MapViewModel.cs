@@ -11,7 +11,8 @@ public class MapViewModel : ViewModel
 
     [Reactive]
     public double Scale { get; set; } = 1;
-    
+
+    [ObservableAsProperty]
     public MapService MapService { get; }
     
     [ObservableAsProperty]

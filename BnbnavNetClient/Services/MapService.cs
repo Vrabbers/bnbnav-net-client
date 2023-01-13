@@ -1,18 +1,21 @@
 ﻿using BnbnavNetClient.Models;
+
 using ReactiveUI;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace BnbnavNetClient.Services;
 public sealed class MapService : ReactiveObject
 {
-
-    static readonly string BaseUrl = Environment.GetEnvironmentVariable("BNBNAV_BASEURL") ?? "https://bnbnav.aircs.racing/";
+    public static readonly string BaseUrl = Environment.GetEnvironmentVariable("BNBNAV_BASEURL") ?? "https://bnbnav.aircs.racing/";
 
     static readonly HttpClient HttpClient = new() { BaseAddress = new(BaseUrl) };
 
