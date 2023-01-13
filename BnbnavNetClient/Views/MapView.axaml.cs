@@ -93,7 +93,7 @@ public partial class MapView : UserControl
                     Matrix.CreateScale(scale, scale);
 
                 if (rotate != 0)
-                {\
+                {
                     var centerOfBounds = new Vector(Bounds.Width, Bounds.Height) / (scale * 2);
                     
                     matrix *=
