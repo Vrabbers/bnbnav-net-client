@@ -1,74 +1,74 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-	<SolidColorBrush x:Key="BackgroundBrush" Color="#001e32"/>
-	<SolidColorBrush x:Key="NodeFill" Color="Black"/>
-	<Pen x:Key="NodeBorder" Thickness="2">
-		<Pen.Brush>
-			<SolidColorBrush Color="Black"/>
-		</Pen.Brush>
-	</Pen>
-	<Pen x:Key="UnknownRoadPen" Thickness="5" LineCap="Round">
-		<Pen.Brush>
-			<SolidColorBrush Color="DarkBlue"/>
-		</Pen.Brush>
-	</Pen>
-	<Pen x:Key="LocalRoadPen" Thickness="5" LineCap="Round">
-		<Pen.Brush>
-			<SolidColorBrush Color="#004f8c"/>
-		</Pen.Brush>
-	</Pen>
-	<Pen x:Key="MainRoadPen" Thickness="5" LineCap="Round">
-		<Pen.Brush>
-			<SolidColorBrush Color="#966432"/>
-		</Pen.Brush>
-	</Pen>
-	<Pen x:Key="HighwayRoadPen" Thickness="5" LineCap="Round">
-		<Pen.Brush>
-			<SolidColorBrush Color="#730f00"/>
-		</Pen.Brush>
-	</Pen>
-	<Pen x:Key="ExpresswayRoadPen" Thickness="5" LineCap="Round">
-		<Pen.Brush>
-			<SolidColorBrush Color="#2c761f"/>
-		</Pen.Brush>
-	</Pen>
-	<Pen x:Key="MotorwayRoadPen" Thickness="15" LineCap="Round">
-		<Pen.Brush>
-			<!--<LinearGradientBrush>   
-				<GradientStop Color="#640000" Offset="0"/>
-				<GradientStop Color="#640000" Offset="0.3"/>
-				<GradientStop Color="#c8c800" Offset="0.3001"/>
-				<GradientStop Color="#c8c800" Offset="0.6999"/>
-				<GradientStop Color="#640000" Offset="0.7"/>
-				<GradientStop Color="#640000" Offset="1"/>
-			</LinearGradientBrush>     the gradient renders incorrectly right now, until we figure this out, this suffices-->
-			<SolidColorBrush Color="#bd7800"/>
-		</Pen.Brush>
-	</Pen>
-	<Pen x:Key="FootpathRoadPen" Thickness="5" LineCap="Round">
-		<Pen.Brush>
-			<SolidColorBrush Color="#969696"/>
-		</Pen.Brush>
-	</Pen>
-	<Pen x:Key="WaterwayRoadPen" Thickness="5" LineCap="Round">
-		<Pen.Brush>
-			<SolidColorBrush Color="#006e96"/>
-		</Pen.Brush>
-	</Pen>
-	<Pen x:Key="PrivateRoadPen" Thickness="5" LineCap="Round">
-		<Pen.Brush>
-			<SolidColorBrush Color="#646464"/>
-		</Pen.Brush>
-	</Pen>
-	<Pen x:Key="RoundaboutRoadPen" Thickness="5" LineCap="Round">
-		<Pen.Brush>
-			<SolidColorBrush Color="#00508c"/>
-		</Pen.Brush>
-	</Pen>
-	<Pen x:Key="DuongWarpRoadPen" Thickness="5" LineCap="Round">
-		<Pen.Brush>
-			<SolidColorBrush Color="Transparent"/>
-		</Pen.Brush>
-	</Pen>
+  <SolidColorBrush x:Key="BackgroundBrush" Color="#001e32"/>
+  <SolidColorBrush x:Key="NodeFill" Color="Black"/>
+  <Pen x:Key="NodeBorder" Thickness="2">
+    <Pen.Brush>
+      <SolidColorBrush Color="Black"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="UnknownRoadPen" Thickness="5" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="DarkBlue"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="LocalRoadPen" Thickness="5" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="#004f8c"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="MainRoadPen" Thickness="5" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="#966432"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="HighwayRoadPen" Thickness="5" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="#730f00"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="ExpresswayRoadPen" Thickness="5" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="#2c761f"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="MotorwayRoadPen" Thickness="15" LineCap="Round">
+    <Pen.Brush>
+      <!--<LinearGradientBrush>   
+        <GradientStop Color="#640000" Offset="0"/>
+        <GradientStop Color="#640000" Offset="0.3"/>
+        <GradientStop Color="#c8c800" Offset="0.3001"/>
+        <GradientStop Color="#c8c800" Offset="0.6999"/>
+        <GradientStop Color="#640000" Offset="0.7"/>
+        <GradientStop Color="#640000" Offset="1"/>
+      </LinearGradientBrush>     the gradient renders incorrectly right now, until we figure this out, this suffices-->
+      <SolidColorBrush Color="#bd7800"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="FootpathRoadPen" Thickness="5" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="#969696"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="WaterwayRoadPen" Thickness="5" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="#006e96"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="PrivateRoadPen" Thickness="5" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="#646464"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="RoundaboutRoadPen" Thickness="5" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="#00508c"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="DuongWarpRoadPen" Thickness="5" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="Transparent"/>
+    </Pen.Brush>
+  </Pen>
 </ResourceDictionary>
 

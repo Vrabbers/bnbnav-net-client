@@ -45,10 +45,7 @@ public partial class MainView : UserControl
             App.Current!.Styles.Remove(_whiteTextStyle);
         }
 
-        var mvm = (DataContext as MainViewModel)?.MapViewModel;
-
-        if (mvm is not null)
-            mvm.NightMode = night;
+        ((MapThemeResources)App.Current!.Resources.MergedDictionaries[0]).Theme = night ? MapTheme.Night : MapTheme.Day;
     }
 
 }
