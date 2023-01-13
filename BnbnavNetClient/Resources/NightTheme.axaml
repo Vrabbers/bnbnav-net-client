@@ -35,12 +35,12 @@
   <Pen x:Key="MotorwayRoadPen" Thickness="10" LineCap="Round">
     <Pen.Brush>
       <LinearGradientBrush>   
-        <GradientStop Color="#640000" Offset="0"/>
-        <GradientStop Color="#640000" Offset="0.3"/>
-        <GradientStop Color="#c8c800" Offset="0.3001"/>
-        <GradientStop Color="#c8c800" Offset="0.6999"/>
-        <GradientStop Color="#640000" Offset="0.7"/>
-        <GradientStop Color="#640000" Offset="1"/>
+        <GradientStop Color="#320000" Offset="0"/>
+        <GradientStop Color="#320000" Offset="0.3"/>
+        <GradientStop Color="#646400" Offset="0.3001"/>
+        <GradientStop Color="#646400" Offset="0.6999"/>
+        <GradientStop Color="#320000" Offset="0.7"/>
+        <GradientStop Color="#320000" Offset="1"/>
       </LinearGradientBrush>    
     </Pen.Brush>
   </Pen>
