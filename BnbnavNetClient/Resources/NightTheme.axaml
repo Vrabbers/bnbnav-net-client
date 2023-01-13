@@ -1,12 +1,7 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-	<SolidColorBrush x:Key="BackgroundBrush" Color="Black"/>
+	<SolidColorBrush x:Key="BackgroundBrush" Color="#001e32"/>
 	<SolidColorBrush x:Key="NodeFill" Color="Black"/>
-	<Pen x:Key="NodeBorder" Thickness="2">
-		<Pen.Brush>
-			<SolidColorBrush Color="White"/>
-		</Pen.Brush>
-	</Pen>
 	<Pen x:Key="NodeBorder" Thickness="2">
 		<Pen.Brush>
 			<SolidColorBrush Color="Black"/>
@@ -47,7 +42,7 @@
 				<GradientStop Color="#640000" Offset="0.7"/>
 				<GradientStop Color="#640000" Offset="1"/>
 			</LinearGradientBrush>     the gradient renders incorrectly right now, until we figure this out, this suffices-->
-			<SolidColorBrush Color="#646400"/>
+			<SolidColorBrush Color="#bd7800"/>
 		</Pen.Brush>
 	</Pen>
 	<Pen x:Key="FootpathRoadPen" Thickness="5" LineCap="Round">
