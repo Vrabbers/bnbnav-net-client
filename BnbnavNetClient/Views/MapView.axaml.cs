@@ -145,7 +145,13 @@ public partial class MapView : UserControl
                 Matrix.CreateTranslation(from);
             if (!LineIntersects(from, to, Bounds))
                 continue;
+
             pen.Thickness *= scale;
+            if (pen.Brush is LinearGradientBrush gradBrush)
+            {
+                gradBrush.StartPoint = new RelativePoint(0, -pen.Thickness / 2, RelativeUnit.Absolute);
+                gradBrush.EndPoint = new RelativePoint(0, pen.Thickness / 2, RelativeUnit.Absolute);
+            }
             using (context.PushPreTransform(matrix))
                 context.DrawLine(pen, new(0, 0), new(len, 0));
             pen.Thickness /= scale;

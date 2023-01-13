@@ -34,7 +34,6 @@
   </Pen>
   <Pen x:Key="MotorwayRoadPen" Thickness="7" LineCap="Round">
     <Pen.Brush>
-      <!--
       <LinearGradientBrush StartPoint="-100%,0%" EndPoint="100%, 0%">
         <GradientStop Color="#640000" Offset="0"/>
         <GradientStop Color="#640000" Offset="0.3"/>
@@ -43,8 +42,6 @@
         <GradientStop Color="#640000" Offset="0.7"/>
         <GradientStop Color="#640000" Offset="1"/>
       </LinearGradientBrush>    
-      -->
-      <SolidColorBrush Color="#640000"/>
     </Pen.Brush>
   </Pen>
   <Pen x:Key="FootpathRoadPen" Thickness="5" LineCap="Round">

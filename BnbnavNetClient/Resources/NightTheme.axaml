@@ -34,15 +34,14 @@
   </Pen>
   <Pen x:Key="MotorwayRoadPen" Thickness="7" LineCap="Round">
     <Pen.Brush>
-      <!--<LinearGradientBrush>   
+      <LinearGradientBrush>   
         <GradientStop Color="#640000" Offset="0"/>
         <GradientStop Color="#640000" Offset="0.3"/>
         <GradientStop Color="#c8c800" Offset="0.3001"/>
         <GradientStop Color="#c8c800" Offset="0.6999"/>
         <GradientStop Color="#640000" Offset="0.7"/>
         <GradientStop Color="#640000" Offset="1"/>
-      </LinearGradientBrush>     the gradient renders incorrectly right now, until we figure this out, this suffices-->
-      <SolidColorBrush Color="#bd7800"/>
+      </LinearGradientBrush>    
     </Pen.Brush>
   </Pen>
   <Pen x:Key="FootpathRoadPen" Thickness="5" LineCap="Round">
