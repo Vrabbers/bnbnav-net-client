@@ -13,6 +13,9 @@ public sealed class MainViewModel : ViewModel
     public bool EditModeEnabled { get; set; }
 
     [Reactive]
+    public bool HighlightTurnRestrictionsEnabled { get; set; }
+
+    [Reactive]
     public bool FollowMeEnabled { get; set; }
 
     [ObservableAsProperty]
@@ -44,7 +47,7 @@ public sealed class MainViewModel : ViewModel
     public async Task InitMapService()
     {
         var mapService = await MapService.DownloadInitialMapAsync();
-        MapViewModel = new(mapService);
+        MapViewModel = new(mapService, this);
         var panText = MapViewModel
             .WhenAnyValue(map => map.Pan)
             .Select(pt => $"x = {double.Round(pt.X)}; y = {double.Round(pt.Y)}");
@@ -74,6 +77,7 @@ public sealed class MainViewModel : ViewModel
                 Popup = null;
             });
             Popup = editModePopup;
+
         }
         else
         {
