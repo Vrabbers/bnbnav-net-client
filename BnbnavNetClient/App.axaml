@@ -6,8 +6,16 @@
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
+  <Application.Resources>
+    <ResourceDictionary>  
+      <ResourceDictionary.MergedDictionaries>
+        <local:MapThemeResources Theme="Day"/>
+        <!--temporary solution 'til dynamic theme switching is implemented-->
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
     <Application.Styles>
-        <FluentTheme Mode="Light"/>
+      <FluentTheme Mode="Light"/>
       <Style Selector=":is(TemplatedControl)">
         <Setter Property="FontFamily" Value="/Assets/EuropaMittelschrift.ttf#Europa"/>
         <Setter Property="FontSize" Value="18"/>

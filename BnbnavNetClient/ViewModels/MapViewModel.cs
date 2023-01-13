@@ -21,6 +21,9 @@ public class MapViewModel : ViewModel
     // in radians!
     public double Rotation { get; set; } = 0;
 
+    [Reactive]
+    public bool NightMode { get; set; } = false;
+
     public MapViewModel(MapService mapService, MainViewModel mainViewModel)
     {
         MapService = mapService;
