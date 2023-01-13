@@ -2,6 +2,7 @@
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using BnbnavNetClient.Models;
@@ -77,6 +78,32 @@ public sealed class MainViewModel : ViewModel
             .WhenAnyValue(map => map.Pan)
             .Select(pt => $"x = {double.Round(pt.X)}; y = {double.Round(pt.Y)}");
         panText.ToPropertyEx(this, me => me.PanText);
+
+        this.WhenAnyValue(me => me.EditModeToken).Subscribe(token => MapService.AuthenticationToken = token);
+
+        MapViewModel.MapService.AuthTokenInteraction.RegisterHandler(async interaction => 
+        {
+            ShowAuthenticationPopup();
+            var token = await this.WhenAnyValue(me => me.EditModeToken);
+            interaction.SetOutput(token);
+        });
+    }
+
+    void ShowAuthenticationPopup()
+    {
+        var editModePopup = new EnterPopupViewModel("Use /editnav to obtain a token and enter here:", "Token");
+        editModePopup.Ok.Subscribe(token =>
+        {
+            EditModeToken = token;
+            EditModeEnabled = true;
+            Popup = null;
+        });
+        editModePopup.Cancel.Subscribe(_ =>
+        {
+            EditModeEnabled = false;
+            Popup = null;
+        });
+        Popup = editModePopup;
     }
 
     public void EditModePressed()
@@ -89,19 +116,7 @@ public sealed class MainViewModel : ViewModel
                 EditModeEnabled = true;
                 return;
             }
-            var editModePopup = new EnterPopupViewModel("Use /editnav to obtain a token and enter here:", "Token");
-            editModePopup.Ok.Subscribe(token =>
-            {
-                EditModeToken = token;
-                EditModeEnabled = true;
-                Popup = null;
-            });
-            editModePopup.Cancel.Subscribe(_ =>
-            {
-                EditModeEnabled = false;
-                Popup = null;
-            });
-            Popup = editModePopup;
+            ShowAuthenticationPopup();
         }
         else
         {
