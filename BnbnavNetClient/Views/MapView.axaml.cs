@@ -61,7 +61,7 @@ public partial class MapView : UserControl
 
         PointerWheelChanged += (_, eventArgs) =>
         {
-            var deltaScale = eventArgs.Delta.Y / 10.0;
+            var deltaScale = eventArgs.Delta.Y * MapViewModel.Scale / 10.0;
             Zoom(deltaScale, (eventArgs.GetPosition(this)));
         };
 

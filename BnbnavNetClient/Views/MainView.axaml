@@ -20,6 +20,7 @@
   <Grid>
     <!-- Main UI -->
     <Grid RowDefinitions="* Auto">
+      <ProgressBar IsIndeterminate="True" IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0"/>
       <UserControl Content="{Binding MapViewModel}"/>
       <Grid Grid.Row="1">
         <Grid ColumnDefinitions="Auto Auto * Auto Auto">
@@ -27,7 +28,7 @@
           <Button Grid.Column="1" IsVisible="{Binding EditModeEnabled}" Content="Spy options">
             <Button.Flyout>
               <Flyout>
-                  <CheckBox Content="Highlight nodes with turn restrictions" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
+                <CheckBox Content="Highlight nodes with turn restrictions" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
               </Flyout>
             </Button.Flyout>
           </Button>
