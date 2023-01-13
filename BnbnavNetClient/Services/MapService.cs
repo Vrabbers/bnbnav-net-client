@@ -3,6 +3,7 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -12,10 +13,16 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Avalonia.Media;
 
 namespace BnbnavNetClient.Services;
 public sealed class MapService : ReactiveObject
 {
+    private class ServerResponse
+    {
+        public required HttpStatusCode StatusCode { get; init; }
+        public required Stream Stream { get; init; }
+    }
 
     static readonly string BaseUrl = Environment.GetEnvironmentVariable("BNBNAV_BASEURL") ?? "https://bnbnav.aircs.racing/";
 
@@ -32,7 +39,7 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Edge> Edges { get; }
     public ReadOnlyDictionary<string, Road> Roads { get; }
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
-
+    private List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
 
     public static string? AuthenticationToken
@@ -58,26 +65,90 @@ public sealed class MapService : ReactiveObject
         _annotations = new Dictionary<string, Annotation>(annotations.ToDictionary(a => a.Id));
     }
 
-    async Task Submit(string path, object json)
+    private async Task<ServerResponse> Submit(string path, object json)
     {
         var resp = await HttpClient.PostAsync($"/api/{path}", JsonContent.Create(json, MediaTypeHeaderValue.Parse("application/json"), new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         }));
 
-        if (resp.StatusCode == HttpStatusCode.Unauthorized && AuthTokenInteraction is not null)
+        if (resp.StatusCode == HttpStatusCode.Unauthorized)
         {
-            AuthenticationToken = await AuthTokenInteraction.Handle(Unit.Default);
+            return await HandleUnauthorizedResponse(path, json);
+        }
+
+        return new()
+        {
+            StatusCode = resp.StatusCode,
+            Stream = await resp.Content.ReadAsStreamAsync()
+        };
+    }
+
+    private async Task<ServerResponse> HandleUnauthorizedResponse(string path, object? json)
+    {
+        var completionSource = new TaskCompletionSource<ServerResponse>();
+        var showDialog = !PendingRequests.Any();
+        PendingRequests.Add((path, json, completionSource));
+        
+        if (showDialog)
+        {
+            try
+            {
+                //Request a new auth token from the user and then replay pending requests
+                AuthenticationToken = await AuthTokenInteraction.Handle(Unit.Default);
+                ReplayPendingRequests();
+            }
+            catch (Exception e)
+            {
+                //Reject all the pending requests as an exception has occurred
+                CancelPendingRequests(e);
+            }
+        }
+
+        return await completionSource.Task;
+    }
+
+    async Task<ServerResponse> Delete(string path)
+    {
+        var resp = await HttpClient.DeleteAsync($"/api/{path}");
+        if (resp.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return await HandleUnauthorizedResponse(path, null);
+        }
+        
+        return new()
+        {
+            StatusCode = resp.StatusCode,
+            Stream = await resp.Content.ReadAsStreamAsync()
+        };
+    }
+
+    private void CancelPendingRequests(Exception e)
+    {
+        var requests = PendingRequests.ToList();
+        PendingRequests.Clear();
+        foreach (var (_, _, completionSource) in requests)
+        {
+            completionSource.SetException(e);
         }
     }
 
-    async Task Delete(string path)
+    private async void ReplayPendingRequests()
     {
-        var resp = await HttpClient.DeleteAsync($"/api/{path}");
-        if (resp.StatusCode == HttpStatusCode.Unauthorized && AuthTokenInteraction is not null)
+        var requests = PendingRequests.ToList();
+        PendingRequests.Clear();
+        await Task.WhenAll(requests.Select(async x=>
         {
-            AuthenticationToken = await AuthTokenInteraction.Handle(Unit.Default);
-        }
+            var (path, payload, completionSource) = x;
+            if (payload is null)
+            {
+                completionSource.SetResult(await Delete(path));
+            }
+            else
+            {
+                completionSource.SetResult(await Submit(path, payload));
+            }
+        }));
     }
 
     public async Task DeleteNode(Node node)
