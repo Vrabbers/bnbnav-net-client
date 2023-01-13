@@ -32,7 +32,7 @@
       <SolidColorBrush Color="#2c761f"/>
     </Pen.Brush>
   </Pen>
-  <Pen x:Key="MotorwayRoadPen" Thickness="7" LineCap="Round">
+  <Pen x:Key="MotorwayRoadPen" Thickness="10" LineCap="Round">
     <Pen.Brush>
       <LinearGradientBrush>   
         <GradientStop Color="#640000" Offset="0"/>
