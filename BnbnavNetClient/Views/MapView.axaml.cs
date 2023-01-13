@@ -145,9 +145,10 @@ public partial class MapView : UserControl
                 Matrix.CreateTranslation(from);
             if (!LineIntersects(from, to, Bounds))
                 continue;
-            pen.Thickness = 5 * scale;
+            pen.Thickness *= scale;
             using (context.PushPreTransform(matrix))
                 context.DrawLine(pen, new(0, 0), new(len, 0));
+            pen.Thickness /= scale;
         }
 
         if (scale >= 0.8)
