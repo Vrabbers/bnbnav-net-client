@@ -58,8 +58,8 @@ public sealed class MainViewModel : ViewModel
 
         MapViewModel.MapService.AuthTokenInteraction.RegisterHandler(async interaction => 
         {
-            var token = await this.WhenAnyValue(me => me.EditModeToken);
             ShowAuthenticationPopup();
+            var token = await this.WhenAnyValue(me => me.EditModeToken);
             interaction.SetOutput(token);
         });
     }
