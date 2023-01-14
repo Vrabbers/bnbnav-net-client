@@ -8,6 +8,7 @@ using System;
 using System.Reactive;
 
 namespace BnbnavNetClient.Views;
+
 public partial class MapView : UserControl
 {
     bool _pointerPressing;
