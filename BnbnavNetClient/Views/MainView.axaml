@@ -20,7 +20,7 @@
   <Grid>
     <!-- Main UI -->
     <Grid RowDefinitions="* Auto">
-      <ProgressBar IsIndeterminate="True" IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0"/>
+      <ProgressBar IsIndeterminate="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0"/>
       <UserControl Content="{Binding MapViewModel}"/>
       <Grid Grid.Row="1">
         <Grid ColumnDefinitions="Auto Auto * Auto Auto">
