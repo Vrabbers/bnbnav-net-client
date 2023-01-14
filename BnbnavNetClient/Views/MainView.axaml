@@ -8,6 +8,7 @@
              x:Class="BnbnavNetClient.Views.MainView"
              x:DataType="viewModels:MainViewModel"
              xmlns:views="clr-namespace:BnbnavNetClient.Views"
+             xmlns:controls="using:BnbnavNetClient.Controls"
              x:CompileBindings="True"
              Loaded="ViewLoaded">
 
@@ -32,7 +33,7 @@
               </Flyout>
             </Button.Flyout>
           </Button>
-          <ToggleButton Grid.Column="3" Click="ColorModeSwitch" Content="Night Mode"/>
+          <controls:DayNightButton Grid.Column="3" Click="ColorModeSwitch"/>
           <ToggleButton Grid.Column="4" Command="{Binding FollowMePressed}" Content="{Binding FollowMeText}" IsChecked="{Binding FollowMeEnabled}"/>
         </Grid>
         <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>

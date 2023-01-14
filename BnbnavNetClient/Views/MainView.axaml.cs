@@ -1,7 +1,9 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using BnbnavNetClient.ViewModels;
@@ -28,14 +30,14 @@ public partial class MainView : UserControl
     }
 
 
+    bool _isNightMode = false;
 
     public void ColorModeSwitch(object sender, RoutedEventArgs e)
     {
-        var toggle = (ToggleButton)sender;
-        var night = toggle.IsChecked ?? false;
-        ((FluentTheme)App.Current!.Styles[0]).Mode = night ? FluentThemeMode.Dark : FluentThemeMode.Light;
+        _isNightMode = !_isNightMode;
+        ((FluentTheme)App.Current!.Styles[0]).Mode = _isNightMode ? FluentThemeMode.Dark : FluentThemeMode.Light;
     
-        if (night)
+        if (_isNightMode)
         {
             //WASM seems to need a little help setting the textblock styles. hopefully they fix this sometime!
             App.Current!.Styles.Add(_whiteTextStyle);
@@ -45,7 +47,6 @@ public partial class MainView : UserControl
             App.Current!.Styles.Remove(_whiteTextStyle);
         }
 
-        ((MapThemeResources)App.Current!.Resources.MergedDictionaries[0]).Theme = night ? MapTheme.Night : MapTheme.Day;
+        ((MapThemeResources)App.Current!.Resources.MergedDictionaries[0]).Theme = _isNightMode ? MapTheme.Night : MapTheme.Day;
     }
-
 }
