@@ -23,20 +23,18 @@
     <Grid RowDefinitions="* Auto">
       <ProgressBar IsIndeterminate="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0"/>
       <UserControl Content="{Binding MapViewModel}"/>
-      <Grid Grid.Row="1">
-        <Grid ColumnDefinitions="Auto Auto * Auto Auto">
-          <ToggleButton Grid.Column="0" Command="{Binding EditModePressed}" Content="Edit Mode" IsChecked="{Binding EditModeEnabled}"/>
-          <Button Grid.Column="1" IsVisible="{Binding EditModeEnabled}" Content="Spy options">
-            <Button.Flyout>
-              <Flyout>
-                <CheckBox Content="Highlight nodes with turn restrictions" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
-              </Flyout>
-            </Button.Flyout>
-          </Button>
-          <controls:DayNightButton Grid.Column="3" Click="ColorModeSwitch"/>
-          <ToggleButton Grid.Column="4" Command="{Binding FollowMePressed}" Content="{Binding FollowMeText}" IsChecked="{Binding FollowMeEnabled}"/>
-        </Grid>
-        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
+      <Grid Grid.Row="1" ColumnDefinitions="Auto Auto * Auto Auto">
+        <ToggleButton Grid.Column="0" Command="{Binding EditModePressed}" Content="Edit Mode" IsChecked="{Binding EditModeEnabled}"/>
+        <Button Grid.Column="1" IsVisible="{Binding EditModeEnabled}" Content="Spy options">
+          <Button.Flyout>
+            <Flyout>
+              <CheckBox Content="Highlight nodes with turn restrictions" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+        <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
+        <controls:DayNightButton Grid.Column="3" Click="ColorModeSwitch"/>
+        <ToggleButton Grid.Column="4" Command="{Binding FollowMePressed}" Content="{Binding FollowMeText}" IsChecked="{Binding FollowMeEnabled}"/>
       </Grid>
     </Grid>
 
