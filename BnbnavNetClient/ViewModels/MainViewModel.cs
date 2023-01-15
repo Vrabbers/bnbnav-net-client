@@ -11,8 +11,6 @@ namespace BnbnavNetClient.ViewModels;
 
 public sealed class MainViewModel : ViewModel
 {
-    private MapService _mapService;
-
     [Reactive]
     public bool EditModeEnabled { get; set; }
 
@@ -44,10 +42,17 @@ public sealed class MainViewModel : ViewModel
     public EditModeControl CurrentEditMode { get; set; } = EditModeControl.Select;
 
     //TODO: make this better
-    [ObservableAsProperty] public bool IsInSelectMode => CurrentEditMode == EditModeControl.Select;
-    [ObservableAsProperty] public bool IsInJoinMode => CurrentEditMode == EditModeControl.Join;
-    [ObservableAsProperty] public bool IsInJoinTwoWayMode => CurrentEditMode == EditModeControl.JoinTwoWay;
-    [ObservableAsProperty] public bool RoadControlsRequired => false;
+    [ObservableAsProperty] 
+    public bool IsInSelectMode => CurrentEditMode == EditModeControl.Select;
+
+    [ObservableAsProperty] 
+    public bool IsInJoinMode => CurrentEditMode == EditModeControl.Join;
+
+    [ObservableAsProperty] 
+    public bool IsInJoinTwoWayMode => CurrentEditMode == EditModeControl.JoinTwoWay;
+
+    [ObservableAsProperty] 
+    public bool RoadControlsRequired => false;
     
 
     public MainViewModel()
@@ -72,8 +77,8 @@ public sealed class MainViewModel : ViewModel
 
     public async Task InitMapService()
     {
-        _mapService = await MapService.DownloadInitialMapAsync();
-        MapViewModel = new(_mapService, this);
+        var mapService = await MapService.DownloadInitialMapAsync();
+        MapViewModel = new(mapService, this);
         var panText = MapViewModel
             .WhenAnyValue(map => map.Pan)
             .Select(pt => $"x = {double.Round(pt.X)}; y = {double.Round(pt.Y)}");
