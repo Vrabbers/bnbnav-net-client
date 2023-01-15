@@ -172,7 +172,7 @@ public partial class MapView : UserControl
     {
         var scale = MapViewModel.Scale;
 
-        context.FillRectangle(BackgroundBrush, Bounds);
+        context.FillRectangle((Brush)this.FindResource("BackgroundBrush")!, Bounds);
 
         foreach (var (from, to, edge) in _drawnEdges)
         {
