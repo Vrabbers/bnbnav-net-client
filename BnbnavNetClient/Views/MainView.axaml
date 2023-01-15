@@ -8,6 +8,7 @@
              x:Class="BnbnavNetClient.Views.MainView"
              x:DataType="viewModels:MainViewModel"
              xmlns:views="clr-namespace:BnbnavNetClient.Views"
+             xmlns:controls="using:BnbnavNetClient.Controls"
              x:CompileBindings="True"
              Loaded="ViewLoaded">
 
@@ -52,18 +53,16 @@
       </Grid>
       
       <!-- Main Bar -->
-      <Grid Grid.Row="3">
-        <Grid ColumnDefinitions="Auto * Auto">
-          <ToggleButton Grid.Column="0" Command="{Binding EditModePressed}" Content="Edit Mode" IsChecked="{Binding EditModeEnabled}"/>
-          <ToggleButton Grid.Column="2" Command="{Binding FollowMePressed}" Content="{Binding FollowMeText}" IsChecked="{Binding FollowMeEnabled}"/>
-        </Grid>
-        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
+      <Grid Grid.Row="3" ColumnDefinitions="Auto * Auto">
+        <ToggleButton Grid.Column="0" Command="{Binding EditModePressed}" Content="Edit Mode" IsChecked="{Binding EditModeEnabled}"/>
+        <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
+        <ToggleButton Grid.Column="2" Command="{Binding FollowMePressed}" Content="{Binding FollowMeText}" IsChecked="{Binding FollowMeEnabled}"/>
       </Grid>
     </Grid>
 
     <!-- Popup -->
     <Grid IsVisible="{Binding Popup, Converter={x:Static ObjectConverters.IsNotNull}}" ColumnDefinitions="* Auto *" RowDefinitions="* Auto *" Background="#7f000000">
-      <Border CornerRadius="3" Grid.Column="1" Grid.Row="1" BoxShadow="0 0 200 0 Black" Background="White">
+      <Border CornerRadius="3" Grid.Column="1" Grid.Row="1" BoxShadow="0 0 200 0 Black" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
         <UserControl Content="{Binding Popup}"/>
       </Border>
     </Grid>

@@ -75,7 +75,7 @@ public partial class MapView : UserControl
 
         PointerWheelChanged += (_, eventArgs) =>
         {
-            var deltaScale = eventArgs.Delta.Y / 10.0;
+            var deltaScale = eventArgs.Delta.Y * MapViewModel.Scale / 10.0;
             Zoom(deltaScale, (eventArgs.GetPosition(this)));
         };
 
@@ -112,18 +112,13 @@ public partial class MapView : UserControl
             .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
     }
 
-    static readonly double NodeSize = 14;
     static readonly double LandmarkSize = 10;
-    static readonly IPen BlackBorderPen = new Pen(new SolidColorBrush(Colors.Black), thickness: 2);
-    static readonly IBrush BackgroundBrush = new SolidColorBrush(Colors.WhiteSmoke);
-    static readonly IBrush WhiteFillBrush = new SolidColorBrush(Colors.White);
-    static readonly Pen RoadPen = new Pen(new SolidColorBrush(Colors.DarkBlue), thickness: 20, lineCap: PenLineCap.Round);
-
+    static readonly double NodeSize = 14;
     readonly Dictionary<string, SKSvg> _svgCache = new();
 
-    private IReadOnlyList<(Point, Point, Edge)> _drawnEdges = new List<(Point, Point, Edge)>();
-    private IReadOnlyList<(Rect, Landmark)> _drawnLandmarks = new List<(Rect, Landmark)>();
-    private IReadOnlyList<(Rect, Node)> _drawnNodes = new List<(Rect, Node)>();
+    IReadOnlyList<(Point, Point, Edge)> _drawnEdges = new List<(Point, Point, Edge)>();
+    IReadOnlyList<(Rect, Landmark)> _drawnLandmarks = new List<(Rect, Landmark)>();
+    IReadOnlyList<(Rect, Node)> _drawnNodes = new List<(Rect, Node)>();
 
     private IEnumerable<MapItem> HitTest(Point point)
     {
@@ -179,10 +174,40 @@ public partial class MapView : UserControl
 
         context.FillRectangle(BackgroundBrush, Bounds);
 
-        foreach (var (from, to, _) in _drawnEdges)
+        foreach (var (from, to, edge) in _drawnEdges)
         {
-            RoadPen.Thickness = 20 * scale;
-            context.DrawLine(RoadPen, from, to);
+            var pen = (Pen)(edge.Road.RoadType switch
+            {
+                RoadType.Local => this.FindResource("LocalRoadPen")!,
+                RoadType.Main => this.FindResource("MainRoadPen")!,
+                RoadType.Highway => this.FindResource("HighwayRoadPen")!,
+                RoadType.Expressway => this.FindResource("ExpresswayRoadPen")!,
+                RoadType.Motorway => this.FindResource("MotorwayRoadPen")!,
+                RoadType.Footpath => this.FindResource("FootpathRoadPen")!,
+                RoadType.Waterway => this.FindResource("WaterwayRoadPen")!,
+                RoadType.Private => this.FindResource("PrivateRoadPen")!,
+                RoadType.Roundabout => this.FindResource("RoundaboutRoadPen")!,
+                RoadType.DuongWarp => this.FindResource("DuongWarpRoadPen")!,
+                _ => this.FindResource("UnknownRoadPen")!,
+            });  
+
+            var length = double.Sqrt(double.Pow(from.X - to.X, 2) + double.Pow(from.Y - to.Y, 2));
+            var diffPoint = to - from;
+            var angle = double.Atan2(diffPoint.Y, diffPoint.X);
+
+            var matrix = Matrix.Identity *
+                Matrix.CreateRotation(angle) *
+                Matrix.CreateTranslation(from);
+
+            pen.Thickness *= scale;
+            if (pen.Brush is LinearGradientBrush gradBrush)
+            {
+                gradBrush.StartPoint = new RelativePoint(0, -pen.Thickness / 2, RelativeUnit.Absolute);
+                gradBrush.EndPoint = new RelativePoint(0, pen.Thickness / 2, RelativeUnit.Absolute);
+            }
+            using (context.PushPreTransform(matrix))
+                context.DrawLine(pen, new(0, 0), new(length, 0));
+            pen.Thickness /= scale;
         }
 
         if (scale >= 0.8)
@@ -231,7 +256,7 @@ public partial class MapView : UserControl
         {
             foreach (var (rect, _) in _drawnNodes)
             {
-                context.DrawRectangle(WhiteFillBrush, BlackBorderPen, rect);
+                context.DrawRectangle((Brush)this.FindResource("NodeFill")!, (Pen)this.FindResource("NodeBorder")!, rect);
             }
         }
 
@@ -267,6 +292,5 @@ public partial class MapView : UserControl
         var worldFutureIncorrectPos = ToWorld(origin);
         var correction = worldFutureIncorrectPos - worldPrevPos;
         MapViewModel.Pan -= correction;
-
     }
 }
