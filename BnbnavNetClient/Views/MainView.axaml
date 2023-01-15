@@ -22,7 +22,7 @@
     <!-- Main UI -->
     <Grid RowDefinitions="* Auto Auto Auto">
       <!-- Map -->
-      <UserControl Content="{Binding MapViewModel}"/>
+      <UserControl Content="{Binding}" DataContext="{Binding MapViewModel}"/>
       
       <!-- Road Controls -->
       <Grid Grid.Row="1" IsVisible="{Binding RoadControlsRequired}">
