@@ -79,6 +79,8 @@ public partial class MapView : UserControl
             Zoom(deltaScale, (eventArgs.GetPosition(this)));
         };
 
+        BoundsProperty.Changed.Subscribe(_ => UpdateDrawnItems());
+
         //why does this happen to me :sob:
         MapViewModel
             .WhenAnyValue(x => x.Pan, x => x.Scale, x => x.Rotation)
