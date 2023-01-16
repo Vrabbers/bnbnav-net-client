@@ -13,7 +13,7 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        CultureInfo.CurrentUICulture = new("he");
+
         AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>().Initialize("BnbnavNetClient.locales");
     }
 
