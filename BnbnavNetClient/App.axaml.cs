@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.ViewModels;
 using BnbnavNetClient.Views;
+using System.Globalization;
 
 namespace BnbnavNetClient;
 
@@ -12,7 +13,7 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-
+        CultureInfo.CurrentUICulture = new("he");
         AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>().Initialize("BnbnavNetClient.locales");
     }
 

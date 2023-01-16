@@ -1,5 +1,6 @@
 ﻿using I18Next.Net;
 using I18Next.Net.Plugins;
+using System.Globalization;
 
 namespace BnbnavNetClient.I18Next.Services;
 sealed class AvaloniaI18Next : IAvaloniaI18Next
@@ -21,6 +22,15 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
     {
         IsNotNull();
         return _i18Next!.Ta(key, arguments);
+    }
+
+    public bool IsRightToLeft
+    {
+        get 
+        {
+            IsNotNull();
+            return new CultureInfo(_i18Next!.Language).TextInfo.IsRightToLeft;
+        }
     }
 
     void IsNotNull()

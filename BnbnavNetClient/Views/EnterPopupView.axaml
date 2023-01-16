@@ -12,8 +12,8 @@
     <TextBlock Text="{Binding Title}"/>
     <TextBox MinWidth="300" Watermark="{Binding Watermark}" Text="{Binding Input}"/>
     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-      <Button Command="{Binding Cancel}" Content="{str:TString Name=CANCEL}" />
-      <Button Classes="accent" Command="{Binding Ok}" IsDefault="True" Content="{str:TString Name=OK}" />
+      <Button Command="{Binding Cancel}" Content="{str:Tr Key=CANCEL}" />
+      <Button Classes="accent" Command="{Binding Ok}" IsDefault="True" Content="{str:Tr Key=OK}" />
     </StackPanel>
   </StackPanel>
 </UserControl>

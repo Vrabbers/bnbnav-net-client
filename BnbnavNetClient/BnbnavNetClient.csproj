@@ -26,12 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\EnterPopupView.axaml.cs">
-      <DependentUpon>EnterPopupView.axaml</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="locales/**/*" WithCulture="false" />
   </ItemGroup>
   

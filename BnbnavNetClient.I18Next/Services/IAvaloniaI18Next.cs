@@ -17,6 +17,8 @@ public interface IAvaloniaI18Next
     Task<string> TAsync(string key, params (string Name, object? Value)[] arguments) =>
         TAsync(key, TupleArrayToDict(arguments));
 
+    bool IsRightToLeft { get; }
+
     void Initialize(string basePath) => 
         Initialize(new JsonResourcesFileBackend(Assembly.GetCallingAssembly(), basePath));
     
