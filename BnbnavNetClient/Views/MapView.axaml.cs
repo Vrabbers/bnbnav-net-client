@@ -6,7 +6,6 @@ using BnbnavNetClient.ViewModels;
 using DynamicData.Binding;
 using ReactiveUI;
 using System;
-using System.IO;
 using System.Reactive;
 using Avalonia.Platform;
 using Avalonia.Svg.Skia;

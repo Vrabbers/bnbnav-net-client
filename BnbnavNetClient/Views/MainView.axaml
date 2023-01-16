@@ -10,7 +10,7 @@
              xmlns:views="clr-namespace:BnbnavNetClient.Views"
              xmlns:controls="using:BnbnavNetClient.Controls"
              x:CompileBindings="True"
-             xmlns:str="using:BnbnavNetClient.i18n"
+             xmlns:str="using:BnbnavNetClient.I18Next"
              Loaded="ViewLoaded">
 
   <Design.DataContext>

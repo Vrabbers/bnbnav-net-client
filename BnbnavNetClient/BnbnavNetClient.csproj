@@ -8,6 +8,7 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <None Remove="Assets\logo.svg" />
+    <None Remove="locales\pt\translation.json" />
     <TrimmerRootDescriptor Include="Roots.xml" />
   </ItemGroup>
 
@@ -29,16 +30,12 @@
       <DependentUpon>EnterPopupView.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="I18n" />
-  </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="locales/**/*" WithCulture="false" />
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\BnbnavNetClient.I18n\BnbnavNetClient.I18n.csproj" />
+    <ProjectReference Include="..\BnbnavNetClient.I18Next\BnbnavNetClient.I18Next.csproj" />
   </ItemGroup>
 </Project>

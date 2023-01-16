@@ -3,25 +3,24 @@ using System.Text.Json;
 using I18Next.Net.Backends;
 using I18Next.Net.TranslationTrees;
 
-namespace BnbnavNetClient.i18n;
+namespace BnbnavNetClient.I18Next;
 
-public class JsonResourcesFileBackend : ITranslationBackend
+public sealed class JsonResourcesFileBackend : ITranslationBackend
 {
-    private readonly string _basePath;
-    private readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
-    private Assembly _assembly;
+    readonly string _basePath;
+    readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
+    readonly Assembly _assembly;
 
-    public JsonResourcesFileBackend(string basePath)
-        : this(basePath, new GenericTranslationTreeBuilderFactory<HierarchicalTranslationTreeBuilder>())
+    public JsonResourcesFileBackend(Assembly assembly, string basePath)
+        : this(assembly, basePath, new GenericTranslationTreeBuilderFactory<HierarchicalTranslationTreeBuilder>())
     {
-        _assembly = Assembly.GetCallingAssembly();;
     }
 
-    public JsonResourcesFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory)
+    public JsonResourcesFileBackend(Assembly assembly, string basePath, ITranslationTreeBuilderFactory treeBuilderFactory)
     {
         _basePath = basePath;
         _treeBuilderFactory = treeBuilderFactory;
-        _assembly = Assembly.GetCallingAssembly();;
+        _assembly = assembly;
     }
 
     public async Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
@@ -29,9 +28,12 @@ public class JsonResourcesFileBackend : ITranslationBackend
         var builder = _treeBuilderFactory.Create();
         builder.Namespace = @namespace;
 
-        List<string> possibleFiles = new();
-        possibleFiles.Add($"{language.ToLower()}.{@namespace}.json");
-        if (language.Contains("-"))
+        List<string> possibleFiles = new()
+        {
+            $"{language.ToLower()}.{@namespace}.json"
+        };
+
+        if (language.Contains('-'))
         {
             possibleFiles.Add($"{language.Split("-")[0].ToLower()}.{@namespace}.json");
         }

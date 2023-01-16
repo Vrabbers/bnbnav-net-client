@@ -6,7 +6,7 @@
              mc:Ignorable="d" d:DesignWidth="330" d:DesignHeight="150"
              x:Class="BnbnavNetClient.Views.EnterPopupView"
              x:DataType="vm:EnterPopupViewModel"
-             xmlns:str="using:BnbnavNetClient.i18n"
+             xmlns:str="using:BnbnavNetClient.I18Next"
              x:CompileBindings="True">
   <StackPanel VerticalAlignment="Center" Margin="15">
     <TextBlock Text="{Binding Title}"/>

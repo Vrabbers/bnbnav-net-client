@@ -4,7 +4,8 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using BnbnavNetClient.i18n;
+using BnbnavNetClient.I18Next.Services;
+using Avalonia;
 
 namespace BnbnavNetClient.ViewModels;
 
@@ -37,8 +38,11 @@ public sealed class MainViewModel : ViewModel
     [ObservableAsProperty]
     public string PanText { get; } = "x = 0; y = 0";
 
+    IAvaloniaI18Next _tr;
+
     public MainViewModel()
     {
+        _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
         var followMeText = this
             .WhenAnyValue(me => me.FollowMeEnabled, me => me.FollowMeUsername)
             .Select(x => x.Item1 ? $"Following {x.Item2}" : "Follow Me");
@@ -65,7 +69,7 @@ public sealed class MainViewModel : ViewModel
                 EditModeEnabled = true;
                 return;
             }
-            var editModePopup = new EnterPopupViewModel("EDITNAV_PROMPT".T(), "EDITNAV_WATERMARK".T());
+            var editModePopup = new EnterPopupViewModel(_tr["EDITNAV_PROMPT"], _tr["EDITNAV_WATERMARK"]);
             editModePopup.Ok.Subscribe(token =>
             {
                 EditModeToken = token;

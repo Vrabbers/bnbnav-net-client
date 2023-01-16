@@ -17,7 +17,6 @@
   <Application.Styles>
     <FluentTheme Mode="Light"/>
     <Style Selector=":is(TemplatedControl)">
-      <Setter Property="FontFamily" Value="/Assets/EuropaMittelschrift.ttf#Europa"/>
       <Setter Property="FontSize" Value="18"/>
     </Style>
     <Style Selector=":is(Button)">
