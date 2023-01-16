@@ -38,6 +38,8 @@ public sealed class MainViewModel : ViewModel
     [ObservableAsProperty]
     public string PanText { get; } = "x = 0; y = 0";
 
+    public int Test => 1;
+
     IAvaloniaI18Next _tr;
 
     public MainViewModel()

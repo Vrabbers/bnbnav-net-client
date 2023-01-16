@@ -4,7 +4,6 @@ using Avalonia.Markup.Xaml;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.ViewModels;
 using BnbnavNetClient.Views;
-using System.Globalization;
 
 namespace BnbnavNetClient;
 

@@ -6,5 +6,7 @@
   "FOLLOW_ME": "Follow Me",
   "FOLLOW_ME_TURN_RESTRICTIONS": "Highlight nodes with turn restrictions",
   "OK": "OK",
-  "SPY_OPTIONS": "Spy Options"
+  "SPY_OPTIONS": "Spy Options",
+  "TEST_WITH_ARGS_one": "I am {{count}} happy person!",
+  "TEST_WITH_ARGS_other": "We are {{count}} happy people!"
 }

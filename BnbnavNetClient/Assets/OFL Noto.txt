@@ -1,6 +1,4 @@
-Copyright (c) 2009, Peter Wiegel, www.peter-wiegel.de, wiegel@peter-wiegel.de
-with Reserved Font Name "Europa Mittelschrift"
-
+Copyright 2015-2021 Google LLC. All Rights Reserved.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

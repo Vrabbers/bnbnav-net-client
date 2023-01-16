@@ -17,13 +17,14 @@
   <Application.Styles>
     <FluentTheme Mode="Light"/>
     <Style Selector=":is(TemplatedControl)">
-      <Setter Property="FontFamily" Value="/Assets/EuropaMittelschrift.ttf#Europa"/>
-      <Setter Property="FontSize" Value="18"/>
+      <Setter Property="FontFamily" Value="/Assets/NotoSans-Regular.ttf#Noto"/>
+      <Setter Property="FontSize" Value="16"/>
     </Style>
     <Style Selector=":is(Button)">
       <Setter Property="Margin" Value="2"/>
       <Setter Property="MinWidth" Value="72"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
     <Style Selector="TextBox">
       <Setter Property="Margin" Value="2"/>
