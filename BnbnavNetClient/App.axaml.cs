@@ -1,3 +1,4 @@
+using System.Reflection;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -16,21 +17,25 @@ public partial class App : Application
     {
         AvaloniaXamlLoader.Load(this);
 
-        var backend = new JsonFileBackend("locales");
-        var i18n = new I18NextNet(backend, new DefaultTranslator(backend, new TraceLogger(), new CldrPluralResolver(), new DefaultInterpolator()));
+        var backend = new JsonResourcesFileBackend("BnbnavNetClient.locales");
+        var i18n = new I18NextNet(backend, new DefaultTranslator(backend, new TraceLogger(), new CldrPluralResolver(), new DefaultInterpolator()), new CultureInfoLanguageDetector());
+        i18n.UseDetectedLanguage();
+        i18n.SetFallbackLanguages("en");
         var test = i18n.T("TEST");
         var testWithArg = i18n.T("TEST_WITH_ARG", new
         {
             age = "22"
         });
-        var testPluralSingular = i18n.T("TEST-PLURAL", new
+        var testPluralSingular = i18n.T("TEST_PLURAL", new
         {
             count = 1
         });
-        var testPlural = i18n.T("TEST-PLURAL", new
+        var testPlural = i18n.T("TEST_PLURAL", new
         {
             count = 2
         });
+
+        var names = Assembly.GetAssembly(GetType()).GetManifestResourceNames();
     }
 
     public override void OnFrameworkInitializationCompleted()

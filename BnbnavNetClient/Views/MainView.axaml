@@ -10,6 +10,7 @@
              xmlns:views="clr-namespace:BnbnavNetClient.Views"
              xmlns:controls="using:BnbnavNetClient.Controls"
              x:CompileBindings="True"
+             xmlns:str="using:BnbnavNetClient.i18n"
              Loaded="ViewLoaded">
 
   <Design.DataContext>
@@ -34,7 +35,7 @@
         </Button>
         <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
         <controls:DayNightButton Grid.Column="3" Click="ColorModeSwitch"/>
-        <ToggleButton Grid.Column="4" Command="{Binding FollowMePressed}" Content="{Binding FollowMeText}" IsChecked="{Binding FollowMeEnabled}"/>
+        <ToggleButton Grid.Column="4" Command="{Binding FollowMePressed}" Content="{str:TString Name=Test}" IsChecked="{Binding FollowMeEnabled}"/>
       </Grid>
     </Grid>
 

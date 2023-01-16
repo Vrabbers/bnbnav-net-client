@@ -4,10 +4,10 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>BnbnavNetClient.I18n</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Avalonia" Version="11.0.0-preview4" />
       <PackageReference Include="I18Next.Net" Version="1.0.0" />
       <PackageReference Include="Sepia.Globalization" Version="0.8.0" />
     </ItemGroup>

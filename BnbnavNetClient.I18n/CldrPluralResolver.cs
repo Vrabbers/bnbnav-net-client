@@ -23,7 +23,7 @@ public class CldrPluralResolver : IPluralResolver
         //HACK: For some reason German doesn't seem to be working correctly so hardcode the English rules
         var locale = Locale.Create(language.Split("-")[0]);
 
-        var pluralsFile = Assembly.GetExecutingAssembly().GetManifestResourceStream("BnbnavNetClient.I18n.Resources.plurals.xml")!;
+        var pluralsFile = Assembly.GetAssembly(GetType())!.GetManifestResourceStream("BnbnavNetClient.I18n.Resources.plurals.xml")!;
         var xp = new XPathDocument(pluralsFile);
         
         var rules = new List<XPathDocument>{xp}
@@ -38,5 +38,4 @@ public class CldrPluralResolver : IPluralResolver
     {
         return true;
     }
-
 }

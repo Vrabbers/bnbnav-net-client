@@ -31,24 +31,14 @@
   </ItemGroup>
   
   <ItemGroup>
-    <None Update="locales/**/*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  
-  <ItemGroup>
     <Folder Include="I18n" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="locales/**/*" WithCulture="false" />
   </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\BnbnavNetClient.I18n\BnbnavNetClient.I18n.csproj" />
   </ItemGroup>
-  
-<!--  -->
-<!--  <Target Name="CopyLocales" AfterTargets="AfterBuild">-->
-<!--    <Copy SourceFiles="locales/**" DestinationFolder="$(OutDir)" />-->
-<!--  </Target>-->
-<!--  <Target Name="CopyLocalesOnPublish" AfterTargets="Publish">-->
-<!--    <Copy SourceFiles="locales/**" DestinationFolder="$(PublishDir)" />-->
-<!--  </Target>-->
 </Project>

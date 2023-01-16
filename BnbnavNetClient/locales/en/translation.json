@@ -1,6 +1,6 @@
 {
   "TEST": "This is a test",
   "TEST_WITH_ARG": "I am {{age}} years old",
-  "TEST-PLURAL_one": "You have {{count}} unread notification",
-  "TEST-PLURAL_other": "You have {{count}} unread notifications"
+  "TEST_PLURAL_one": "You have {{count}} unread notification",
+  "TEST_PLURAL_other": "You have {{count}} unread notifications"
 }
