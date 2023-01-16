@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>BnbnavNetClient.I18n</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="I18Next.Net" Version="1.0.0" />
+      <PackageReference Include="Sepia.Globalization" Version="0.8.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Resources/plurals.xml" WithCulture="false" />
+    </ItemGroup>
+
+</Project>
