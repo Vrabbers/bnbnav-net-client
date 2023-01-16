@@ -13,11 +13,13 @@ using Svg.Skia;
 using System.Collections.Generic;
 using System.Linq;
 using BnbnavNetClient.Models;
+using ReactiveUI.Fody.Helpers;
 
 namespace BnbnavNetClient.Views;
 public partial class MapView : UserControl
 {
     bool _pointerPressing;
+    private bool _disablePan = false;
     Point _pointerPrevPosition;
 
     Matrix _toScreenMtx = Matrix.Identity;
@@ -26,6 +28,9 @@ public partial class MapView : UserControl
     readonly IAssetLoader _assetLoader;
 
     MapViewModel MapViewModel => (MapViewModel)DataContext!;
+
+    [Reactive]
+    private IList<Node> RoadGhosts { get; set; } = new List<Node>();
 
     public MapView()
     {
@@ -39,20 +44,89 @@ public partial class MapView : UserControl
         
         PointerPressed += (_, eventArgs) =>
         {
+            var pointerPos = eventArgs.GetPosition(this);
             _pointerPressing = true;
-            _pointerPrevPosition = eventArgs.GetPosition(this);
+            _pointerPrevPosition = pointerPos;
+
+            _disablePan = false;
+            switch (MapViewModel.MapEditorService.CurrentEditMode)
+            {
+                case EditModeControl.Select:
+                    break;
+                case EditModeControl.Join:
+                case EditModeControl.JoinTwoWay:
+                    //Don't try to pan
+                    if (HitTest(pointerPos).Any(x => x is Node)) _disablePan = true;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         };
 
         PointerMoved += (_, eventArgs) =>
         {
-            if (!_pointerPressing)
-                return;
-
             var pointerPos = eventArgs.GetPosition(this);
+            if (_pointerPressing)
+            {
+                if (_disablePan)
+                {
 
-            // We need to pan _more_ when scale is smaller:
-            MapViewModel.Pan += (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
-            _pointerPrevPosition = pointerPos;
+                    switch (MapViewModel.MapEditorService.CurrentEditMode)
+                    {
+                        case EditModeControl.Select:
+                            break;
+                        case EditModeControl.Join:
+                        case EditModeControl.JoinTwoWay:
+                            var item = HitTest(pointerPos).FirstOrDefault(x => x is Node);
+                            if (item is Node node)
+                            {
+                                var lastNode = RoadGhosts.Last();
+                                
+                                //Make sure this makes sense
+                                //TODO: Make sure we can't loop back on ourselves: we also need to check RoadGhosts for duplicates
+                                if (node.Id != lastNode.Id && !MapViewModel.MapService.Edges.Any(x =>
+                                        x.Value.From == lastNode && x.Value.To == node))
+                                {
+                                    RoadGhosts.Add(node);
+                                }
+                            }
+
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    InvalidateVisual();
+                } 
+                else
+                {
+                    // We need to pan _more_ when scale is smaller:
+                    MapViewModel.Pan += (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
+                }
+                _pointerPrevPosition = pointerPos;
+            }
+            else
+            {
+                switch (MapViewModel.MapEditorService.CurrentEditMode)
+                {
+                    case EditModeControl.Select:
+                        break;
+                    case EditModeControl.Join:
+                    case EditModeControl.JoinTwoWay:
+                    {
+                        RoadGhosts.Clear();
+                        // Draw a circular ghost around any nodes
+                        var item = HitTest(pointerPos).FirstOrDefault(x => x is Node);
+                        if (item is Node node)
+                        {
+                            RoadGhosts.Add(node);
+                        }
+                        InvalidateVisual();
+                        break;
+                    }
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         };
 
         PointerReleased += (_, eventArgs) =>
@@ -256,6 +330,16 @@ public partial class MapView : UserControl
 
         if (MapViewModel.IsInEditMode)
         {
+            if (RoadGhosts.Count != 0)
+            {
+                PolylineGeometry geo = new();
+                geo.Points.AddRange(RoadGhosts.Select(x => ToScreen(new(x.X, x.Z))));
+                if (_pointerPressing) geo.Points.Add(_pointerPrevPosition);
+
+                Pen pen = new(0x50000000, 5 * scale, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
+                context.DrawGeometry(null, pen, geo);
+            }
+            
             foreach (var (rect, _) in _drawnNodes)
             {
                 context.DrawRectangle((Brush)this.FindResource("NodeFill")!, (Pen)this.FindResource("NodeBorder")!, rect);

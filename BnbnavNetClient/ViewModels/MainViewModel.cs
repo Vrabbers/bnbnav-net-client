@@ -11,8 +11,6 @@ namespace BnbnavNetClient.ViewModels;
 
 public sealed class MainViewModel : ViewModel
 {
-    [Reactive]
-    public bool EditModeEnabled { get; set; }
 
     [Reactive]
     public bool HighlightTurnRestrictionsEnabled { get; set; }
@@ -38,41 +36,45 @@ public sealed class MainViewModel : ViewModel
     [ObservableAsProperty]
     public string PanText { get; } = "x = 0; y = 0";
 
-    [Reactive]
-    public EditModeControl CurrentEditMode { get; set; } = EditModeControl.Select;
-
     //TODO: make this better
     [ObservableAsProperty] 
-    public bool IsInSelectMode => CurrentEditMode == EditModeControl.Select;
+    public bool IsInSelectMode => MapEditorService.CurrentEditMode == EditModeControl.Select;
 
     [ObservableAsProperty] 
-    public bool IsInJoinMode => CurrentEditMode == EditModeControl.Join;
+    public bool IsInJoinMode => MapEditorService.CurrentEditMode == EditModeControl.Join;
 
     [ObservableAsProperty] 
-    public bool IsInJoinTwoWayMode => CurrentEditMode == EditModeControl.JoinTwoWay;
+    public bool IsInJoinTwoWayMode => MapEditorService.CurrentEditMode == EditModeControl.JoinTwoWay;
 
     [ObservableAsProperty] 
     public bool RoadControlsRequired => false;
+
+    [ObservableAsProperty]
+    public bool EditModeEnabled => false;
     
+    public MapEditorService MapEditorService { get; set; }
 
     public MainViewModel()
     {
+        MapEditorService = new();
+        
         var followMeText = this
             .WhenAnyValue(me => me.FollowMeEnabled, me => me.FollowMeUsername)
             .Select(x => x.Item1 ? $"Following {x.Item2}" : "Follow Me");
         followMeText.ToPropertyEx(this, me => me.FollowMeText);
 
-        this.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Select)
+        MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Select)
             .ToPropertyEx(this, x => x.IsInSelectMode);
-        this.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Join)
+        MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Join)
             .ToPropertyEx(this, x => x.IsInJoinMode);
-        this.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.JoinTwoWay)
-            .ToPropertyEx(this, x => x.IsInJoinTwoWayMode);
-        this.WhenAnyValue(x => x.CurrentEditMode, x => x.EditModeEnabled).Select(x =>
+        MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.JoinTwoWay)
+            .ToPropertyEx(this, x => x.IsInJoinTwoWayMode); 
+        MapEditorService.WhenAnyValue(x => x.CurrentEditMode, x => x.EditModeEnabled).Select(x =>
         {
             if (!x.Item2) return false;
             return x.Item1 is EditModeControl.Join or EditModeControl.JoinTwoWay;
         }).ToPropertyEx(this, x => x.RoadControlsRequired);
+        MapEditorService.WhenAnyValue(x => x.EditModeEnabled).ToPropertyEx(this, x => x.EditModeEnabled);
     }
 
     public async Task InitMapService()
@@ -100,12 +102,12 @@ public sealed class MainViewModel : ViewModel
         editModePopup.Ok.Subscribe(token =>
         {
             EditModeToken = token;
-            EditModeEnabled = true;
+            MapEditorService.EditModeEnabled = true;
             Popup = null;
         });
         editModePopup.Cancel.Subscribe(_ =>
         {
-            EditModeEnabled = false;
+            MapEditorService.EditModeEnabled = false;
             Popup = null;
         });
         Popup = editModePopup;
@@ -113,35 +115,35 @@ public sealed class MainViewModel : ViewModel
 
     public void EditModePressed()
     {
-        EditModeEnabled = !EditModeEnabled;
-        if(!EditModeEnabled)
+        //MapEditorService.EditModeEnabled = !MapEditorService.EditModeEnabled;
+        if (!MapEditorService.EditModeEnabled)
         {
             if (EditModeToken is not null)
             {
-                EditModeEnabled = true;
+                MapEditorService.EditModeEnabled = true;
                 return;
             }
             ShowAuthenticationPopup();
         }
         else
         {
-            EditModeEnabled = false;
+            MapEditorService.EditModeEnabled = false;
         }
     }
 
     public void SelectModePressed()
     {
-        CurrentEditMode = EditModeControl.Select;
+        MapEditorService.CurrentEditMode = EditModeControl.Select;
     }
 
     public void JoinModePressed()
     {
-        CurrentEditMode = EditModeControl.Join;
+        MapEditorService.CurrentEditMode = EditModeControl.Join;
     }
 
     public void JoinTwoWayModePressed()
     {
-        CurrentEditMode = EditModeControl.JoinTwoWay;
+        MapEditorService.CurrentEditMode = EditModeControl.JoinTwoWay;
     }
 
     public void FollowMePressed()
