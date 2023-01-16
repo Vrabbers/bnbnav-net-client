@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectSettingsService">
+    <option name="localesDirectory" value="$PROJECT_DIR$/BnbnavNetClient/locales" />
+    <option name="folderStrategy" value="MODULARIZED_LOCALE" />
+    <option name="defaultNamespace" value="translation" />
+  </component>
+</project>

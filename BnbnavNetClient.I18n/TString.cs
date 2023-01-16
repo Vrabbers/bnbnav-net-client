@@ -9,6 +9,6 @@ public class TString : MarkupExtension
     
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
-        return $"ME STRING {Name}";
+        return Name.T();
     }
 }

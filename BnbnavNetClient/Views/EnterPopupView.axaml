@@ -6,13 +6,14 @@
              mc:Ignorable="d" d:DesignWidth="330" d:DesignHeight="150"
              x:Class="BnbnavNetClient.Views.EnterPopupView"
              x:DataType="vm:EnterPopupViewModel"
+             xmlns:str="using:BnbnavNetClient.i18n"
              x:CompileBindings="True">
   <StackPanel VerticalAlignment="Center" Margin="15">
     <TextBlock Text="{Binding Title}"/>
     <TextBox MinWidth="300" Watermark="{Binding Watermark}" Text="{Binding Input}"/>
     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-      <Button Command="{Binding Cancel}">Cancel</Button>
-      <Button Classes="accent" Command="{Binding Ok}" IsDefault="True">OK</Button>
+      <Button Command="{Binding Cancel}" Content="{str:TString Name=CANCEL}" />
+      <Button Classes="accent" Command="{Binding Ok}" IsDefault="True" Content="{str:TString Name=OK}" />
     </StackPanel>
   </StackPanel>
 </UserControl>

@@ -44,6 +44,7 @@ public class JsonResourcesFileBackend : ITranslationBackend
         var contents = await JsonSerializer.DeserializeAsync<Dictionary<string, string>>(fileStream);
         foreach (var (key, value) in contents!)
         {
+            if (string.IsNullOrWhiteSpace(value)) continue;
             builder.AddTranslation(key, value);
         }
         return builder.Build();

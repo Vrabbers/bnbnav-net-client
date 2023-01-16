@@ -25,17 +25,17 @@
       <ProgressBar IsIndeterminate="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0"/>
       <UserControl Content="{Binding MapViewModel}"/>
       <Grid Grid.Row="1" ColumnDefinitions="Auto Auto * Auto Auto">
-        <ToggleButton Grid.Column="0" Command="{Binding EditModePressed}" Content="Edit Mode" IsChecked="{Binding EditModeEnabled}"/>
-        <Button Grid.Column="1" IsVisible="{Binding EditModeEnabled}" Content="Spy options">
+        <ToggleButton Grid.Column="0" Command="{Binding EditModePressed}" Content="{str:TString Name=EDIT_MODE}" IsChecked="{Binding EditModeEnabled}"/>
+        <Button Grid.Column="1" IsVisible="{Binding EditModeEnabled}" Content="{str:TString Name=SPY_OPTIONS}">
           <Button.Flyout>
             <Flyout>
-              <CheckBox Content="Highlight nodes with turn restrictions" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
+              <CheckBox Content="{str:TString Name=FOLLOW_ME_TURN_RESTRICTIONS}" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
             </Flyout>
           </Button.Flyout>
         </Button>
         <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
         <controls:DayNightButton Grid.Column="3" Click="ColorModeSwitch"/>
-        <ToggleButton Grid.Column="4" Command="{Binding FollowMePressed}" Content="{str:TString Name=Test}" IsChecked="{Binding FollowMeEnabled}"/>
+        <ToggleButton Grid.Column="4" Command="{Binding FollowMePressed}" Content="{str:TString Name=FOLLOW_ME}" IsChecked="{Binding FollowMeEnabled}"/>
       </Grid>
     </Grid>
 

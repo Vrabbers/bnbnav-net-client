@@ -4,6 +4,7 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using BnbnavNetClient.i18n;
 
 namespace BnbnavNetClient.ViewModels;
 
@@ -64,7 +65,7 @@ public sealed class MainViewModel : ViewModel
                 EditModeEnabled = true;
                 return;
             }
-            var editModePopup = new EnterPopupViewModel("Use /editnav to obtain a token and enter here:", "Token");
+            var editModePopup = new EnterPopupViewModel("EDITNAV_PROMPT".T(), "EDITNAV_WATERMARK".T());
             editModePopup.Ok.Subscribe(token =>
             {
                 EditModeToken = token;

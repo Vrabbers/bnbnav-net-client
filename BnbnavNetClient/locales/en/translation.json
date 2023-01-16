@@ -1,6 +1,10 @@
 {
-  "TEST": "This is a test",
-  "TEST_WITH_ARG": "I am {{age}} years old",
-  "TEST_PLURAL_one": "You have {{count}} unread notification",
-  "TEST_PLURAL_other": "You have {{count}} unread notifications"
+  "CANCEL": "Cancel",
+  "EDITNAV_PROMPT": "Use /editnav to obtain a token and enter here:",
+  "EDITNAV_WATERMARK": "Token",
+  "EDIT_MODE": "Edit Mode",
+  "FOLLOW_ME": "Follow Me",
+  "FOLLOW_ME_TURN_RESTRICTIONS": "Highlight nodes with turn restrictions",
+  "OK": "OK",
+  "SPY_OPTIONS": "Spy Options"
 }
