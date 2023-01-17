@@ -7,6 +7,7 @@ public sealed class CultureInfoLanguageDetector : ILanguageDetector
 {
     public string GetLanguage()
     {
-        return CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        return CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+        // TODO: change to .Name so it can get regional variants?
     }
 }

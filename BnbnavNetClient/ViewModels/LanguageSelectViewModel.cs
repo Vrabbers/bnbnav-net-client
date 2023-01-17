@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using BnbnavNetClient.I18Next.Services;
+using BnbnavNetClient.Settings;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ public class LanguageSelectViewModel : ViewModel
     public LanguageSelectViewModel()
     {
         _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
-        ChosenLanguage = _tr.CurrentLanguage;
+        ChosenLanguage = new(SettingsManager.Settings.Language);
         Ok = ReactiveCommand.Create(() => ChosenLanguage);
     }
 }

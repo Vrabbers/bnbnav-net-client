@@ -43,7 +43,7 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
 
         set
         {
-            CultureInfo.CurrentUICulture = value;
+            CultureInfo.CurrentCulture = value;
             _i18Next!.UseDetectedLanguage();
         }
     }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using BnbnavNetClient.I18Next.Services;
 using Avalonia;
 using System.Globalization;
+using BnbnavNetClient.Settings;
 
 namespace BnbnavNetClient.ViewModels;
 
@@ -65,10 +66,11 @@ public sealed class MainViewModel : ViewModel
     public void LanguageButtonPressed()
     {
         var languagePopup = new LanguageSelectViewModel();
-        languagePopup.Ok.Subscribe(lang =>
+        languagePopup.Ok.Subscribe(async lang =>
         {
             Popup = null;
-            _tr.CurrentLanguage = lang;
+            SettingsManager.Settings.Language = lang.Name;
+            await SettingsManager.SaveAsync();
         });
         Popup = languagePopup;
     }
