@@ -3,6 +3,12 @@
     "BnbnavNetClient.Desktop": {
       "commandName": "Project"
     },
+    "BnbnavNetClient.Desktop with Pseudolocalization": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "PSEUDOLOCALIZATION": "true"
+      }
+    },
     "WSL": {
       "commandName": "WSL2",
       "distributionName": ""

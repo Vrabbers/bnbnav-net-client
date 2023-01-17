@@ -19,10 +19,10 @@ public interface IAvaloniaI18Next
 
     bool IsRightToLeft { get; }
 
-    void Initialize(string basePath) => 
-        Initialize(new JsonResourcesFileBackend(Assembly.GetCallingAssembly(), basePath));
+    void Initialize(string basePath, bool pseudo) => 
+        Initialize(new JsonResourcesFileBackend(Assembly.GetCallingAssembly(), basePath), pseudo);
     
-    void Initialize(JsonResourcesFileBackend backend);
+    void Initialize(JsonResourcesFileBackend backend, bool pseudo);
 
     static Dictionary<string, object?> TupleArrayToDict((string Name, object? Value)[] arguments) =>
         arguments.ToDictionary(static t => t.Name, static t => t.Value);

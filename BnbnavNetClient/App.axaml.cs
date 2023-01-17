@@ -13,7 +13,8 @@ public partial class App : Application
     {
         AvaloniaXamlLoader.Load(this);
 
-        AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>().Initialize("BnbnavNetClient.locales");
+        var pseudo = System.Environment.GetEnvironmentVariable("PSEUDOLOCALIZATION") == "true";
+        AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>().Initialize("BnbnavNetClient.locales", pseudo);
     }
 
     public override void OnFrameworkInitializationCompleted()

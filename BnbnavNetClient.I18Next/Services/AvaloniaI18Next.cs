@@ -39,9 +39,16 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
             throw new InvalidOperationException("IAvaloniaI18Next.Initialize(...) must be called before translations are accessed.");
     }
 
-    public void Initialize(JsonResourcesFileBackend backend)
+    public void Initialize(JsonResourcesFileBackend backend, bool pseudo)
     {
-        _i18Next = new I18NextNet(backend, new DefaultTranslator(backend, new TraceLogger(), new CldrPluralResolver(), new DefaultInterpolator()), new CultureInfoLanguageDetector());
+        var translator = new Translator(backend, new TraceLogger(), new CldrPluralResolver(),
+            new DefaultInterpolator());
+        if (pseudo)
+        {
+            translator.PostProcessors.Add(new PseudoLocalizationPostProcessor(new()));
+        }
+
+        _i18Next = new(backend, translator, new CultureInfoLanguageDetector());
         _i18Next.UseDetectedLanguage();
         _i18Next.SetFallbackLanguages("en");
     }
