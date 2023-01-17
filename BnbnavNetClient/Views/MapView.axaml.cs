@@ -176,6 +176,8 @@ public partial class MapView : UserControl
 
                 _toScreenMtx = matrix;
                 _toWorldMtx = matrix.Invert();
+
+                UpdateDrawnItems();
             }));
         MapViewModel
             .WhenAnyPropertyChanged()
@@ -186,11 +188,11 @@ public partial class MapView : UserControl
     static readonly double NodeSize = 14;
     readonly Dictionary<string, SKSvg> _svgCache = new();
 
-    IReadOnlyList<(Point, Point, Edge)> _drawnEdges = new List<(Point, Point, Edge)>();
-    IReadOnlyList<(Rect, Landmark)> _drawnLandmarks = new List<(Rect, Landmark)>();
-    IReadOnlyList<(Rect, Node)> _drawnNodes = new List<(Rect, Node)>();
+    List<(Point, Point, Edge)> _drawnEdges = new List<(Point, Point, Edge)>();
+    List<(Rect, Landmark)> _drawnLandmarks = new List<(Rect, Landmark)>();
+    List<(Rect, Node)> _drawnNodes = new List<(Rect, Node)>();
 
-    private IEnumerable<MapItem> HitTest(Point point)
+    IEnumerable<MapItem> HitTest(Point point)
     {
         foreach (var (rect, landmark) in _drawnLandmarks)
         {
@@ -203,10 +205,24 @@ public partial class MapView : UserControl
         }
     }
 
-    private void UpdateDrawnItems()
+
+    protected override Size ArrangeOverride(Size finalSize)
+    {
+        UpdateDrawnItems(new Rect(finalSize));
+        return base.ArrangeOverride(finalSize);
+    }
+
+    void UpdateDrawnItems(Rect? boundsRect = null)
     {
         var mapService = MapViewModel.MapService;
         var scale = MapViewModel.Scale;
+
+        if (Bounds.Size.IsDefault && boundsRect is null)
+        {
+            return;
+        }
+
+        var bounds = boundsRect ?? Bounds;
 
         _drawnEdges = mapService.Edges.Values.Select(edge =>
         {
@@ -215,7 +231,7 @@ public partial class MapView : UserControl
             var toEdge = mapService.Nodes[edge.To.Id];
             var to = ToScreen(new (toEdge.X, toEdge.Z));
             return (from, to, edge);
-        }).Where(edge => LineIntersects(edge.from, edge.to, Bounds)).ToList();
+        }).Where(edge => LineIntersects(edge.from, edge.to, bounds)).ToList();
 
         _drawnLandmarks = mapService.Landmarks.Values.Select(landmark =>
         {
@@ -225,7 +241,7 @@ public partial class MapView : UserControl
                 pos.Y - LandmarkSize * scale / 2,
                 LandmarkSize * scale, LandmarkSize * scale);
             return (rect, landmark);
-        }).Where(landmark => Bounds.Intersects(landmark.rect)).ToList().AsReadOnly();
+        }).Where(landmark => bounds.Intersects(landmark.rect)).ToList();
 
         _drawnNodes = mapService.Nodes.Values.Select(node =>
         {
@@ -235,14 +251,13 @@ public partial class MapView : UserControl
                 pos.Y - NodeSize / 2,
                 NodeSize, NodeSize);
             return (rect, node);
-        }).Where(node => Bounds.Intersects(node.rect)).ToList().AsReadOnly();
+        }).Where(node => bounds.Intersects(node.rect)).ToList();
     }
 
     public override void Render(DrawingContext context)
     {
         var scale = MapViewModel.Scale;
 
-        UpdateDrawnItems();
         context.FillRectangle((Brush)this.FindResource("BackgroundBrush")!, Bounds);
 
         foreach (var (from, to, edge) in _drawnEdges)
