@@ -27,6 +27,8 @@ public partial class MainView : UserControl
             return;
 
         await vm.InitMapService();
+
+        MapPanel.Children.Add(new MapView() { DataContext = vm.MapViewModel });
     }
 
 

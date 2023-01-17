@@ -22,8 +22,8 @@
     <!-- Main UI -->
     <Grid RowDefinitions="* Auto Auto Auto">
       <!-- Map -->
-      <UserControl Content="{Binding}" DataContext="{Binding MapViewModel}"/>
-      
+      <Panel Name="MapPanel"/>
+
       <!-- Road Controls -->
       <Grid Grid.Row="1" IsVisible="{Binding RoadControlsRequired}">
         <Grid ColumnDefinitions="Auto Auto Auto Auto Auto * Auto">

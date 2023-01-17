@@ -153,8 +153,6 @@ public partial class MapView : UserControl
             Zoom(deltaScale, (eventArgs.GetPosition(this)));
         };
 
-        BoundsProperty.Changed.Subscribe(_ => UpdateDrawnItems());
-
         //why does this happen to me :sob:
         MapViewModel
             .WhenAnyValue(x => x.Pan, x => x.Scale, x => x.Rotation)
@@ -180,8 +178,6 @@ public partial class MapView : UserControl
 
                 _toScreenMtx = matrix;
                 _toWorldMtx = matrix.Invert();
-                
-                UpdateDrawnItems();
             }));
         MapViewModel
             .WhenAnyPropertyChanged()
@@ -248,6 +244,7 @@ public partial class MapView : UserControl
     {
         var scale = MapViewModel.Scale;
 
+        UpdateDrawnItems();
         context.FillRectangle((Brush)this.FindResource("BackgroundBrush")!, Bounds);
 
         foreach (var (from, to, edge) in _drawnEdges)
