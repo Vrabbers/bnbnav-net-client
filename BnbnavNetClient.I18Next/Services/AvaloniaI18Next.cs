@@ -33,6 +33,7 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
         }
     }
 
+    //TODO : how to do this?
     public IEnumerable<CultureInfo> AvailableLanguages => new CultureInfo[] { new("en"), new("vi"), new("pt") };
     public CultureInfo CurrentLanguage
     {
@@ -43,6 +44,7 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
 
         set
         {
+            CultureInfo.CurrentUICulture = value;
             CultureInfo.CurrentCulture = value;
             _i18Next!.UseDetectedLanguage();
         }

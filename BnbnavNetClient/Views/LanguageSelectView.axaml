@@ -6,30 +6,20 @@
              mc:Ignorable="d" d:DesignWidth="330" d:DesignHeight="150"
              x:Class="BnbnavNetClient.Views.LanguageSelectView"
              x:DataType="vm:LanguageSelectViewModel"
+             xmlns:str="using:BnbnavNetClient.I18Next"
              x:CompileBindings="True">
   <StackPanel VerticalAlignment="Center" Margin="15" Spacing="2">
-    <TextBlock Text="Change Language"/>
+    <TextBlock Text="{str:Tr Key=LANG_CHANGE}"/>
     <ComboBox HorizontalAlignment="Stretch" Items="{Binding AvailableLanguages}" SelectedItem="{Binding ChosenLanguage}">
       <ComboBox.ItemTemplate>
         <DataTemplate>
-
-          <StackPanel Orientation="Horizontal">
-            <TextBlock Text="{Binding Name}"/>
-            <TextBlock Text="–"/>
-
-            <TextBlock Text="{Binding NativeName}"/>
-            
-            <TextBlock Text="("/>
-            <TextBlock Text="{Binding DisplayName}"/>
-            <TextBlock Text=")"/>
-
-          </StackPanel>
+          <TextBlock Text="{Binding PrettyPrint}"/>
         </DataTemplate>
       </ComboBox.ItemTemplate>
     </ComboBox>
-    <TextBlock>Please restart for setting to take effect.</TextBlock>
+    <TextBlock IsVisible="{Binding LangChanged}" Text="{str:Tr Key=LANG_CHANGE_RESTART_REQUIRED}"/>
     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-      <Button Command="{Binding Ok}" Classes="accent" IsDefault="True">OK</Button>
+      <Button Command="{Binding Ok}" Classes="accent" IsDefault="True" Content="{str:Tr Key=OK}"/>
     </StackPanel>
   </StackPanel>
 </UserControl>
