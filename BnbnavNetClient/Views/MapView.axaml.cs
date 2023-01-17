@@ -254,6 +254,23 @@ public partial class MapView : UserControl
         }).Where(node => bounds.Intersects(node.rect)).ToList();
     }
 
+    Pen PenForRoadType(RoadType type) => (Pen)(type switch
+    {
+        RoadType.Local => this.FindResource("LocalRoadPen")!,
+        RoadType.Main => this.FindResource("MainRoadPen")!,
+        RoadType.Highway => this.FindResource("HighwayRoadPen")!,
+        RoadType.Expressway => this.FindResource("ExpresswayRoadPen")!,
+        RoadType.Motorway => this.FindResource("MotorwayRoadPen")!,
+        RoadType.Footpath => this.FindResource("FootpathRoadPen")!,
+        RoadType.Waterway => this.FindResource("WaterwayRoadPen")!,
+        RoadType.Private => this.FindResource("PrivateRoadPen")!,
+        RoadType.Roundabout => this.FindResource("RoundaboutRoadPen")!,
+        RoadType.DuongWarp => this.FindResource("DuongWarpRoadPen")!,
+        _ => this.FindResource("UnknownRoadPen")!,
+    });
+
+    double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? this.FindResource("MotorwayThickness")! : this.FindResource("RoadThickness")!);
+
     public override void Render(DrawingContext context)
     {
         var scale = MapViewModel.Scale;
@@ -262,20 +279,7 @@ public partial class MapView : UserControl
 
         foreach (var (from, to, edge) in _drawnEdges)
         {
-            var pen = (Pen)(edge.Road.RoadType switch
-            {
-                RoadType.Local => this.FindResource("LocalRoadPen")!,
-                RoadType.Main => this.FindResource("MainRoadPen")!,
-                RoadType.Highway => this.FindResource("HighwayRoadPen")!,
-                RoadType.Expressway => this.FindResource("ExpresswayRoadPen")!,
-                RoadType.Motorway => this.FindResource("MotorwayRoadPen")!,
-                RoadType.Footpath => this.FindResource("FootpathRoadPen")!,
-                RoadType.Waterway => this.FindResource("WaterwayRoadPen")!,
-                RoadType.Private => this.FindResource("PrivateRoadPen")!,
-                RoadType.Roundabout => this.FindResource("RoundaboutRoadPen")!,
-                RoadType.DuongWarp => this.FindResource("DuongWarpRoadPen")!,
-                _ => this.FindResource("UnknownRoadPen")!,
-            });  
+            var pen = PenForRoadType(edge.Road.RoadType);
 
             var length = double.Sqrt(double.Pow(from.X - to.X, 2) + double.Pow(from.Y - to.Y, 2));
             var diffPoint = to - from;
@@ -285,7 +289,7 @@ public partial class MapView : UserControl
                 Matrix.CreateRotation(angle) *
                 Matrix.CreateTranslation(from);
 
-            pen.Thickness *= scale;
+            pen.Thickness = ThicknessForRoadType(edge.Road.RoadType) * scale;
             if (pen.Brush is LinearGradientBrush gradBrush)
             {
                 gradBrush.StartPoint = new RelativePoint(0, -pen.Thickness / 2, RelativeUnit.Absolute);
@@ -293,7 +297,6 @@ public partial class MapView : UserControl
             }
             using (context.PushPreTransform(matrix))
                 context.DrawLine(pen, new(0, 0), new(length, 0));
-            pen.Thickness /= scale;
         }
 
         if (scale >= 0.8)
@@ -347,11 +350,9 @@ public partial class MapView : UserControl
                 if (_pointerPressing) geo.Points.Add(_pointerPrevPosition);
 
                 var pen = (Pen)this.FindResource("RoadGhostPen")!;
-                pen.Thickness *= scale;
+                pen.Thickness = ThicknessForRoadType(RoadType.Local) * scale;
                 context.DrawGeometry(null, pen, geo);
-                pen.Thickness /= scale;
             }
-
             var nodeBorder = (Pen)this.FindResource("NodeBorder")!;
             var nodeBrush = (Brush)this.FindResource("NodeFill")!;
             var selNodeBrush = (Brush)this.FindResource("SelectedNodeFill")!;
