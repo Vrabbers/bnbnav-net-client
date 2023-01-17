@@ -1,10 +1,13 @@
 {
   "CANCEL": "Cancelar",
-  "EDITNAV_PROMPT": "Use /editnav para obter uma chave e insira-a aqui:",
+  "EDITNAV_PROMPT": "Use /editnav para obter uma chave e a insira aqui:",
   "EDITNAV_WATERMARK": "Chave",
-  "EDIT_MODE": "Modo de Edição",
+  "EDIT_MODE": "Modo editar",
   "FOLLOW_ME": "Siga-me",
-  "FOLLOW_ME_TURN_RESTRICTIONS": "Destacar nós com restrições de virada",
+  "FOLLOWING": "Seguindo {{user}}",
+  "FOLLOW_ME_PROMPT": "Insira o nome do usuário do Minecraft:",
+  "FOLLOW_ME_WATERMARK": "Nome do usuário",
+  "FOLLOW_ME_TURN_RESTRICTIONS": "Destacar nós com proibições de virada",
   "OK": "OK",
-  "SPY_OPTIONS": "Espionagem"
+  "SPY_OPTIONS": "Espionar"
 }

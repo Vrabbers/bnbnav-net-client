@@ -9,7 +9,7 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
 
     internal AvaloniaI18Next() { }
 
-    public string this[string key, object? arguments]
+    public string this[string key, Dictionary<string, object?>? arguments]
     {
         get
         {
@@ -30,6 +30,21 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
         {
             IsNotNull();
             return new CultureInfo(_i18Next!.Language).TextInfo.IsRightToLeft;
+        }
+    }
+
+    public IEnumerable<CultureInfo> AvailableLanguages => new CultureInfo[] { new("en"), new("vi"), new("pt") };
+    public CultureInfo CurrentLanguage
+    {
+        get
+        {
+            return new(_i18Next!.Language);
+        }
+
+        set
+        {
+            CultureInfo.CurrentUICulture = value;
+            _i18Next!.UseDetectedLanguage();
         }
     }
 

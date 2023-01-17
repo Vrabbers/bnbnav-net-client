@@ -32,4 +32,10 @@
   <ItemGroup>
     <ProjectReference Include="..\BnbnavNetClient.I18Next\BnbnavNetClient.I18Next.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Update="Views\LanguageSelectView.axaml.cs">
+      <DependentUpon>LanguageSelectView.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

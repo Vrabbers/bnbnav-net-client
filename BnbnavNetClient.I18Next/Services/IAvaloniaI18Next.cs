@@ -1,11 +1,12 @@
-﻿using System.Reflection;
+﻿using System.Globalization;
+using System.Reflection;
 
 namespace BnbnavNetClient.I18Next.Services;
 public interface IAvaloniaI18Next
 {    
-    string this[string key, object? arguments] { get; }
+    string this[string key, Dictionary<string, object?>? arguments] { get; }
 
-    string this[string key] => this[key, (object?)null];
+    string this[string key] => this[key, (Dictionary<string, object?>?) null];
 
     string this[string key, params (string Name, object? Value)[] arguments] => 
         this[key, TupleArrayToDict(arguments)];
@@ -18,6 +19,9 @@ public interface IAvaloniaI18Next
         TAsync(key, TupleArrayToDict(arguments));
 
     bool IsRightToLeft { get; }
+
+    IEnumerable<CultureInfo> AvailableLanguages { get; }
+    CultureInfo CurrentLanguage { get; set; }
 
     void Initialize(string basePath, bool pseudo) => 
         Initialize(new JsonResourcesFileBackend(Assembly.GetCallingAssembly(), basePath), pseudo);
