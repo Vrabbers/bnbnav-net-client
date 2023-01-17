@@ -5,7 +5,6 @@ using BnbnavNetClient.ViewModels;
 using DynamicData.Binding;
 using ReactiveUI;
 using System;
-using System.IO;
 using System.Reactive;
 using Avalonia.Platform;
 using Avalonia.Svg.Skia;
@@ -13,7 +12,7 @@ using Svg.Skia;
 using System.Collections.Generic;
 using System.Linq;
 using BnbnavNetClient.Models;
-using ReactiveUI.Fody.Helpers;
+using DynamicData;
 
 namespace BnbnavNetClient.Views;
 public partial class MapView : UserControl
@@ -29,8 +28,7 @@ public partial class MapView : UserControl
 
     MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
-    [Reactive]
-    private IList<Node> RoadGhosts { get; set; } = new List<Node>();
+    List<Node> _roadGhosts = new();
 
     public MapView()
     {
@@ -80,14 +78,14 @@ public partial class MapView : UserControl
                             var item = HitTest(pointerPos).FirstOrDefault(x => x is Node);
                             if (item is Node node)
                             {
-                                var lastNode = RoadGhosts.Last();
+                                var lastNode = _roadGhosts.Last();
                                 
                                 //Make sure this makes sense
                                 //TODO: Make sure we can't loop back on ourselves: we also need to check RoadGhosts for duplicates
                                 if (node.Id != lastNode.Id && !MapViewModel.MapService.Edges.Any(x =>
                                         x.Value.From == lastNode && x.Value.To == node))
                                 {
-                                    RoadGhosts.Add(node);
+                                    _roadGhosts.Add(node);
                                 }
                             }
 
@@ -113,12 +111,12 @@ public partial class MapView : UserControl
                     case EditModeControl.Join:
                     case EditModeControl.JoinTwoWay:
                     {
-                        RoadGhosts.Clear();
+                        _roadGhosts.Clear();
                         // Draw a circular ghost around any nodes
                         var item = HitTest(pointerPos).FirstOrDefault(x => x is Node);
                         if (item is Node node)
                         {
-                            RoadGhosts.Add(node);
+                            _roadGhosts.Add(node);
                         }
                         InvalidateVisual();
                         break;
@@ -327,19 +325,25 @@ public partial class MapView : UserControl
 
         if (MapViewModel.IsInEditMode)
         {
-            if (RoadGhosts.Count != 0)
+            if (_roadGhosts.Count != 0)
             {
                 PolylineGeometry geo = new();
-                geo.Points.AddRange(RoadGhosts.Select(x => ToScreen(new(x.X, x.Z))));
+                geo.Points.AddRange(_roadGhosts.Select(x => ToScreen(new(x.X, x.Z))));
                 if (_pointerPressing) geo.Points.Add(_pointerPrevPosition);
 
-                Pen pen = new(0x50000000, 5 * scale, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
+                var pen = (Pen)this.FindResource("RoadGhostPen")!;
+                pen.Thickness *= scale;
                 context.DrawGeometry(null, pen, geo);
+                pen.Thickness /= scale;
             }
-            
-            foreach (var (rect, _) in _drawnNodes)
+
+            var nodeBorder = (Pen)this.FindResource("NodeBorder")!;
+            var nodeBrush = (Brush)this.FindResource("NodeFill")!;
+            var selNodeBrush = (Brush)this.FindResource("SelectedNodeFill")!;
+            foreach (var (rect, node) in _drawnNodes)
             {
-                context.DrawRectangle((Brush)this.FindResource("NodeFill")!, (Pen)this.FindResource("NodeBorder")!, rect);
+                var brush = _roadGhosts.Contains(node) ? selNodeBrush : nodeBrush;
+                context.DrawRectangle(brush, nodeBorder, rect);
             }
         }
 

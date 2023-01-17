@@ -2,7 +2,6 @@
 using BnbnavNetClient.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System.Reactive;
 
 namespace BnbnavNetClient.ViewModels;
 public class MapViewModel : ViewModel

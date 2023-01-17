@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <SolidColorBrush x:Key="BackgroundBrush" Color="WhiteSmoke"/>
   <SolidColorBrush x:Key="NodeFill" Color="White"/>
+  <SolidColorBrush x:Key="SelectedNodeFill" Color="Yellow"/>
   <Pen x:Key="NodeBorder" Thickness="2">
     <Pen.Brush>
       <SolidColorBrush Color="Black"/>
@@ -67,6 +68,11 @@
   <Pen x:Key="DuongWarpRoadPen" Thickness="5" LineCap="Round">
     <Pen.Brush>
       <SolidColorBrush Color="Transparent"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="RoadGhostPen" Thickness="5" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="#7f7f7f7f"/>
     </Pen.Brush>
   </Pen>
 </ResourceDictionary>

@@ -13,7 +13,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Avalonia.Media;
 
 namespace BnbnavNetClient.Services;
 public sealed class MapService : ReactiveObject
