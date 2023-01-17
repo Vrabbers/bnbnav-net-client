@@ -27,7 +27,7 @@ public class PseudoLocalizationPostProcessor : IPostProcessor
         return value;
     }
 
-    public string ProcessResult(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
+    public string ProcessResult(string key, string value, IDictionary<string, object> args, string language, ITranslator? translator)
     {
         var output = new StringBuilder();
         
