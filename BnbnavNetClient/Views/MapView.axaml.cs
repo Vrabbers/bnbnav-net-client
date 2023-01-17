@@ -145,6 +145,9 @@ public partial class MapView : UserControl
                     case Landmark landmark:
                         Console.WriteLine($"Clicked on Landmark  type: {landmark.Type}  name: {landmark.Name}");
                         break;
+                    case Edge edge:
+                        Console.WriteLine($"Clicked on Edge  road: {edge.Road.Name}");
+                        break;
                 }
             }
         };
@@ -358,6 +361,9 @@ public partial class MapView : UserControl
                 PolylineGeometry geo = new();
                 geo.Points.AddRange(_roadGhosts.Select(x => ToScreen(new(x.X, x.Z))));
                 if (_pointerPressing) geo.Points.Add(_pointerPrevPosition);
+                
+                //Make the shape into a circle
+                if (geo.Points.Count == 1) geo.Points.Add(geo.Points.First());
 
                 var pen = (Pen)this.FindResource("RoadGhostPen")!;
                 pen.Thickness = ThicknessForRoadType(RoadType.Local) * scale;
