@@ -23,6 +23,7 @@
     <Grid RowDefinitions="* Auto Auto Auto">
       <!-- Map -->
       <Panel Name="MapPanel"/>
+      <TextBlock Text="{Binding MapViewModel.Test}"/>
 
       <!-- Road Controls -->
       <Grid Grid.Row="1" IsVisible="{Binding RoadControlsRequired}">

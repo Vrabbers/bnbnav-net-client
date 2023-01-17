@@ -24,6 +24,9 @@ public class MapViewModel : ViewModel
     [Reactive]
     public bool NightMode { get; set; } = false;
 
+    [Reactive]
+    public string Test { get; set; } = string.Empty;
+
     public MapEditorService MapEditorService { get; set; }
 
     public MapViewModel(MapService mapService, MainViewModel mainViewModel)

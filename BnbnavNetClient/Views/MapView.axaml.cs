@@ -13,12 +13,13 @@ using System.Collections.Generic;
 using System.Linq;
 using BnbnavNetClient.Models;
 using DynamicData;
+using BnbnavNetClient.Helpers;
 
 namespace BnbnavNetClient.Views;
 public partial class MapView : UserControl
 {
     bool _pointerPressing;
-    private bool _disablePan = false;
+    bool _disablePan = false;
     Point _pointerPrevPosition;
 
     Matrix _toScreenMtx = Matrix.Identity;
@@ -28,7 +29,7 @@ public partial class MapView : UserControl
 
     MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
-    List<Node> _roadGhosts = new();
+    readonly List<Node> _roadGhosts = new();
 
     public MapView()
     {
@@ -50,6 +51,9 @@ public partial class MapView : UserControl
             switch (MapViewModel.MapEditorService.CurrentEditMode)
             {
                 case EditModeControl.Select:
+                    MapViewModel.Test = string.Empty;
+                    foreach (var hit in HitTest(pointerPos))
+                        MapViewModel.Test += hit.ToString() + "\n";
                     break;
                 case EditModeControl.Join:
                 case EditModeControl.JoinTwoWay:
@@ -64,11 +68,11 @@ public partial class MapView : UserControl
         PointerMoved += (_, eventArgs) =>
         {
             var pointerPos = eventArgs.GetPosition(this);
+
             if (_pointerPressing)
             {
                 if (_disablePan)
                 {
-
                     switch (MapViewModel.MapEditorService.CurrentEditMode)
                     {
                         case EditModeControl.Select:
@@ -203,6 +207,12 @@ public partial class MapView : UserControl
         {
             if (rect.Contains(point)) yield return node;
         }
+
+        foreach (var (a, b, edge) in _drawnEdges)
+        {
+            if (GeoHelper.LineSegmentToPointDistance(a, b, point) <= ThicknessForRoadType(edge.Road.RoadType) * MapViewModel.Scale / 2)
+                yield return edge;
+        }
     }
 
 
@@ -231,7 +241,7 @@ public partial class MapView : UserControl
             var toEdge = mapService.Nodes[edge.To.Id];
             var to = ToScreen(new (toEdge.X, toEdge.Z));
             return (from, to, edge);
-        }).Where(edge => LineIntersects(edge.from, edge.to, bounds)).ToList();
+        }).Where(edge => GeoHelper.LineIntersects(edge.from, edge.to, bounds)).ToList();
 
         _drawnLandmarks = mapService.Landmarks.Values.Select(landmark =>
         {
@@ -366,24 +376,10 @@ public partial class MapView : UserControl
         base.Render(context);
     }
 
-    private static bool LineIntersects(Point from, Point to, Rect bounds)
-    {
-        if (bounds.Contains(from) || bounds.Contains(to)) 
-            return true;
-
-        //If the line is bigger than the smallest edge of the bounds, draw it, as both points may lie outside the view;
-        var minDistSqr = double.Pow(double.Min(bounds.Width, bounds.Height), 2);
-        var lengthSqr = double.Pow(from.X - to.X, 2) + double.Pow(from.Y - to.Y, 2);
-        if (lengthSqr > minDistSqr) 
-            return true;
-        // TODO: do this properly
-        return false;
-    }
-
-    private Point ToWorld(Point screenCoords) =>
+    Point ToWorld(Point screenCoords) =>
          _toWorldMtx.Transform(screenCoords);
 
-    private Point ToScreen(Point worldCoords) =>
+    Point ToScreen(Point worldCoords) =>
         _toScreenMtx.Transform(worldCoords);
 
     public void Zoom(double deltaScale, Point origin)
