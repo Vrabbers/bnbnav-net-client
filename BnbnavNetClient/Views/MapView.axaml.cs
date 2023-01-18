@@ -15,8 +15,6 @@ using System.Linq;
 using BnbnavNetClient.Models;
 using DynamicData;
 using BnbnavNetClient.Helpers;
-using Avalonia.Skia;
-using Avalonia.Animation;
 
 namespace BnbnavNetClient.Views;
 
@@ -35,28 +33,16 @@ public partial class MapView : UserControl
 
     readonly List<Node> _roadGhosts = new();
 
-    Vector _velocity;
-
     public MapView()
     {
         _assetLoader = AvaloniaLocator.Current.GetService<IAssetLoader>()!;
         InitializeComponent();
-        Clock = new Clock();
-        Clock.Subscribe(ts =>
-        {
-            if (_pointerPressing)
-                return;
-            MapViewModel.Pan += _velocity;
-            _velocity /= 1.075;
-        });
-
     }
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-
-
+        
         PointerPressed += (_, eventArgs) =>
         {
             var pointerPos = eventArgs.GetPosition(this);
@@ -117,8 +103,8 @@ public partial class MapView : UserControl
                 } 
                 else
                 {
-                    _velocity = (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
-                    MapViewModel.Pan += _velocity;
+                    // We need to pan _more_ when scale is smaller:
+                    MapViewModel.Pan += (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
                 }
                 _pointerPrevPosition = pointerPos;
             }

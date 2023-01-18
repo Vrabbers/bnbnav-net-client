@@ -1,5 +1,4 @@
 using Avalonia;
-using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
@@ -9,8 +8,6 @@ using BnbnavNetClient.Controls;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Settings;
 using BnbnavNetClient.ViewModels;
-using System;
-using System.Reactive;
 
 namespace BnbnavNetClient.Views;
 
