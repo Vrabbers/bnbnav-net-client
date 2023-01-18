@@ -8,6 +8,7 @@
              x:Class="BnbnavNetClient.Views.MainView"
              x:DataType="viewModels:MainViewModel"
              xmlns:views="clr-namespace:BnbnavNetClient.Views"
+             xmlns:controls="using:BnbnavNetClient.Controls"
              x:CompileBindings="True"
              Loaded="ViewLoaded">
 
@@ -20,26 +21,26 @@
   <Grid>
     <!-- Main UI -->
     <Grid RowDefinitions="* Auto">
+      <ProgressBar IsIndeterminate="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0"/>
       <UserControl Content="{Binding MapViewModel}"/>
-      <Grid Grid.Row="1">
-        <Grid ColumnDefinitions="Auto Auto * Auto">
-          <ToggleButton Grid.Column="0" Command="{Binding EditModePressed}" Content="Edit Mode" IsChecked="{Binding EditModeEnabled}"/>
-          <Button Grid.Column="1" IsVisible="{Binding EditModeEnabled}" Content="Spy options">
-            <Button.Flyout>
-              <Flyout>
-                  <CheckBox Content="Highlight nodes with turn restrictions" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
-              </Flyout>
-            </Button.Flyout>
-          </Button>
-          <ToggleButton Grid.Column="3" Command="{Binding FollowMePressed}" Content="{Binding FollowMeText}" IsChecked="{Binding FollowMeEnabled}"/>
-        </Grid>
-        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
+      <Grid Grid.Row="1" ColumnDefinitions="Auto Auto * Auto Auto">
+        <ToggleButton Grid.Column="0" Command="{Binding EditModePressed}" Content="Edit Mode" IsChecked="{Binding EditModeEnabled}"/>
+        <Button Grid.Column="1" IsVisible="{Binding EditModeEnabled}" Content="Spy options">
+          <Button.Flyout>
+            <Flyout>
+              <CheckBox Content="Highlight nodes with turn restrictions" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+        <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
+        <controls:DayNightButton Grid.Column="3" Click="ColorModeSwitch"/>
+        <ToggleButton Grid.Column="4" Command="{Binding FollowMePressed}" Content="{Binding FollowMeText}" IsChecked="{Binding FollowMeEnabled}"/>
       </Grid>
     </Grid>
 
     <!-- Popup -->
     <Grid IsVisible="{Binding Popup, Converter={x:Static ObjectConverters.IsNotNull}}" ColumnDefinitions="* Auto *" RowDefinitions="* Auto *" Background="#7f000000">
-      <Border CornerRadius="3" Grid.Column="1" Grid.Row="1" BoxShadow="0 0 200 0 Black" Background="White">
+      <Border CornerRadius="3" Grid.Column="1" Grid.Row="1" BoxShadow="0 0 200 0 Black" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
         <UserControl Content="{Binding Popup}"/>
       </Border>
     </Grid>

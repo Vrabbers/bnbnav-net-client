@@ -7,11 +7,11 @@
              x:Class="BnbnavNetClient.Views.AlertDialogView"
              x:DataType="vm:AlertDialogViewModel"
              x:CompileBindings="True">
-    <StackPanel VerticalAlignment="Center" Margin="15">
-        <TextBlock Text="{Binding Title}" FontWeight="Bold"/>
-        <TextBlock Text="{Binding Message}"/>
-        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-            <Button Command="{Binding Ok}" IsDefault="True">OK</Button>
-        </StackPanel>
+  <StackPanel VerticalAlignment="Center" Margin="15">
+    <TextBlock Text="{Binding Title}" FontWeight="Bold"/>
+    <TextBlock Text="{Binding Message}"/>
+    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+      <Button Classes="accent" Command="{Binding Ok}" IsDefault="True">OK</Button>
     </StackPanel>
+  </StackPanel>
 </UserControl>

@@ -1,11 +1,17 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using BnbnavNetClient.Models;
 using BnbnavNetClient.ViewModels;
 using DynamicData.Binding;
 using ReactiveUI;
 using System;
+using System.IO;
 using System.Reactive;
+using Avalonia.Platform;
+using Avalonia.Svg.Skia;
+using Svg.Skia;
+using System.Collections.Generic;
 
 namespace BnbnavNetClient.Views;
 
@@ -13,13 +19,17 @@ public partial class MapView : UserControl
 {
     bool _pointerPressing;
     Point _pointerPrevPosition;
-    MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
     Matrix _toScreenMtx = Matrix.Identity;
     Matrix _toWorldMtx = Matrix.Identity;
 
+    readonly IAssetLoader _assetLoader;
+
+    MapViewModel MapViewModel => (MapViewModel)DataContext!;
+
     public MapView()
     {
+        _assetLoader = AvaloniaLocator.Current.GetService<IAssetLoader>()!;
         InitializeComponent();
     }
 
@@ -52,7 +62,7 @@ public partial class MapView : UserControl
 
         PointerWheelChanged += (_, eventArgs) =>
         {
-            var deltaScale = eventArgs.Delta.Y / 10.0;
+            var deltaScale = eventArgs.Delta.Y * MapViewModel.Scale / 10.0;
             Zoom(deltaScale, (eventArgs.GetPosition(this)));
         };
 
@@ -82,47 +92,129 @@ public partial class MapView : UserControl
                 _toScreenMtx = matrix;
                 _toWorldMtx = matrix.Invert();
             }));
+
+
         MapViewModel
             .WhenAnyPropertyChanged()
             .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
     }
 
-    static readonly double NodeSize = 14;
-    static readonly IPen BlackBorderPen = new Pen(new SolidColorBrush(Colors.Black), thickness: 2);
-    static readonly IBrush BackgroundBrush = new SolidColorBrush(Colors.WhiteSmoke);
-    static readonly IBrush WhiteFillBrush = new SolidColorBrush(Colors.White);
-    static readonly Pen RoadPen = new Pen(new SolidColorBrush(Colors.DarkBlue), thickness: 20, lineCap: PenLineCap.Round);
+    static readonly double LandmarkSize = 10;
+    readonly Dictionary<string, SKSvg> _svgCache = new();
+
     public override void Render(DrawingContext context)
     {
         var mapService = MapViewModel.MapService;
         var scale = MapViewModel.Scale;
 
-        context.FillRectangle(BackgroundBrush, Bounds);
+        context.FillRectangle((Brush)this.FindResource("BackgroundBrush")!, Bounds);
 
         foreach (var edge in mapService.Edges.Values)
         {
+            var pen = (Pen)(edge.Road.RoadType switch
+            {
+                RoadType.Local => this.FindResource("LocalRoadPen")!,
+                RoadType.Main => this.FindResource("MainRoadPen")!,
+                RoadType.Highway => this.FindResource("HighwayRoadPen")!,
+                RoadType.Expressway => this.FindResource("ExpresswayRoadPen")!,
+                RoadType.Motorway => this.FindResource("MotorwayRoadPen")!,
+                RoadType.Footpath => this.FindResource("FootpathRoadPen")!,
+                RoadType.Waterway => this.FindResource("WaterwayRoadPen")!,
+                RoadType.Private => this.FindResource("PrivateRoadPen")!,
+                RoadType.Roundabout => this.FindResource("RoundaboutRoadPen")!,
+                RoadType.DuongWarp => this.FindResource("DuongWarpRoadPen")!,
+                _ => this.FindResource("UnknownRoadPen")!,
+            });  
             var fromEdge = mapService.Nodes[edge.From.Id];
             var from = ToScreen(new(fromEdge.X, fromEdge.Z));
             var toEdge = mapService.Nodes[edge.To.Id];
-            var to = ToScreen(new (toEdge.X, toEdge.Z));
+            var to = ToScreen(new (toEdge.X, toEdge.Z));      
+
+            var length = double.Sqrt(double.Pow(from.X - to.X, 2) + double.Pow(from.Y - to.Y, 2));
+            var diffPoint = to - from;
+            var angle = double.Atan2(diffPoint.Y, diffPoint.X);
+            
+            var matrix = Matrix.Identity *
+                Matrix.CreateRotation(angle) *
+                Matrix.CreateTranslation(from);
             if (!LineIntersects(from, to, Bounds))
                 continue;
-            RoadPen.Thickness = 20 * scale;
-            context.DrawLine(RoadPen, from, to);
+
+            pen.Thickness *= scale;
+            if (pen.Brush is LinearGradientBrush gradBrush)
+            {
+                gradBrush.StartPoint = new RelativePoint(0, -pen.Thickness / 2, RelativeUnit.Absolute);
+                gradBrush.EndPoint = new RelativePoint(0, pen.Thickness / 2, RelativeUnit.Absolute);
+            }
+            using (context.PushPreTransform(matrix))
+                context.DrawLine(pen, new(0, 0), new(length, 0));
+            pen.Thickness /= scale;
+        }
+
+        if (scale >= 0.8)
+        {
+            foreach (var landmark in mapService.Landmarks.Values)
+            {
+                var pos = ToScreen(new(landmark.Node.X, landmark.Node.Z));
+                var rect = new Rect(
+                    pos.X - LandmarkSize * scale / 2,
+                    pos.Y - LandmarkSize * scale / 2,
+                    LandmarkSize * scale, LandmarkSize * scale);
+                if (!Bounds.Intersects(rect))
+                    continue;
+
+                SKSvg? svg = null;
+
+                if (_svgCache.TryGetValue(landmark.Type, out var outSvg))
+                {
+                    svg = outSvg;
+                }
+                else
+                {
+                    var uri = new Uri($"avares://BnbnavNetClient/Assets/Landmarks/{landmark.Type}.svg");
+                    if (_assetLoader.Exists(uri))
+                    {
+                        var asset = _assetLoader.Open(uri);
+
+                        svg = new SKSvg();
+                        svg.Load(asset);
+                        if (svg.Picture is null)
+                            continue;
+                        _svgCache.Add(landmark.Type, svg);
+                    }
+                }
+
+                if (svg is null)
+                    continue;
+
+                var sourceSize = new Size(svg.Picture!.CullRect.Width, svg.Picture.CullRect.Height);
+                var scaleMatrix = Matrix.CreateScale(
+                    rect.Width / sourceSize.Width,
+                    rect.Height / sourceSize.Height);
+                var translateMatrix = Matrix.CreateTranslation(
+                    rect.X * sourceSize.Width / rect.Width,
+                    rect.Y * sourceSize.Height / rect.Height);
+
+                using (context.PushClip(rect))
+                using (context.PushPreTransform(translateMatrix * scaleMatrix))
+                    context.Custom(new SvgCustomDrawOperation(rect, svg));
+
+            }
         }
 
         if (MapViewModel.IsInEditMode)
         {
+            var nodeSize = 14;
             foreach (var node in mapService.Nodes.Values)
             {
                 var pos = ToScreen(new(node.X, node.Z));
                 var rect = new Rect(
-                    pos.X - NodeSize / 2, 
-                    pos.Y - NodeSize / 2,
-                    NodeSize, NodeSize);
+                    pos.X - nodeSize / 2, 
+                    pos.Y - nodeSize / 2,
+                    nodeSize, nodeSize);
                 if (!Bounds.Intersects(rect))
                     continue;
-                context.DrawRectangle(WhiteFillBrush, BlackBorderPen, rect);
+                context.DrawRectangle((Brush)this.FindResource("NodeFill")!, (Pen)this.FindResource("NodeBorder")!, rect);
             }
         }
 
@@ -158,6 +250,5 @@ public partial class MapView : UserControl
         var worldFutureIncorrectPos = ToWorld(origin);
         var correction = worldFutureIncorrectPos - worldPrevPos;
         MapViewModel.Pan -= correction;
-
     }
 }
