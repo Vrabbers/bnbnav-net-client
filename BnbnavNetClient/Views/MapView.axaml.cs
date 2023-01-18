@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Media;
 using BnbnavNetClient.Models;
@@ -19,6 +20,8 @@ public partial class MapView : UserControl
 {
     bool _pointerPressing;
     Point _pointerPrevPosition;
+    Point _viewVelocity;
+    List<Point> _pointerVelocities; // This list is averaged to get smooth panning.
 
     Matrix _toScreenMtx = Matrix.Identity;
     Matrix _toWorldMtx = Matrix.Identity;
@@ -30,6 +33,8 @@ public partial class MapView : UserControl
     public MapView()
     {
         _assetLoader = AvaloniaLocator.Current.GetService<IAssetLoader>()!;
+        _pointerVelocities = new List<Point>();
+
         InitializeComponent();
     }
 
@@ -41,6 +46,8 @@ public partial class MapView : UserControl
         {
             _pointerPressing = true;
             _pointerPrevPosition = eventArgs.GetPosition(this);
+
+            _viewVelocity = new(0, 0);
         };
 
         PointerMoved += (_, eventArgs) =>
@@ -52,6 +59,28 @@ public partial class MapView : UserControl
 
             // We need to pan _more_ when scale is smaller:
             MapViewModel.Pan += (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
+            
+            _pointerVelocities.Add(new Point(
+                pointerPos.X - _pointerPrevPosition.X,
+                pointerPos.Y - _pointerPrevPosition.Y
+            ));
+
+            if (_pointerVelocities.Count > 5)
+                _pointerVelocities.RemoveAt(0);
+
+            var xSum = 0.0;
+            var ySum = 0.0;
+
+            foreach (var i in _pointerVelocities) {
+                xSum += i.X;
+                ySum += i.Y;
+            }
+
+            _viewVelocity = new(
+                xSum / _pointerVelocities.Count,
+                ySum / _pointerVelocities.Count
+            );
+
             _pointerPrevPosition = pointerPos;
         };
 
@@ -65,6 +94,17 @@ public partial class MapView : UserControl
             var deltaScale = eventArgs.Delta.Y * MapViewModel.Scale / 10.0;
             Zoom(deltaScale, (eventArgs.GetPosition(this)));
         };
+
+        Clock = new Clock();
+        Clock.Subscribe(
+            ts => {
+                if (_pointerPressing)
+                    return;
+            
+                MapViewModel.Pan += _viewVelocity;
+                _viewVelocity /= 1.075; // 1.075 is the friction.
+            }
+        );
 
         //why does this happen to me :sob:
         MapViewModel
