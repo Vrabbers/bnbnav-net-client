@@ -61,13 +61,8 @@ public partial class MapView : UserControl
             MapViewModel.Pan += (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
             
             _pointerVelocities.Add(new Point(
-<<<<<<< HEAD
                 _pointerPrevPosition.X - pointerPos.X,
                 _pointerPrevPosition.Y - pointerPos.Y
-=======
-                pointerPos.X - _pointerPrevPosition.X,
-                pointerPos.Y - _pointerPrevPosition.Y
->>>>>>> inertial-pan
             ));
 
             if (_pointerVelocities.Count > 5)
@@ -86,15 +81,12 @@ public partial class MapView : UserControl
                 ySum / _pointerVelocities.Count
             );
 
-<<<<<<< HEAD
             /*
              * The actual view velocity should be the average of the last 5
              * computed velocities, due to how low-quality mouses work (low-quality
              * mouses have a tendency to move in angles snapped to 45 degrees).
              */
 
-=======
->>>>>>> inertial-pan
             _pointerPrevPosition = pointerPos;
         };
 
@@ -113,21 +105,14 @@ public partial class MapView : UserControl
             _pointerVelocities.Clear();
         };
 
-<<<<<<< HEAD
         // This is the physics part of inertial panning.
-=======
->>>>>>> inertial-pan
         Clock = new Clock();
         Clock.Subscribe(
             ts => {
                 if (_pointerPressing)
                     return;
             
-<<<<<<< HEAD
                 MapViewModel.Pan += _viewVelocity / MapViewModel.Scale;
-=======
-                MapViewModel.Pan += _viewVelocity;
->>>>>>> inertial-pan
                 _viewVelocity /= 1.075; // 1.075 is the friction.
             }
         );
