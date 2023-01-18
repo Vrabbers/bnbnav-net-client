@@ -23,7 +23,7 @@
     <!-- Main UI -->
     <Grid RowDefinitions="* Auto">
       <ProgressBar IsIndeterminate="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0"/>
-      <UserControl Content="{Binding MapViewModel}"/>
+      <Panel Name="MapPanel"/>
       <Grid Grid.Row="1" ColumnDefinitions="Auto Auto Auto * Auto Auto">
         <Button MinWidth="0" Command="{Binding LanguageButtonPressed}"><PathIcon Data="{StaticResource globe_regular}"/></Button>
         <ToggleButton Grid.Column="1" Command="{Binding EditModePressed}" Content="{str:Tr Key=EDIT_MODE}" IsChecked="{Binding EditModeEnabled}"/>
