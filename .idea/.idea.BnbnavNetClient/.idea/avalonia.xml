@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="BnbnavNetClient/App.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Resources/DayTheme.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Resources/NightTheme.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Views/AlertDialog.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Views/AlertDialogView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Views/EnterPopupView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Views/MainView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Views/MainWindow.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Views/MapView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+      </map>
+    </option>
+  </component>
+</project>

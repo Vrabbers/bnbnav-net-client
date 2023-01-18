@@ -4,6 +4,9 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using BnbnavNetClient.I18Next.Services;
+using Avalonia;
+using BnbnavNetClient.Settings;
 
 namespace BnbnavNetClient.ViewModels;
 
@@ -19,7 +22,7 @@ public sealed class MainViewModel : ViewModel
     public bool FollowMeEnabled { get; set; }
 
     [ObservableAsProperty]
-    public string FollowMeText { get; } = "Follow Me";
+    public string FollowMeText { get; }
 
     [Reactive]
     public string FollowMeUsername { get; set; } = string.Empty;
@@ -34,14 +37,22 @@ public sealed class MainViewModel : ViewModel
     public MapViewModel? MapViewModel { get; private set; }
 
     [ObservableAsProperty]
-    public string PanText { get; } = "x = 0; y = 0";
+    public string PanText { get; }
+
+    readonly IAvaloniaI18Next _tr;
+
+    readonly ISettingsManager _settings;
 
     public MainViewModel()
     {
+        _settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
+        _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
         var followMeText = this
             .WhenAnyValue(me => me.FollowMeEnabled, me => me.FollowMeUsername)
-            .Select(x => x.Item1 ? $"Following {x.Item2}" : "Follow Me");
+            .Select(x => x.Item1 ? _tr["FOLLOWING", ("user", x.Item2)] : _tr["FOLLOW_ME"]);
         followMeText.ToPropertyEx(this, me => me.FollowMeText);
+        FollowMeText = _tr["FOLLOW_ME"];
+        PanText = "x = 0; y = 0";
     }
 
     public async Task InitMapService()
@@ -54,6 +65,18 @@ public sealed class MainViewModel : ViewModel
         panText.ToPropertyEx(this, me => me.PanText);
     }
 
+    public void LanguageButtonPressed()
+    {
+        var languagePopup = new LanguageSelectViewModel();
+        languagePopup.Ok.Subscribe(async lang =>
+        {
+            Popup = null;
+            _settings.Settings.Language = lang.Name;
+            await _settings.SaveAsync();
+        });
+        Popup = languagePopup;
+    }
+
     public void EditModePressed()
     {
         EditModeEnabled = !EditModeEnabled;
@@ -64,7 +87,7 @@ public sealed class MainViewModel : ViewModel
                 EditModeEnabled = true;
                 return;
             }
-            var editModePopup = new EnterPopupViewModel("Use /editnav to obtain a token and enter here:", "Token");
+            var editModePopup = new EnterPopupViewModel(_tr["EDITNAV_PROMPT"], _tr["EDITNAV_WATERMARK"]);
             editModePopup.Ok.Subscribe(token =>
             {
                 EditModeToken = token;
@@ -91,7 +114,7 @@ public sealed class MainViewModel : ViewModel
         FollowMeEnabled = !FollowMeEnabled;
         if (!FollowMeEnabled)
         {
-            var followMePopup = new EnterPopupViewModel("Enter Minecraft username:", "Username");
+            var followMePopup = new EnterPopupViewModel(_tr["FOLLOW_ME_PROMPT"], _tr["FOLLOW_ME_WATERMARK"]);
             Observable.Merge(
                 followMePopup.Ok,
                 followMePopup.Cancel.Select(_ => (string?)null))

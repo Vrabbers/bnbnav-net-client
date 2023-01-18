@@ -3,9 +3,9 @@ using Avalonia.Markup.Xaml;
 
 namespace BnbnavNetClient.Views;
 
-public partial class AlertDialogView : UserControl
+public partial class LanguageSelectView : UserControl
 {
-    public AlertDialogView()
+    public LanguageSelectView()
     {
         InitializeComponent();
     }

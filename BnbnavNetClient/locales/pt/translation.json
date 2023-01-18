@@ -1,0 +1,15 @@
+{
+  "CANCEL": "Cancelar",
+  "EDITNAV_PROMPT": "Use /editnav para obter uma chave e a insira aqui:",
+  "EDITNAV_WATERMARK": "Chave",
+  "EDIT_MODE": "Modo editar",
+  "FOLLOW_ME": "Siga-me",
+  "FOLLOWING": "Seguindo {{user}}",
+  "FOLLOW_ME_PROMPT": "Insira o nome do usuário do Minecraft:",
+  "FOLLOW_ME_WATERMARK": "Nome do usuário",
+  "FOLLOW_ME_TURN_RESTRICTIONS": "Destacar nós com proibições de virada",
+  "LANG_CHANGE": "Mudar linguagem:",
+  "LANG_CHANGE_RESTART_REQUIRED": "Reinicie bnbnav para que as mudanças tenham efeito.",
+  "OK": "OK",
+  "SPY_OPTIONS": "Espionar"
+}

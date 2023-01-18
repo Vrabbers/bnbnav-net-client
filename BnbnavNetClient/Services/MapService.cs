@@ -111,7 +111,7 @@ public sealed class MapService : ReactiveObject
             var obj = jsonAnnotation.Value;
             annotations.Add(new Annotation(id, obj.Clone()));
         }
-
+        
         var ws = new BnbnavWebsocketService();
         await ws.ConnectAsync(CancellationToken.None);
         var service = new MapService(nodes.Values, edges, roads.Values, landmarks, annotations, ws);
