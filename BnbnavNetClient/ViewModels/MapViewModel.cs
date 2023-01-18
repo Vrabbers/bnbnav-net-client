@@ -4,6 +4,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace BnbnavNetClient.ViewModels;
+
 public class MapViewModel : ViewModel
 {
     [Reactive]
@@ -11,9 +12,9 @@ public class MapViewModel : ViewModel
 
     [Reactive]
     public double Scale { get; set; } = 1;
-    
+
     public MapService MapService { get; }
-    
+
     [ObservableAsProperty]
     public bool IsInEditMode { get; }
 
@@ -29,6 +30,5 @@ public class MapViewModel : ViewModel
         MapService = mapService;
         mainViewModel.WhenAnyValue(x => x.EditModeEnabled).ToPropertyEx(this, x => x.IsInEditMode);
     }
-
-
 }
+

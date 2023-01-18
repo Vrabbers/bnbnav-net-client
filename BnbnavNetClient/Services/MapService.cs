@@ -1,18 +1,21 @@
 ﻿using BnbnavNetClient.Models;
+
 using ReactiveUI;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BnbnavNetClient.Services;
+
 public sealed class MapService : ReactiveObject
 {
-
-    static readonly string BaseUrl = Environment.GetEnvironmentVariable("BNBNAV_BASEURL") ?? "https://bnbnav.aircs.racing/";
+    public static readonly string BaseUrl = Environment.GetEnvironmentVariable("BNBNAV_BASEURL") ?? "https://bnbnav.aircs.racing/";
 
     static readonly HttpClient HttpClient = new() { BaseAddress = new(BaseUrl) };
 
@@ -22,13 +25,16 @@ public sealed class MapService : ReactiveObject
     readonly Dictionary<string, Landmark> _landmarks;
     readonly Dictionary<string, Annotation> _annotations;
 
+    readonly BnbnavWebsocketService _websocketService;
+
     public ReadOnlyDictionary<string, Node> Nodes { get; }
     public ReadOnlyDictionary<string, Edge> Edges { get; }
     public ReadOnlyDictionary<string, Road> Roads { get; }
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
 
-    MapService(IEnumerable<Node> nodes, IEnumerable<Edge> edges, IEnumerable<Road> roads, IEnumerable<Landmark> landmarks, IEnumerable<Annotation> annotations)
+    MapService(IEnumerable<Node> nodes, IEnumerable<Edge> edges, IEnumerable<Road> roads, IEnumerable<Landmark> landmarks, IEnumerable<Annotation> annotations, BnbnavWebsocketService websocketService)
     {
+
         _nodes = new Dictionary<string, Node>(nodes.ToDictionary(n => n.Id));
         Nodes = _nodes.AsReadOnly();
         _edges = new Dictionary<string, Edge>(edges.ToDictionary(e => e.Id));
@@ -38,6 +44,7 @@ public sealed class MapService : ReactiveObject
         _landmarks = new Dictionary<string, Landmark>(landmarks.ToDictionary(l => l.Id));
         Landmarks = _landmarks.AsReadOnly();
         _annotations = new Dictionary<string, Annotation>(annotations.ToDictionary(a => a.Id));
+        _websocketService = websocketService;
     }
 
     public static async Task<MapService> DownloadInitialMapAsync()
@@ -105,7 +112,73 @@ public sealed class MapService : ReactiveObject
             annotations.Add(new Annotation(id, obj.Clone()));
         }
         
-        return new MapService(nodes.Values, edges, roads.Values, landmarks, annotations);
+        var ws = new BnbnavWebsocketService();
+        await ws.ConnectAsync(CancellationToken.None);
+        var service = new MapService(nodes.Values, edges, roads.Values, landmarks, annotations, ws);
+        _ = service.ProcessChangesAsync();
+        return service;
     }
 
+    async Task ProcessChangesAsync()
+    {
+        await foreach (var message in _websocketService.GetMessages(CancellationToken.None))
+        {
+            string id = message.Id!;
+            string type = "";
+            switch (message)
+            {
+                case NodeCreated node:
+                    type = nameof(Nodes);
+                    _nodes.Add(id, new(id, node.X, node.Y, node.Z));
+                    break;
+
+                case UpdatedNode node:
+                    type = nameof(Nodes);
+                    _nodes[id] = new(id, node.X, node.Y, node.Z);
+                    break;
+
+                case NodeRemoved:
+                    type = nameof(Nodes);
+                    _nodes.Remove(id);
+                    break;
+
+                case RoadCreated road:
+                    type = nameof(Roads);
+                    _roads.Add(id, new(id, road.Name, road.RoadType));
+                    break;
+
+                case UpdatedRoad road:
+                    type = nameof(Roads);
+                    _roads[id] = new(id, road.Name, road.RoadType);
+                    break;
+
+                case RoadRemoved:
+                    type = nameof(Roads);
+                    _roads.Remove(id);
+                    break;
+
+                case EdgeCreated edge:
+                    type = nameof(Edges);
+                    _edges.Add(id, new(id, _roads[edge.Road], _nodes[edge.Node1], _nodes[edge.Node2]));
+                    break;
+
+                case EdgeRemoved:
+                    type = nameof(Edges);
+                    _edges.Remove(id);
+                    break;
+
+                case LandmarkCreated landmark:
+                    type = nameof(Landmarks);
+                    _landmarks.Add(id, new(id, _nodes[landmark.Node], landmark.Name, landmark.LandmarkType));
+                    break;
+
+                case LandmarkRemoved:
+                    type = nameof(Landmarks);
+                    _landmarks.Remove(id);
+                    break;
+            }
+
+            this.RaisePropertyChanged(type);
+        }
+    }
 }
