@@ -22,12 +22,11 @@ internal static class GeoHelper
         if (lineA == lineB)
             return Distance(lineA, point);
         var lengthSqr = DistanceSquared(lineA, lineB);
-        var param = double.Clamp(Dot(point - lineA, lineB - lineA) / lengthSqr, 0, 1);
+        var param = double.Clamp(Vector.Dot(point - lineA, lineB - lineA) / lengthSqr, 0, 1);
         var proj = lineA + param * (lineB - lineA);
         return Distance(point, proj);
     }
 
     public static double DistanceSquared(Point a, Point b) => double.Pow(a.X - b.X, 2) + double.Pow(a.Y - b.Y, 2);
     public static double Distance(Point a, Point b) => double.Sqrt(DistanceSquared(a, b));
-    public static double Dot(Vector a, Vector b) => a.X * b.X + a.Y * b.Y;
 }
