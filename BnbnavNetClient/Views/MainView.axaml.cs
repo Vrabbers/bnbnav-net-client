@@ -14,12 +14,14 @@ namespace BnbnavNetClient.Views;
 public partial class MainView : UserControl
 {
     readonly Style _whiteTextStyle;
+    readonly ISettingsManager _settings;
 
     public MainView()
     {
         FlowDirection = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>().IsRightToLeft ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
         _whiteTextStyle = new Style(static x => x.OfType<TextBlock>());
         _whiteTextStyle.Setters.Add(new Setter(TextBlock.ForegroundProperty, new SolidColorBrush(Colors.White)));
+        _settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
         InitializeComponent();
     }
 
@@ -29,7 +31,7 @@ public partial class MainView : UserControl
             return;
 
         await vm.InitMapService();
-        if (SettingsManager.Settings.NightMode)
+        if (_settings.Settings.NightMode)
         {
             DayNightButton.IsNightMode = true;
             ColorModeSwitch(null, null);
@@ -54,7 +56,7 @@ public partial class MainView : UserControl
 
         ((MapThemeResources)App.Current!.Resources.MergedDictionaries[0]).Theme = button.IsNightMode ? MapTheme.Night : MapTheme.Day;
 
-        SettingsManager.Settings.NightMode = button.IsNightMode;
-        await SettingsManager.SaveAsync();
+        _settings.Settings.NightMode = button.IsNightMode;
+        await _settings.SaveAsync();
     }
 }

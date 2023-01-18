@@ -1,16 +1,19 @@
-﻿using System;
+﻿using BnbnavNetClient.Settings;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System;
 
-namespace BnbnavNetClient.Settings;
-internal static class SettingsManager
+namespace BnbnavNetClient.Desktop;
+public sealed class SettingsManagerDesktop : ISettingsManager
 {
-    static readonly string SettingsFilePath =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
-            "bnbnav", "settings.json");
-    public static Settings Settings { get; private set; } = null!;
-    public static async Task LoadFromJsonAsync()
+    static string SettingsFilePath =>
+    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "bnbnav", "settings.json");
+
+    public SettingsObject Settings { get; private set; } = null!;
+
+    public async Task LoadAsync()
     {
         var file = new FileInfo(SettingsFilePath);
         if (!file.Directory!.Exists)
@@ -19,22 +22,22 @@ internal static class SettingsManager
         }
         if (!file.Exists)
         {
-            Settings = Settings.Defaults;
+            Settings = SettingsObject.Defaults;
             await SaveAsync();
             return;
         }
         using var stream = File.Open(SettingsFilePath, FileMode.Open);
-        var des = JsonSerializer.Deserialize<Settings>(stream);
+        var des = JsonSerializer.Deserialize<SettingsObject>(stream);
         if (des is null)
         {
-            Settings = Settings.Defaults;
+            Settings = SettingsObject.Defaults;
             await SaveAsync();
             return;
         }
         Settings = des;
     }
 
-    public static async Task SaveAsync()
+    public async Task SaveAsync()
     {
         using var stream = File.Create(SettingsFilePath);
         await JsonSerializer.SerializeAsync(stream, Settings);

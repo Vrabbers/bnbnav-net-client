@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 
 namespace BnbnavNetClient.Settings;
-public class Settings
+public class SettingsObject
 {
-    public static Settings Defaults => new() 
+    public static SettingsObject Defaults => new() 
     {
         Language = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName,
         NightMode = false

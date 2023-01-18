@@ -33,8 +33,7 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
         }
     }
 
-    //TODO : how to do this?
-    public IEnumerable<CultureInfo> AvailableLanguages => new CultureInfo[] { new("en"), new("vi"), new("pt") };
+    public IEnumerable<CultureInfo> AvailableLanguages { get; private set; } = null!;
     public CultureInfo CurrentLanguage
     {
         get
@@ -68,5 +67,7 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
         _i18Next = new(backend, translator, new CultureInfoLanguageDetector());
         _i18Next.UseDetectedLanguage();
         _i18Next.SetFallbackLanguages("en");
+
+        AvailableLanguages = backend.AvailableLanguages;
     }
 }

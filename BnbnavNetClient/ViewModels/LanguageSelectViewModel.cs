@@ -3,7 +3,6 @@ using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Settings;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -27,9 +26,12 @@ public sealed class LanguageSelectViewModel : ViewModel
     [ObservableAsProperty]
     public bool LangChanged { get; }
 
+    readonly ISettingsManager _settings;
+
     public LanguageSelectViewModel()
     {
-        var presentLanguage = new CultureInfo(SettingsManager.Settings.Language);
+        _settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
+        var presentLanguage = new CultureInfo(_settings.Settings.Language);
         _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
         ChosenLanguage = new(presentLanguage);
         Ok = ReactiveCommand.Create(() => ChosenLanguage.Info);

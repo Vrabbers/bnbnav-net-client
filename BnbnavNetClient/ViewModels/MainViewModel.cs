@@ -6,7 +6,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using BnbnavNetClient.I18Next.Services;
 using Avalonia;
-using System.Globalization;
 using BnbnavNetClient.Settings;
 
 namespace BnbnavNetClient.ViewModels;
@@ -42,8 +41,11 @@ public sealed class MainViewModel : ViewModel
 
     readonly IAvaloniaI18Next _tr;
 
+    readonly ISettingsManager _settings;
+
     public MainViewModel()
     {
+        _settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
         _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
         var followMeText = this
             .WhenAnyValue(me => me.FollowMeEnabled, me => me.FollowMeUsername)
@@ -69,8 +71,8 @@ public sealed class MainViewModel : ViewModel
         languagePopup.Ok.Subscribe(async lang =>
         {
             Popup = null;
-            SettingsManager.Settings.Language = lang.Name;
-            await SettingsManager.SaveAsync();
+            _settings.Settings.Language = lang.Name;
+            await _settings.SaveAsync();
         });
         Popup = languagePopup;
     }

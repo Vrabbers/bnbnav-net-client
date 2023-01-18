@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
 using I18Next.Net.Backends;
@@ -22,6 +24,24 @@ public sealed class JsonResourcesFileBackend : ITranslationBackend
         _treeBuilderFactory = treeBuilderFactory;
         _assembly = assembly;
     }
+
+    internal CultureInfo[] AvailableLanguages =>
+        _assembly.GetManifestResourceNames()
+        .Where(s => s.StartsWith(_basePath))
+        .Select(s => s[(_basePath.Length + 1)..].Split('.')[0])
+        .Select(s =>
+        {
+            try
+            {
+                return new CultureInfo(s); //check if the folder name is a culture
+            }
+            catch (ArgumentException)
+            {
+                return null;
+            }
+        })
+        .Where(info => info is not null)
+        .ToArray()!;
 
     public async Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
     {

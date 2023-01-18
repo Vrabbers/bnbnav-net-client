@@ -104,7 +104,7 @@ public sealed class MapService : ReactiveObject
             var obj = jsonAnnotation.Value;
             annotations.Add(new Annotation(id, obj.Clone()));
         }
-
+        
         return new MapService(nodes.Values, edges, roads.Values, landmarks, annotations);
     }
 

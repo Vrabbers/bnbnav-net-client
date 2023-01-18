@@ -9,6 +9,7 @@
     <AvaloniaResource Include="Assets\**" />
     <None Remove="Assets\logo.svg" />
     <None Remove="locales\pt\translation.json" />
+    <None Remove="locales\ur\translation.json" />
     <TrimmerRootDescriptor Include="Roots.xml" />
   </ItemGroup>
 
