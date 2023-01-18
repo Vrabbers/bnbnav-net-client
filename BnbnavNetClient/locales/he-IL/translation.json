@@ -1,15 +1,15 @@
 {
-  "CANCEL": "",
-  "EDITNAV_PROMPT": "",
-  "EDITNAV_WATERMARK": "",
-  "EDIT_MODE": "",
-  "FOLLOW_ME": "",
-  "FOLLOW_ME_PROMPT": "",
+  "CANCEL": "ביטול",
+  "EDITNAV_PROMPT": "השתמש ב-/editnav כדי לקבל שובר. הזן אותו פה:",
+  "EDITNAV_WATERMARK": "שובר",
+  "EDIT_MODE": "מצב עריכה",
+  "FOLLOW_ME": "עקוב אחרי",
+  "FOLLOW_ME_PROMPT": "הזו את שם המשתמש שלך ב-Minecraft:",
   "FOLLOW_ME_WATERMARK": "שם משתמש",
   "FOLLOW_ME_TURN_RESTRICTIONS": "",
-  "FOLLOWING": "",
+  "FOLLOWING": "עוקב אחרי {{user}}",
   "LANG_CHANGE": "שנה שפה",
   "LANG_CHANGE_RESTART_REQUIRED": "",
-  "OK": "",
-  "SPY_OPTIONS": ""
+  "OK": "אישור",
+  "SPY_OPTIONS": "אפשרויות ל"
 }
