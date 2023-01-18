@@ -6,6 +6,7 @@ using DynamicData.Binding;
 using ReactiveUI;
 using System;
 using System.Reactive;
+using BnbnavNetClient.Services;
 using Avalonia.Platform;
 using Avalonia.Svg.Skia;
 using Svg.Skia;
@@ -16,6 +17,7 @@ using DynamicData;
 using BnbnavNetClient.Helpers;
 
 namespace BnbnavNetClient.Views;
+
 public partial class MapView : UserControl
 {
     bool _pointerPressing;
@@ -189,6 +191,9 @@ public partial class MapView : UserControl
         MapViewModel
             .WhenAnyPropertyChanged()
             .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
+        MapViewModel.MapService
+            .WhenAnyPropertyChanged()
+            .Subscribe(Observer.Create<MapService?>(_ => InvalidateVisual()));
     }
 
     static readonly double LandmarkSize = 10;

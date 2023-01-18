@@ -8,6 +8,8 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <None Remove="Assets\logo.svg" />
+    <None Remove="locales\pt\translation.json" />
+    <None Remove="locales\ur\translation.json" />
     <TrimmerRootDescriptor Include="Roots.xml" />
   </ItemGroup>
 
@@ -22,5 +24,13 @@
     <PackageReference Include="ReactiveUI.Fody" Version="18.4.1" />
     <PackageReference Include="XamlNameReferenceGenerator" Version="1.5.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="locales/**/*" WithCulture="false" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\BnbnavNetClient.I18Next\BnbnavNetClient.I18Next.csproj" />
   </ItemGroup>
 </Project>

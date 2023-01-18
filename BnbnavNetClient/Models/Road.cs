@@ -32,7 +32,7 @@ public static class RoadTypeExtensions
         RoadType.Private => 2,
         RoadType.Roundabout => 1,
         RoadType.DuongWarp => 0,
-        _ => throw new ArgumentOutOfRangeException()
+        _ => throw new ArgumentOutOfRangeException(nameof(type))
     };
 }
 
