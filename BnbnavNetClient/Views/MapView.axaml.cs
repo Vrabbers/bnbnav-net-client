@@ -108,11 +108,10 @@ public partial class MapView : UserControl
                     return;
 
                 // Stop the timer, don't waste resources.
-                if (Math.Abs(_viewVelocity.X) < 4 && Math.Abs(_viewVelocity.Y) < 4) {
+                if (Math.Abs(_viewVelocity.X) < 4 && Math.Abs(_viewVelocity.Y) < 4)
                     _viewVelocity = Vector.Zero;
-                } else {
+                else
                     MapViewModel.Pan += _viewVelocity / MapViewModel.Scale;
-                }
 
                 _viewVelocity /= 1.075; // 1.075 is the friction.
             }
