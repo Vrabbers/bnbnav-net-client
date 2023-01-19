@@ -21,7 +21,8 @@ public partial class MapView : UserControl
     bool _pointerPressing;
     Point _pointerPrevPosition;
     Point _viewVelocity;
-    List<Point> _pointerVelocities; // This list is averaged to get smooth panning.
+    readonly List<Point> _pointerVelocities = new();
+    // This list is averaged to get smooth panning.
 
     Matrix _toScreenMtx = Matrix.Identity;
     Matrix _toWorldMtx = Matrix.Identity;
@@ -33,7 +34,6 @@ public partial class MapView : UserControl
     public MapView()
     {
         _assetLoader = AvaloniaLocator.Current.GetService<IAssetLoader>()!;
-        _pointerVelocities = new List<Point>();
 
         InitializeComponent();
     }
