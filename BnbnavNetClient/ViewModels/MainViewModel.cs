@@ -48,10 +48,7 @@ public sealed class MainViewModel : ViewModel
 
     [ObservableAsProperty] 
     public bool IsInJoinMode => MapEditorService.CurrentEditMode == EditModeControl.Join;
-
-    [ObservableAsProperty] 
-    public bool IsInJoinTwoWayMode => MapEditorService.CurrentEditMode == EditModeControl.JoinTwoWay;
-
+    
     [ObservableAsProperty] 
     public bool RoadControlsRequired => false;
 
@@ -77,12 +74,10 @@ public sealed class MainViewModel : ViewModel
             .ToPropertyEx(this, x => x.IsInSelectMode);
         MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Join)
             .ToPropertyEx(this, x => x.IsInJoinMode);
-        MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.JoinTwoWay)
-            .ToPropertyEx(this, x => x.IsInJoinTwoWayMode); 
         MapEditorService.WhenAnyValue(x => x.CurrentEditMode, x => x.EditModeEnabled).Select(x =>
         {
             if (!x.Item2) return false;
-            return x.Item1 is EditModeControl.Join or EditModeControl.JoinTwoWay;
+            return x.Item1 is EditModeControl.Join;
         }).ToPropertyEx(this, x => x.RoadControlsRequired);
         MapEditorService.WhenAnyValue(x => x.EditModeEnabled).ToPropertyEx(this, x => x.EditModeEnabled);
     }
@@ -161,11 +156,6 @@ public sealed class MainViewModel : ViewModel
     public void JoinModePressed()
     {
         MapEditorService.CurrentEditMode = EditModeControl.Join;
-    }
-
-    public void JoinTwoWayModePressed()
-    {
-        MapEditorService.CurrentEditMode = EditModeControl.JoinTwoWay;
     }
 
     public void FollowMePressed()

@@ -58,7 +58,6 @@ public partial class MapView : UserControl
                         MapViewModel.Test += hit.ToString() + "\n";
                     break;
                 case EditModeControl.Join:
-                case EditModeControl.JoinTwoWay:
                     //Don't try to pan
                     if (HitTest(pointerPos).Any(x => x is Node)) _disablePan = true;
                     break;
@@ -80,7 +79,6 @@ public partial class MapView : UserControl
                         case EditModeControl.Select:
                             break;
                         case EditModeControl.Join:
-                        case EditModeControl.JoinTwoWay:
                             var item = HitTest(pointerPos).FirstOrDefault(x => x is Node);
                             if (item is Node node)
                             {
@@ -115,7 +113,6 @@ public partial class MapView : UserControl
                     case EditModeControl.Select:
                         break;
                     case EditModeControl.Join:
-                    case EditModeControl.JoinTwoWay:
                     {
                         _roadGhosts.Clear();
                         // Draw a circular ghost around any nodes
