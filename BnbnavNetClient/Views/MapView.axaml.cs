@@ -60,10 +60,7 @@ public partial class MapView : UserControl
             // We need to pan _more_ when scale is smaller:
             MapViewModel.Pan += (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
             
-            _pointerVelocities.Add(new Point(
-                _pointerPrevPosition.X - pointerPos.X,
-                _pointerPrevPosition.Y - pointerPos.Y
-            ));
+            _pointerVelocities.Add(_pointerPrevPosition - pointerPos);
 
             if (_pointerVelocities.Count > 5)
                 _pointerVelocities.RemoveAt(0);
