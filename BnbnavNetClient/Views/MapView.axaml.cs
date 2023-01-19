@@ -7,6 +7,7 @@ using BnbnavNetClient.ViewModels;
 using DynamicData.Binding;
 using ReactiveUI;
 using System;
+using System.Linq;
 using System.Reactive;
 using BnbnavNetClient.Services;
 using Avalonia.Platform;
@@ -65,18 +66,10 @@ public partial class MapView : UserControl
             if (_pointerVelocities.Count > 5)
                 _pointerVelocities.RemoveAt(0);
 
-            var xSum = 0.0;
-            var ySum = 0.0;
+            var xAverage = _pointerVelocities.Average(i => i.X);
+            var yAverage = _pointerVelocities.Average(i => i.Y);
 
-            foreach (var i in _pointerVelocities) {
-                xSum += i.X;
-                ySum += i.Y;
-            }
-
-            _viewVelocity = new(
-                xSum / _pointerVelocities.Count,
-                ySum / _pointerVelocities.Count
-            );
+            _viewVelocity = new(xAverage, yAverage);
 
             /*
              * The actual view velocity should be the average of the last 5
