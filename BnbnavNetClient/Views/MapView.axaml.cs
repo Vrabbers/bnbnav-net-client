@@ -71,6 +71,9 @@ public partial class MapView : UserControl
 
             _viewVelocity = new(xAverage, yAverage);
 
+            if (Math.Abs(_viewVelocity.Y) < 7 && Math.Abs(_viewVelocity.Y) < 7)
+                _viewVelocity = Vector.Zero;
+
             /*
              * The actual view velocity should be the average of the last 5
              * computed velocities, due to how low-quality mouses work (low-quality
