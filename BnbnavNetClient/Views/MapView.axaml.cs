@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Media;
 using BnbnavNetClient.Models;
@@ -6,6 +7,7 @@ using BnbnavNetClient.ViewModels;
 using DynamicData.Binding;
 using ReactiveUI;
 using System;
+using System.Linq;
 using System.Reactive;
 using BnbnavNetClient.Services;
 using Avalonia.Platform;
@@ -19,6 +21,9 @@ public partial class MapView : UserControl
 {
     bool _pointerPressing;
     Point _pointerPrevPosition;
+    Vector _viewVelocity = Vector.Zero;
+    readonly List<Point> _pointerVelocities = new();
+    // This list is averaged to get smooth panning.
 
     Matrix _toScreenMtx = Matrix.Identity;
     Matrix _toWorldMtx = Matrix.Identity;
@@ -30,6 +35,7 @@ public partial class MapView : UserControl
     public MapView()
     {
         _assetLoader = AvaloniaLocator.Current.GetService<IAssetLoader>()!;
+
         InitializeComponent();
     }
 
@@ -41,6 +47,9 @@ public partial class MapView : UserControl
         {
             _pointerPressing = true;
             _pointerPrevPosition = eventArgs.GetPosition(this);
+
+            _viewVelocity = Vector.Zero;
+            _pointerVelocities.Clear();
         };
 
         PointerMoved += (_, eventArgs) =>
@@ -52,19 +61,62 @@ public partial class MapView : UserControl
 
             // We need to pan _more_ when scale is smaller:
             MapViewModel.Pan += (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
+            
+            _pointerVelocities.Add(_pointerPrevPosition - pointerPos);
+
+            if (_pointerVelocities.Count > 5)
+                _pointerVelocities.RemoveAt(0);
+
+            var xAverage = _pointerVelocities.Average(i => i.X);
+            var yAverage = _pointerVelocities.Average(i => i.Y);
+
+            _viewVelocity = new(xAverage, yAverage);
+
+            if (Math.Abs(_viewVelocity.Y) < 7 && Math.Abs(_viewVelocity.Y) < 7)
+                _viewVelocity = Vector.Zero;
+
+            /*
+             * The actual view velocity should be the average of the last 5
+             * computed velocities, due to how low-quality mouses work (low-quality
+             * mouses have a tendency to move in angles snapped to 45 degrees).
+             */
+
             _pointerPrevPosition = pointerPos;
         };
 
         PointerReleased += (_, __) =>
         {
             _pointerPressing = false;
+
+            _pointerVelocities.Clear(); // Make sure we're not using velocities from previous pan.
         };
 
         PointerWheelChanged += (_, eventArgs) =>
         {
             var deltaScale = eventArgs.Delta.Y * MapViewModel.Scale / 10.0;
             Zoom(deltaScale, (eventArgs.GetPosition(this)));
+
+            _viewVelocity = Vector.Zero; // Reset velocities
+            _pointerVelocities.Clear();
         };
+
+        // This is the physics part of inertial panning.
+        Clock = new Clock();
+        Clock.Subscribe(
+            ts =>
+            {
+                if (_pointerPressing)
+                    return;
+
+                // Stop the timer, don't waste resources.
+                if (Math.Abs(_viewVelocity.X) < 4 && Math.Abs(_viewVelocity.Y) < 4)
+                    _viewVelocity = Vector.Zero;
+                else
+                    MapViewModel.Pan += _viewVelocity / MapViewModel.Scale;
+
+                _viewVelocity /= 1.075; // 1.075 is the friction.
+            }
+        );
 
         //why does this happen to me :sob:
         MapViewModel
