@@ -103,7 +103,8 @@ public partial class MapView : UserControl
         // This is the physics part of inertial panning.
         Clock = new Clock();
         Clock.Subscribe(
-            ts => {
+            ts =>
+            {
                 if (_pointerPressing)
                     return;
 
