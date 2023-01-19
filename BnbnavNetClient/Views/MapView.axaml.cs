@@ -83,6 +83,7 @@ public partial class MapView : UserControl
         PointerReleased += (_, __) =>
         {
             _pointerPressing = false;
+
             _pointerVelocities.Clear(); // Make sure we're not using velocities from previous pan.
         };
 
@@ -101,8 +102,14 @@ public partial class MapView : UserControl
             ts => {
                 if (_pointerPressing)
                     return;
-            
-                MapViewModel.Pan += _viewVelocity / MapViewModel.Scale;
+
+                // Stop the timer, don't waste resources.
+                if (Math.Abs(_viewVelocity.X) < 4 && Math.Abs(_viewVelocity.Y) < 4) {
+                    _viewVelocity = Vector.Zero;
+                } else {
+                    MapViewModel.Pan += _viewVelocity / MapViewModel.Scale;
+                }
+
                 _viewVelocity /= 1.075; // 1.075 is the friction.
             }
         );
