@@ -49,6 +49,7 @@ public partial class MapView : UserControl
             _pointerPrevPosition = eventArgs.GetPosition(this);
 
             _viewVelocity = Vector.Zero;
+            _pointerVelocities.Clear();
         };
 
         PointerMoved += (_, eventArgs) =>
