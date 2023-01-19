@@ -20,7 +20,7 @@ public partial class MapView : UserControl
 {
     bool _pointerPressing;
     Point _pointerPrevPosition;
-    Point _viewVelocity;
+    Vector _viewVelocity = Vector.Zero;
     readonly List<Point> _pointerVelocities = new();
     // This list is averaged to get smooth panning.
 
@@ -47,7 +47,7 @@ public partial class MapView : UserControl
             _pointerPressing = true;
             _pointerPrevPosition = eventArgs.GetPosition(this);
 
-            _viewVelocity = new(0, 0);
+            _viewVelocity = Vector.Zero;
         };
 
         PointerMoved += (_, eventArgs) =>
@@ -101,7 +101,7 @@ public partial class MapView : UserControl
             var deltaScale = eventArgs.Delta.Y * MapViewModel.Scale / 10.0;
             Zoom(deltaScale, (eventArgs.GetPosition(this)));
 
-            _viewVelocity = new(); // Reset velocities
+            _viewVelocity = Vector.Zero; // Reset velocities
             _pointerVelocities.Clear();
         };
 
