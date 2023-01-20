@@ -1,9 +1,15 @@
 {
   "CANCEL": "Hủy",
-  "EDITNAV_PROMPT": "",
-  "EDITNAV_WATERMARK": "",
+  "EDITNAV_PROMPT": "Sử dụng lệnh /editnav để nhận mã và điền vào đây:",
+  "EDITNAV_WATERMARK": "Mã",
+  "EDIT_MODE": "Chế độ sửa đổi",
   "FOLLOW_ME": "Đi theo tôi",
-  "FOLLOW_ME_TURN_RESTRICTIONS": "",
+  "FOLLOW_ME_PROMPT": "Điền vào tên người dùng Minecraft:",
+  "FOLLOW_ME_WATERMARK": "Tên người dùng",
+  "FOLLOW_ME_TURN_RESTRICTIONS": "Tỏa sáng nút đã gắn hạn quẹo",
+  "FOLLOWING": "Đang theo dõi {{user}}",
+  "LANG_CHANGE": "Đổi ngôn ngữ:",
+  "LANG_CHANGE_RESTART_REQUIRED": "Vui lòng khởi chạy bnbnav lại để áp dụng cài đặt này.",
   "OK": "OK",
-  "TEST_WITH_ARGS": "Chúng tôi là {{count}} người vui vẻ"
+  "SPY_OPTIONS": "Tùy chọn tỏa sáng"
 }

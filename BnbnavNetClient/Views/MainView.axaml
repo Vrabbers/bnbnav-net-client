@@ -23,6 +23,7 @@
     <!-- Main UI -->
     <Grid RowDefinitions="* Auto Auto Auto">
       <!-- Map -->
+      <ProgressBar IsIndeterminate="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0"/>
       <Panel Name="MapPanel"/>
       <TextBlock Text="{Binding MapViewModel.Test}"/>
 
