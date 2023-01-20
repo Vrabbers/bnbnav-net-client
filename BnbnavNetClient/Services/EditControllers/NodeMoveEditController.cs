@@ -61,13 +61,27 @@ public class NodeMoveEditController : IEditController
             var movingRect = _movingNode.BoundingRect(mapView);
             var movedRect = _movedNode.BoundingRect(mapView);
             
+
+            ExtendedLine lineBetween = new()
+            {
+                Point1 = movingRect.Center,
+                Point2 = movedRect.Center
+            };
+
+            lineBetween = lineBetween.SetLength(20).FlipDirection().SetLength(-(lineBetween.Length - 40));
+
+            var headLength = lineBetween.Length < 100 ? lineBetween.Length / 2 : 50;
+            var arrowhead1 = lineBetween.FlipDirection().SetAngle(lineBetween.Angle - 45).SetLength(headLength);
+            var arrowhead2 = lineBetween.FlipDirection().SetAngle(lineBetween.Angle - -45).SetLength(headLength);
+            
             PolylineGeometry geo = new();
-            geo.Points.Add(movingRect.Center);
-            geo.Points.Add(movedRect.Center);
+            geo.Points.Add(arrowhead1.Point2);
+            geo.Points.Add(arrowhead1.Point1);
+            geo.Points.Add(arrowhead2.Point2);
 
             //TODO: Another colour?
-            var pen = (Pen)mapView.FindResource("RoadGhostPen")!;
-            pen.Thickness = mapView.ThicknessForRoadType(RoadType.Local) * mapView.MapViewModel.Scale;
+            var pen = (Pen)mapView.FindResource("EditMovePen")!;
+            context.DrawLine(pen, lineBetween.Point1, lineBetween.Point2);
             context.DrawGeometry(null, pen, geo);
 
             context.DrawRectangle(selNodeBrush, nodeBorder, _movingNode.BoundingRect(mapView));

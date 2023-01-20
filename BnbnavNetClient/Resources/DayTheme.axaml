@@ -78,4 +78,9 @@
       <SolidColorBrush Color="#7f3f3fff"/>
     </Pen.Brush>
   </Pen>
+  <Pen x:Key="EditMovePen" Thickness="2" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="#ffff0000"/>
+    </Pen.Brush>
+  </Pen>
 </ResourceDictionary>
