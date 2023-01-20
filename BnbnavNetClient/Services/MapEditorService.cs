@@ -11,14 +11,14 @@ public class MapEditorService : ReactiveObject
 {
     public MapEditorService()
     {
-        EditController = new DummyEditController();
+        EditController = new SelectEditController();
         this.ObservableForProperty(x => x.CurrentEditMode).Subscribe(x =>
         {
             EditController = x.Value switch
             {
-                EditModeControl.Select => new DummyEditController(),
+                EditModeControl.Select => new SelectEditController(),
                 EditModeControl.Join => new NodeJoinEditController(this),
-                EditModeControl.NodeMove => new DummyEditController(),
+                EditModeControl.NodeMove => new NodeMoveEditController(),
                 _ => throw new ArgumentOutOfRangeException(nameof(x), x, null)
             };
         });

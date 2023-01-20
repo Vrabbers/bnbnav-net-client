@@ -65,22 +65,6 @@ public partial class MapView : UserControl
             _disablePan = false;
 
             var flags = MapViewModel.MapEditorService.EditController.PointerPressed(this, eventArgs);
-            
-            switch (MapViewModel.MapEditorService.CurrentEditMode)
-            {
-                case EditModeControl.Select:
-                    MapViewModel.Test = string.Empty;
-                    foreach (var hit in HitTest(pointerPos))
-                        MapViewModel.Test += hit.ToString() + "\n";
-                    break;
-                case EditModeControl.Join:
-                    //Don't try to pan
-                    break;
-                case EditModeControl.NodeMove:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
 
             _disablePan = flags.HasFlag(PointerPressedFlags.DoNotPan);
                 
@@ -124,22 +108,6 @@ public partial class MapView : UserControl
                 }
                 _pointerPrevPosition = pointerPos;
             }
-            else
-            {
-                switch (MapViewModel.MapEditorService.CurrentEditMode)
-                {
-                    case EditModeControl.Select:
-                        break;
-                    case EditModeControl.Join:
-                    {
-                        break;
-                    }
-                    case EditModeControl.NodeMove:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
         };
 
         PointerReleased += (_, eventArgs) =>
@@ -147,18 +115,6 @@ public partial class MapView : UserControl
             _pointerPressing = false;
 
             MapViewModel.MapEditorService.EditController.PointerReleased(this, eventArgs);
-
-            switch (MapViewModel.MapEditorService.CurrentEditMode)
-            {
-                case EditModeControl.Select:
-                    break;
-                case EditModeControl.Join:
-                    break;
-                case EditModeControl.NodeMove:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
 
             foreach (var item in HitTest(eventArgs.GetPosition(this)))
             {
@@ -242,7 +198,6 @@ public partial class MapView : UserControl
     }
 
     static readonly double LandmarkSize = 10;
-    static readonly double NodeSize = 14;
     readonly Dictionary<string, SKSvg> _svgCache = new();
 
     private List<(Point, Point, Edge)> DrawnEdges { get; set; } = new();
@@ -307,13 +262,8 @@ public partial class MapView : UserControl
 
         DrawnNodes = mapService.Nodes.Values.Select(node =>
         {
-            var pos = ToScreen(new(node.X, node.Z));
-            var rect = new Rect(
-                pos.X - NodeSize / 2, 
-                pos.Y - NodeSize / 2,
-                NodeSize, NodeSize);
-            return (rect, node);
-        }).Where(node => bounds.Intersects(node.rect)).ToList();
+            return (node.BoundingRect(this), node);
+        }).Where(node => bounds.Intersects(node.Item1)).ToList();
     }
 
     Pen PenForRoadType(RoadType type) => (Pen)(type switch
@@ -418,7 +368,7 @@ public partial class MapView : UserControl
         base.Render(context);
     }
 
-    Point ToWorld(Point screenCoords) =>
+    public Point ToWorld(Point screenCoords) =>
          _toWorldMtx.Transform(screenCoords);
 
     public Point ToScreen(Point worldCoords) =>
