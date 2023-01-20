@@ -13,10 +13,11 @@ using Avalonia.Platform;
 using Avalonia.Svg.Skia;
 using Svg.Skia;
 using System.Collections.Generic;
-using System.Linq;
 using BnbnavNetClient.Models;
 using DynamicData;
 using BnbnavNetClient.Helpers;
+using Avalonia.Controls.Primitives;
+using System.Collections.Immutable;
 
 namespace BnbnavNetClient.Views;
 
@@ -52,6 +53,13 @@ public partial class MapView : UserControl
         PointerPressed += (_, eventArgs) =>
         {
             var pointerPos = eventArgs.GetPosition(this);
+            var pointer = eventArgs.GetCurrentPoint(this);
+
+            if (pointer.Properties.IsRightButtonPressed)
+            {
+                MapViewModel.LastRightClickHitTest = HitTest(pointerPos).ToList();
+                return;
+            }
             _pointerPressing = true;
             _pointerPrevPosition = pointerPos;
 
@@ -62,6 +70,12 @@ public partial class MapView : UserControl
                     MapViewModel.Test = string.Empty;
                     foreach (var hit in HitTest(pointerPos))
                         MapViewModel.Test += hit.ToString() + "\n";
+                    if (HitTest(pointerPos).FirstOrDefault(x => x is Edge) is Edge x)
+                    {
+                        MapViewModel.FlyoutViewModel = new NewEdgeFlyoutViewModel();
+                        var flyout = Flyout.GetAttachedFlyout(this);
+                        flyout!.ShowAt(this, showAtPointer: true);
+                    }
                     break;
                 case EditModeControl.Join:
                     //Don't try to pan
@@ -245,9 +259,9 @@ public partial class MapView : UserControl
     static readonly double NodeSize = 14;
     readonly Dictionary<string, SKSvg> _svgCache = new();
 
-    List<(Point, Point, Edge)> _drawnEdges = new List<(Point, Point, Edge)>();
-    List<(Rect, Landmark)> _drawnLandmarks = new List<(Rect, Landmark)>();
-    List<(Rect, Node)> _drawnNodes = new List<(Rect, Node)>();
+    List<(Point, Point, Edge)> _drawnEdges = new();
+    List<(Rect, Landmark)> _drawnLandmarks = new();
+    List<(Rect, Node)> _drawnNodes = new();
 
     IEnumerable<MapItem> HitTest(Point point)
     {
@@ -267,7 +281,6 @@ public partial class MapView : UserControl
                 yield return edge;
         }
     }
-
 
     protected override Size ArrangeOverride(Size finalSize)
     {

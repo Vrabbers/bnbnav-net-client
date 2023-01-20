@@ -1,7 +1,5 @@
 ﻿using BnbnavNetClient.Models;
-
 using ReactiveUI;
-
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -71,8 +69,6 @@ public sealed class MapService : ReactiveObject
         _annotations = new Dictionary<string, Annotation>(annotations.ToDictionary(a => a.Id));
         _websocketService = websocketService;
     }
-    
-    
 
     private async Task<ServerResponse> Submit(string path, object json)
     {
