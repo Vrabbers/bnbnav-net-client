@@ -18,6 +18,7 @@ using DynamicData;
 using BnbnavNetClient.Helpers;
 using Avalonia.Controls.Primitives;
 using System.Collections.Immutable;
+using BnbnavNetClient.Services.EditControllers;
 
 namespace BnbnavNetClient.Views;
 
@@ -35,10 +36,7 @@ public partial class MapView : UserControl
 
     readonly IAssetLoader _assetLoader;
 
-    MapViewModel MapViewModel => (MapViewModel)DataContext!;
-
-    readonly List<Node> _roadGhosts = new();
-    private bool _lockRoadGhosts = false;
+    public MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
     public MapView()
     {
@@ -65,6 +63,9 @@ public partial class MapView : UserControl
             _pointerPrevPosition = pointerPos;
 
             _disablePan = false;
+
+            var flags = MapViewModel.MapEditorService.EditController.PointerPressed(this, eventArgs);
+            
             switch (MapViewModel.MapEditorService.CurrentEditMode)
             {
                 case EditModeControl.Select:
@@ -74,7 +75,6 @@ public partial class MapView : UserControl
                     break;
                 case EditModeControl.Join:
                     //Don't try to pan
-                    if (HitTest(pointerPos).Any(x => x is Node)) _disablePan = true;
                     break;
                 case EditModeControl.NodeMove:
                     break;
@@ -82,6 +82,8 @@ public partial class MapView : UserControl
                     throw new ArgumentOutOfRangeException();
             }
 
+            _disablePan = flags.HasFlag(PointerPressedFlags.DoNotPan);
+                
             _viewVelocity = Vector.Zero;
             _pointerVelocities.Clear();
         };
@@ -89,36 +91,13 @@ public partial class MapView : UserControl
         PointerMoved += (_, eventArgs) =>
         {
             var pointerPos = eventArgs.GetPosition(this);
+            
+            MapViewModel.MapEditorService.EditController.PointerMoved(this, eventArgs);
 
             if (_pointerPressing)
             {
                 if (_disablePan)
                 {
-                    switch (MapViewModel.MapEditorService.CurrentEditMode)
-                    {
-                        case EditModeControl.Select:
-                            break;
-                        case EditModeControl.Join:
-                            var item = HitTest(pointerPos).FirstOrDefault(x => x is Node);
-                            if (item is Node node)
-                            {
-                                var lastNode = _roadGhosts.Last();
-                                
-                                //Make sure this makes sense
-                                //TODO: Make sure we can't loop back on ourselves: we also need to check RoadGhosts for duplicates
-                                if (node.Id != lastNode.Id && !MapViewModel.MapService.Edges.Any(x =>
-                                        x.Value.From == lastNode && x.Value.To == node))
-                                {
-                                    _roadGhosts.Add(node);
-                                }
-                            }
-
-                            break;
-                        case EditModeControl.NodeMove:
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
                     InvalidateVisual();
                 } 
                 else
@@ -153,17 +132,6 @@ public partial class MapView : UserControl
                         break;
                     case EditModeControl.Join:
                     {
-                        if (!_lockRoadGhosts)
-                        {
-                            _roadGhosts.Clear();
-                            // Draw a circular ghost around any nodes
-                            var item = HitTest(pointerPos).FirstOrDefault(x => x is Node);
-                            if (item is Node node)
-                            {
-                                _roadGhosts.Add(node);
-                            }
-                            InvalidateVisual();
-                        }
                         break;
                     }
                     case EditModeControl.NodeMove:
@@ -178,30 +146,13 @@ public partial class MapView : UserControl
         {
             _pointerPressing = false;
 
+            MapViewModel.MapEditorService.EditController.PointerReleased(this, eventArgs);
 
             switch (MapViewModel.MapEditorService.CurrentEditMode)
             {
                 case EditModeControl.Select:
                     break;
                 case EditModeControl.Join:
-                    //Attempt to join the nodes
-                    if (_roadGhosts.Count > 1)
-                    {
-                        _lockRoadGhosts = true;
-                        
-                        MapViewModel.FlyoutViewModel = new NewEdgeFlyoutViewModel()
-                        {
-                            NodesToJoin = _roadGhosts
-                        };
-                        var flyout = Flyout.GetAttachedFlyout(this);
-                        flyout.Closed += (_, _) =>
-                        {
-                            _lockRoadGhosts = false;
-                            _roadGhosts.Clear();
-                            InvalidateVisual();
-                        };
-                        flyout!.ShowAt(this, showAtPointer: true);
-                    }
                     break;
                 case EditModeControl.NodeMove:
                     break;
@@ -294,23 +245,23 @@ public partial class MapView : UserControl
     static readonly double NodeSize = 14;
     readonly Dictionary<string, SKSvg> _svgCache = new();
 
-    List<(Point, Point, Edge)> _drawnEdges = new();
-    List<(Rect, Landmark)> _drawnLandmarks = new();
-    List<(Rect, Node)> _drawnNodes = new();
+    private List<(Point, Point, Edge)> DrawnEdges { get; set; } = new();
+    private List<(Rect, Landmark)> DrawnLandmarks { get; set; } = new();
+    public List<(Rect, Node)> DrawnNodes { get; set; } = new();
 
-    IEnumerable<MapItem> HitTest(Point point)
+    public IEnumerable<MapItem> HitTest(Point point)
     {
-        foreach (var (rect, landmark) in _drawnLandmarks)
+        foreach (var (rect, landmark) in DrawnLandmarks)
         {
             if (rect.Contains(point)) yield return landmark;
         }
         
-        foreach (var (rect, node) in _drawnNodes)
+        foreach (var (rect, node) in DrawnNodes)
         {
             if (rect.Contains(point)) yield return node;
         }
 
-        foreach (var (a, b, edge) in _drawnEdges)
+        foreach (var (a, b, edge) in DrawnEdges)
         {
             if (GeoHelper.LineSegmentToPointDistance(a, b, point) <= ThicknessForRoadType(edge.Road.RoadType) * MapViewModel.Scale / 2)
                 yield return edge;
@@ -335,7 +286,7 @@ public partial class MapView : UserControl
 
         var bounds = boundsRect ?? Bounds;
 
-        _drawnEdges = mapService.Edges.Values.Select(edge =>
+        DrawnEdges = mapService.Edges.Values.Select(edge =>
         {
             var fromEdge = mapService.Nodes[edge.From.Id];
             var from = ToScreen(new(fromEdge.X, fromEdge.Z));
@@ -344,7 +295,7 @@ public partial class MapView : UserControl
             return (from, to, edge);
         }).Where(edge => GeoHelper.LineIntersects(edge.from, edge.to, bounds)).ToList();
 
-        _drawnLandmarks = mapService.Landmarks.Values.Select(landmark =>
+        DrawnLandmarks = mapService.Landmarks.Values.Select(landmark =>
         {
             var pos = ToScreen(new(landmark.Node.X, landmark.Node.Z));
             var rect = new Rect(
@@ -354,7 +305,7 @@ public partial class MapView : UserControl
             return (rect, landmark);
         }).Where(landmark => bounds.Intersects(landmark.rect)).ToList();
 
-        _drawnNodes = mapService.Nodes.Values.Select(node =>
+        DrawnNodes = mapService.Nodes.Values.Select(node =>
         {
             var pos = ToScreen(new(node.X, node.Z));
             var rect = new Rect(
@@ -380,7 +331,7 @@ public partial class MapView : UserControl
         _ => this.FindResource("UnknownRoadPen")!,
     });
 
-    double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? this.FindResource("MotorwayThickness")! : this.FindResource("RoadThickness")!);
+    public double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? this.FindResource("MotorwayThickness")! : this.FindResource("RoadThickness")!);
 
     public override void Render(DrawingContext context)
     {
@@ -388,7 +339,7 @@ public partial class MapView : UserControl
 
         context.FillRectangle((Brush)this.FindResource("BackgroundBrush")!, Bounds);
 
-        foreach (var (from, to, edge) in _drawnEdges)
+        foreach (var (from, to, edge) in DrawnEdges)
         {
             var pen = PenForRoadType(edge.Road.RoadType);
 
@@ -412,7 +363,7 @@ public partial class MapView : UserControl
 
         if (scale >= 0.8)
         {
-            foreach (var (rect, landmark) in _drawnLandmarks)
+            foreach (var (rect, landmark) in DrawnLandmarks)
             {
                 SKSvg? svg = null;
 
@@ -454,27 +405,14 @@ public partial class MapView : UserControl
 
         if (MapViewModel.IsInEditMode)
         {
-            if (_roadGhosts.Count != 0)
-            {
-                PolylineGeometry geo = new();
-                geo.Points.AddRange(_roadGhosts.Select(x => ToScreen(new(x.X, x.Z))));
-                if (_pointerPressing) geo.Points.Add(_pointerPrevPosition);
-                
-                //Make the shape into a circle
-                if (geo.Points.Count == 1) geo.Points.Add(geo.Points.First());
-
-                var pen = (Pen)this.FindResource("RoadGhostPen")!;
-                pen.Thickness = ThicknessForRoadType(RoadType.Local) * scale;
-                context.DrawGeometry(null, pen, geo);
-            }
             var nodeBorder = (Pen)this.FindResource("NodeBorder")!;
             var nodeBrush = (Brush)this.FindResource("NodeFill")!;
-            var selNodeBrush = (Brush)this.FindResource("SelectedNodeFill")!;
-            foreach (var (rect, node) in _drawnNodes)
+            foreach (var (rect, node) in DrawnNodes)
             {
-                var brush = _roadGhosts.Contains(node) ? selNodeBrush : nodeBrush;
-                context.DrawRectangle(brush, nodeBorder, rect);
+                context.DrawRectangle(nodeBrush, nodeBorder, rect);
             }
+            
+            MapViewModel.MapEditorService.EditController.Render(this, context);
         }
 
         base.Render(context);
@@ -483,7 +421,7 @@ public partial class MapView : UserControl
     Point ToWorld(Point screenCoords) =>
          _toWorldMtx.Transform(screenCoords);
 
-    Point ToScreen(Point worldCoords) =>
+    public Point ToScreen(Point worldCoords) =>
         _toScreenMtx.Transform(worldCoords);
 
     public void Zoom(double deltaScale, Point origin)
@@ -495,5 +433,13 @@ public partial class MapView : UserControl
         var worldFutureIncorrectPos = ToWorld(origin);
         var correction = worldFutureIncorrectPos - worldPrevPos;
         MapViewModel.Pan -= correction;
+    }
+
+    public FlyoutBase OpenFlyout(ViewModel viewModel)
+    {
+        MapViewModel.FlyoutViewModel = viewModel;
+        var flyout = Flyout.GetAttachedFlyout(this);
+        flyout!.ShowAt(this, showAtPointer: true);
+        return flyout;
     }
 }

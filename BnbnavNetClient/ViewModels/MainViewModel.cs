@@ -88,6 +88,7 @@ public sealed class MainViewModel : ViewModel
     public async Task InitMapService()
     {
         var mapService = await MapService.DownloadInitialMapAsync();
+        MapEditorService.MapService = mapService;
         MapViewModel = new(mapService, this);
         var panText = MapViewModel
             .WhenAnyValue(map => map.Pan)
