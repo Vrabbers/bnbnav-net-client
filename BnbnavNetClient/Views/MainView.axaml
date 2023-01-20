@@ -44,6 +44,7 @@
         <Grid ColumnDefinitions="Auto Auto Auto * Auto">
           <ToggleButton Grid.Column="0" Command="{Binding SelectModePressed}" Content="Select" IsChecked="{Binding IsInSelectMode}"/>
           <ToggleButton Grid.Column="1" Command="{Binding JoinModePressed}" Content="Join" IsChecked="{Binding IsInJoinMode}"/>
+          <ToggleButton Grid.Column="2" Command="{Binding NodeMovePressed}" Content="{str:Tr Key=MOVE_NODE}" IsChecked="{Binding IsInNodeMoveMode}"/>
           <Button Grid.Column="4" IsVisible="{Binding EditModeEnabled}" Content="{str:Tr Key=SPY_OPTIONS}">
             <Button.Flyout>
               <Flyout>

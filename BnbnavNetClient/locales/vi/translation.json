@@ -10,6 +10,7 @@
   "FOLLOWING": "Đang theo dõi {{user}}",
   "LANG_CHANGE": "Đổi ngôn ngữ:",
   "LANG_CHANGE_RESTART_REQUIRED": "Vui lòng khởi chạy bnbnav lại để áp dụng cài đặt này.",
+  "MOVE_NODE": "",
   "OK": "OK",
   "SPY_OPTIONS": "Tùy chọn tỏa sáng"
 }

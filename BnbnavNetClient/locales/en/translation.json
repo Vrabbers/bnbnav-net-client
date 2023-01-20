@@ -3,13 +3,14 @@
   "EDITNAV_PROMPT": "Use /editnav to obtain a token and enter here:",
   "EDITNAV_WATERMARK": "Token",
   "EDIT_MODE": "Edit Mode",
+  "FOLLOWING": "Following {{user}}",
   "FOLLOW_ME": "Follow Me",
   "FOLLOW_ME_PROMPT": "Enter Minecraft username:",
-  "FOLLOW_ME_WATERMARK": "Username",
   "FOLLOW_ME_TURN_RESTRICTIONS": "Highlight nodes with turn restrictions",
-  "FOLLOWING": "Following {{user}}",
+  "FOLLOW_ME_WATERMARK": "Username",
   "LANG_CHANGE": "Change Language:",
   "LANG_CHANGE_RESTART_REQUIRED": "Please restart bnbnav for setting to take effect.",
+  "MOVE_NODE": "Move Node",
   "OK": "OK",
   "SPY_OPTIONS": "Spy Options"
 }

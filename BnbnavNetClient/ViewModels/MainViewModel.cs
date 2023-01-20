@@ -50,6 +50,9 @@ public sealed class MainViewModel : ViewModel
     public bool IsInJoinMode => MapEditorService.CurrentEditMode == EditModeControl.Join;
     
     [ObservableAsProperty] 
+    public bool IsInNodeMoveMode => MapEditorService.CurrentEditMode == EditModeControl.NodeMove;
+    
+    [ObservableAsProperty] 
     public bool RoadControlsRequired => false;
 
     [ObservableAsProperty]
@@ -156,6 +159,11 @@ public sealed class MainViewModel : ViewModel
     public void JoinModePressed()
     {
         MapEditorService.CurrentEditMode = EditModeControl.Join;
+    }
+    
+    public void NodeMovePressed()
+    {
+        MapEditorService.CurrentEditMode = EditModeControl.NodeMove;
     }
 
     public void FollowMePressed()

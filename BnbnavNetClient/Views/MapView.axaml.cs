@@ -38,6 +38,7 @@ public partial class MapView : UserControl
     MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
     readonly List<Node> _roadGhosts = new();
+    private bool _lockRoadGhosts = false;
 
     public MapView()
     {
@@ -70,16 +71,12 @@ public partial class MapView : UserControl
                     MapViewModel.Test = string.Empty;
                     foreach (var hit in HitTest(pointerPos))
                         MapViewModel.Test += hit.ToString() + "\n";
-                    if (HitTest(pointerPos).FirstOrDefault(x => x is Edge) is Edge x)
-                    {
-                        MapViewModel.FlyoutViewModel = new NewEdgeFlyoutViewModel();
-                        var flyout = Flyout.GetAttachedFlyout(this);
-                        flyout!.ShowAt(this, showAtPointer: true);
-                    }
                     break;
                 case EditModeControl.Join:
                     //Don't try to pan
                     if (HitTest(pointerPos).Any(x => x is Node)) _disablePan = true;
+                    break;
+                case EditModeControl.NodeMove:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -116,6 +113,8 @@ public partial class MapView : UserControl
                                 }
                             }
 
+                            break;
+                        case EditModeControl.NodeMove:
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -154,16 +153,21 @@ public partial class MapView : UserControl
                         break;
                     case EditModeControl.Join:
                     {
-                        _roadGhosts.Clear();
-                        // Draw a circular ghost around any nodes
-                        var item = HitTest(pointerPos).FirstOrDefault(x => x is Node);
-                        if (item is Node node)
+                        if (!_lockRoadGhosts)
                         {
-                            _roadGhosts.Add(node);
+                            _roadGhosts.Clear();
+                            // Draw a circular ghost around any nodes
+                            var item = HitTest(pointerPos).FirstOrDefault(x => x is Node);
+                            if (item is Node node)
+                            {
+                                _roadGhosts.Add(node);
+                            }
+                            InvalidateVisual();
                         }
-                        InvalidateVisual();
                         break;
                     }
+                    case EditModeControl.NodeMove:
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -173,6 +177,37 @@ public partial class MapView : UserControl
         PointerReleased += (_, eventArgs) =>
         {
             _pointerPressing = false;
+
+
+            switch (MapViewModel.MapEditorService.CurrentEditMode)
+            {
+                case EditModeControl.Select:
+                    break;
+                case EditModeControl.Join:
+                    //Attempt to join the nodes
+                    if (_roadGhosts.Count > 1)
+                    {
+                        _lockRoadGhosts = true;
+                        
+                        MapViewModel.FlyoutViewModel = new NewEdgeFlyoutViewModel()
+                        {
+                            NodesToJoin = _roadGhosts
+                        };
+                        var flyout = Flyout.GetAttachedFlyout(this);
+                        flyout.Closed += (_, _) =>
+                        {
+                            _lockRoadGhosts = false;
+                            _roadGhosts.Clear();
+                            InvalidateVisual();
+                        };
+                        flyout!.ShowAt(this, showAtPointer: true);
+                    }
+                    break;
+                case EditModeControl.NodeMove:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
             foreach (var item in HitTest(eventArgs.GetPosition(this)))
             {
