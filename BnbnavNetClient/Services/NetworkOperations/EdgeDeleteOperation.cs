@@ -1,0 +1,39 @@
+using System;
+using System.Threading.Tasks;
+using Avalonia.Media;
+using BnbnavNetClient.Models;
+using BnbnavNetClient.Views;
+
+namespace BnbnavNetClient.Services.NetworkOperations;
+
+public class EdgeDeleteOperation : NetworkOperation
+{
+    private readonly MapEditorService _editorService;
+    private readonly Edge _edge;
+
+    public EdgeDeleteOperation(MapEditorService editorService, Edge edge)
+    {
+        _editorService = editorService;
+        _edge = edge;
+    }
+    
+    public override async Task PerformOperation()
+    {
+        ItemsNotToRender.Add(_edge);
+        
+        try
+        {
+            (await _editorService.MapService!.Delete($"/edges/{_edge.Id}")).AssertSuccess();
+        }
+        catch (Exception e)
+        {
+            
+        }
+    }
+
+    public override void Render(MapView mapView, DrawingContext context)
+    {
+        var (from, to) = _edge.Extents(mapView);
+        mapView.DrawEdge(context, _edge.Road.RoadType, from, to, true);
+    }
+}

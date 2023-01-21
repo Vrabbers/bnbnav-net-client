@@ -143,7 +143,7 @@ public sealed class MapService : ReactiveObject
         return await completionSource.Task;
     }
 
-    async Task<ServerResponse> Delete(string path)
+    public async Task<ServerResponse> Delete(string path)
     {
         var resp = await HttpClient.DeleteAsync($"/api/{path}");
         if (resp.StatusCode == HttpStatusCode.Unauthorized)
@@ -213,11 +213,6 @@ public sealed class MapService : ReactiveObject
     public async Task AddTwoWayEdge(Node first, Node second, Road road)
     {
         await Task.WhenAll(AddEdge(first, second, road), AddEdge(second, first, road));
-    }
-
-    public async Task DeleteEdge(Edge edge)
-    {
-        await Delete($"/edges/{edge.Id}");
     }
 
     public async Task AttachLandmark(Node node, string name, string type)

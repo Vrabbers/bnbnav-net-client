@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Input;
 using Avalonia.Media;
 using BnbnavNetClient.Models;
+using BnbnavNetClient.Services.NetworkOperations;
 using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.EditControllers;
@@ -64,8 +65,20 @@ public class SpliceEditController : EditController
 
     public override void PointerReleased(MapView mapView, PointerReleasedEventArgs args)
     {
+        if (_editorService.MapService is null) return;
+        
         if (_splicingEdge is not null)
         {
+            if (_splicingAt is not null)
+            {
+                var otherEdge = _editorService.MapService.OppositeEdge(_splicingEdge);
+                
+                _editorService.TrackNetworkOperation(new EdgeCreateOperation(_editorService, _splicingEdge.Road, _splicingEdge.From, _splicingAt, otherEdge is not null));
+                _editorService.TrackNetworkOperation(new EdgeCreateOperation(_editorService, _splicingEdge.Road, _splicingAt, _splicingEdge.To, otherEdge is not null));
+                
+                _editorService.TrackNetworkOperation(new EdgeDeleteOperation(_editorService, _splicingEdge));
+                if (otherEdge is not null) _editorService.TrackNetworkOperation(new EdgeDeleteOperation(_editorService, otherEdge));
+            }
             _splicingEdge = null;
         }
         ItemsNotToRender.Clear();
