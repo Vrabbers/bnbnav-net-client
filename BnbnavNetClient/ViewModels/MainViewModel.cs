@@ -2,6 +2,7 @@
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using BnbnavNetClient.Models;
@@ -58,6 +59,8 @@ public sealed class MainViewModel : ViewModel
     [ObservableAsProperty]
     public bool EditModeEnabled => false;
     
+    public Interaction<bool, Unit>? AuthTokeInteraction { get; set; }
+
     public MapEditorService MapEditorService { get; set; }
 
     public MainViewModel()
@@ -97,11 +100,17 @@ public sealed class MainViewModel : ViewModel
 
         this.WhenAnyValue(me => me.EditModeToken).Subscribe(token => MapService.AuthenticationToken = token);
 
-        MapViewModel.MapService.AuthTokenInteraction.RegisterHandler(async interaction => 
+        MapViewModel.MapService.AuthTokenInteraction.RegisterHandler(async interaction =>
         {
-            ShowAuthenticationPopup();
-            var token = await this.WhenAnyValue(me => me.EditModeToken);
-            interaction.SetOutput(token);
+            try
+            {
+                var token = await ShowAuthenticationPopup();
+                interaction.SetOutput(token);
+            }
+            catch (Exception ex)
+            {
+                interaction.SetOutput(null);
+            }
         });
     }
     
@@ -117,21 +126,26 @@ public sealed class MainViewModel : ViewModel
         Popup = languagePopup;
     }
 
-    void ShowAuthenticationPopup()
+    Task<string> ShowAuthenticationPopup()
     {
+        var cs = new TaskCompletionSource<string>();
         var editModePopup = new EnterPopupViewModel(_tr["EDITNAV_PROMPT"], _tr["EDITNAV_WATERMARK"]);
         editModePopup.Ok.Subscribe(token =>
         {
             EditModeToken = token;
             MapEditorService.EditModeEnabled = true;
+            cs.SetResult(token);
             Popup = null;
         });
         editModePopup.Cancel.Subscribe(_ =>
         {
+            EditModeToken = null;
             MapEditorService.EditModeEnabled = false;
+            cs.SetException(new Exception());
             Popup = null;
         });
         Popup = editModePopup;
+        return cs.Task;
     }
 
     public void EditModePressed()

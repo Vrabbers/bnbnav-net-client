@@ -19,15 +19,33 @@ namespace BnbnavNetClient.Services;
 
 public sealed class MapService : ReactiveObject
 {
-    private class ServerResponse
+    public class ServerResponse
     {
         public required HttpStatusCode StatusCode { get; init; }
         public required Stream Stream { get; init; }
+
+        public void AssertSuccess()
+        {
+            if (StatusCode is < (HttpStatusCode) 200 or > (HttpStatusCode) 299)
+            {
+                throw new Exception($"Server returned {StatusCode}");
+            }
+        }
     }
 
     public static readonly string BaseUrl = Environment.GetEnvironmentVariable("BNBNAV_BASEURL") ?? "https://bnbnav.aircs.racing/";
 
-    static readonly HttpClient HttpClient = new() { BaseAddress = new(BaseUrl) };
+    static readonly HttpClient HttpClient = new()
+    {
+        BaseAddress = new(BaseUrl),
+        DefaultRequestHeaders =
+        {
+            UserAgent =
+            {
+                new ProductInfoHeaderValue("bnbnav-dotnet", "1.0")                
+            }
+        }
+    };
 
     readonly Dictionary<string, Node> _nodes;
     readonly Dictionary<string, Edge> _edges;
@@ -70,7 +88,7 @@ public sealed class MapService : ReactiveObject
         _websocketService = websocketService;
     }
 
-    private async Task<ServerResponse> Submit(string path, object json)
+    public async Task<ServerResponse> Submit(string path, object json)
     {
         var resp = await HttpClient.PostAsync($"/api/{path}", JsonContent.Create(json, MediaTypeHeaderValue.Parse("application/json"), new()
         {
@@ -101,7 +119,14 @@ public sealed class MapService : ReactiveObject
             {
                 //Request a new auth token from the user and then replay pending requests
                 AuthenticationToken = await AuthTokenInteraction.Handle(Unit.Default);
-                ReplayPendingRequests();
+                if (AuthenticationToken is null)
+                {
+                    CancelPendingRequests(new("Authentication token not provided"));
+                }
+                else
+                {
+                    ReplayPendingRequests();
+                }
             }
             catch (Exception e)
             {

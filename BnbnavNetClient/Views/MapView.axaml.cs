@@ -18,7 +18,9 @@ using DynamicData;
 using BnbnavNetClient.Helpers;
 using Avalonia.Controls.Primitives;
 using System.Collections.Immutable;
+using Avalonia.Threading;
 using BnbnavNetClient.Services.EditControllers;
+using BnbnavNetClient.Services.NetworkOperations;
 
 namespace BnbnavNetClient.Views;
 
@@ -194,7 +196,10 @@ public partial class MapView : UserControl
             .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
         MapViewModel.MapService
             .WhenAnyPropertyChanged()
-            .Subscribe(Observer.Create<MapService?>(_ => InvalidateVisual()));
+            .Subscribe(Observer.Create<MapService?>(_ => UpdateDrawnItems()));
+        MapViewModel.MapEditorService
+            .WhenAnyValue(x => x.OngoingNetworkOperations)
+            .Subscribe(Observer.Create<IReadOnlyList<INetworkOperation>?>(_ => Dispatcher.UIThread.Post(InvalidateVisual)));
     }
 
     static readonly double LandmarkSize = 10;
@@ -363,6 +368,11 @@ public partial class MapView : UserControl
             }
             
             MapViewModel.MapEditorService.EditController.Render(this, context);
+        }
+
+        foreach (var operation in MapViewModel.MapEditorService.OngoingNetworkOperations)
+        {
+            operation.Render(this, context);
         }
 
         base.Render(context);
