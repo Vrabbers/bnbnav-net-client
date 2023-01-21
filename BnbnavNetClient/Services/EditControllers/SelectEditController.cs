@@ -4,9 +4,9 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.EditControllers;
 
-public class SelectEditController : IEditController
+public class SelectEditController : EditController
 {
-    public PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
+    public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
         var pointerPos = args.GetPosition(mapView);
         mapView.MapViewModel.Test = string.Empty;
@@ -16,16 +16,16 @@ public class SelectEditController : IEditController
         return PointerPressedFlags.None;
     }
 
-    public void PointerMoved(MapView mapView, PointerEventArgs args)
+    public override void PointerMoved(MapView mapView, PointerEventArgs args)
     {
         
     }
 
-    public void PointerReleased(MapView mapView, PointerReleasedEventArgs args)
+    public override void PointerReleased(MapView mapView, PointerReleasedEventArgs args)
     {
     }
 
-    public void Render(MapView mapView, DrawingContext context)
+    public override void Render(MapView mapView, DrawingContext context)
     {
         
     }

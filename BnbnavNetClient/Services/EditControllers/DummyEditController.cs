@@ -4,24 +4,24 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.EditControllers;
 
-public class DummyEditController : IEditController
+public class DummyEditController : EditController
 {
-    public PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs _)
+    public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs _)
     {
         // Dummy
         return PointerPressedFlags.None;
     }
 
-    public void PointerMoved(MapView mapView, PointerEventArgs args)
+    public override void PointerMoved(MapView mapView, PointerEventArgs args)
     {
         // Dummy        
     }
 
-    public void PointerReleased(MapView mapView, PointerReleasedEventArgs args) {
+    public override void PointerReleased(MapView mapView, PointerReleasedEventArgs args) {
         
     }
 
-    public void Render(MapView mapView, DrawingContext context)
+    public override void Render(MapView mapView, DrawingContext context)
     {
         
     }

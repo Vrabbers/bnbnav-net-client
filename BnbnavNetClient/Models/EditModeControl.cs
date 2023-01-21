@@ -4,5 +4,6 @@ public enum EditModeControl
 {
     Select,
     Join,
-    NodeMove
+    NodeMove,
+    Splice
 }

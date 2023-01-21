@@ -199,7 +199,7 @@ public partial class MapView : UserControl
             .Subscribe(Observer.Create<MapService?>(_ => UpdateDrawnItems()));
         MapViewModel.MapEditorService
             .WhenAnyValue(x => x.OngoingNetworkOperations)
-            .Subscribe(Observer.Create<IReadOnlyList<INetworkOperation>?>(_ => Dispatcher.UIThread.Post(InvalidateVisual)));
+            .Subscribe(Observer.Create<IReadOnlyList<NetworkOperation>?>(_ => Dispatcher.UIThread.Post(InvalidateVisual)));
     }
 
     static readonly double LandmarkSize = 10;
@@ -248,10 +248,7 @@ public partial class MapView : UserControl
 
         DrawnEdges = mapService.Edges.Values.Select(edge =>
         {
-            var fromEdge = mapService.Nodes[edge.From.Id];
-            var from = ToScreen(new(fromEdge.X, fromEdge.Z));
-            var toEdge = mapService.Nodes[edge.To.Id];
-            var to = ToScreen(new (toEdge.X, toEdge.Z));
+            var (from, to) = edge.Extents(this);
             return (from, to, edge);
         }).Where(edge => GeoHelper.LineIntersects(edge.from, edge.to, bounds)).ToList();
 
@@ -288,38 +285,54 @@ public partial class MapView : UserControl
 
     public double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? this.FindResource("MotorwayThickness")! : this.FindResource("RoadThickness")!);
 
+    public void DrawEdge(DrawingContext context, RoadType roadType, Point from, Point to, bool drawGhost = false)
+    {
+            
+        var pen = PenForRoadType(roadType);
+
+        var length = double.Sqrt(double.Pow(from.X - to.X, 2) + double.Pow(from.Y - to.Y, 2));
+        var diffPoint = to - from;
+        var angle = double.Atan2(diffPoint.Y, diffPoint.X);
+
+        var matrix = Matrix.Identity *
+                     Matrix.CreateRotation(angle) *
+                     Matrix.CreateTranslation(from);
+
+        pen.Thickness = ThicknessForRoadType(roadType) * MapViewModel.Scale;
+        if (pen.Brush is LinearGradientBrush gradBrush)
+        {
+            gradBrush.StartPoint = new RelativePoint(0, -pen.Thickness / 2, RelativeUnit.Absolute);
+            gradBrush.EndPoint = new RelativePoint(0, pen.Thickness / 2, RelativeUnit.Absolute);
+        }
+        using (context.PushPreTransform(matrix))
+            using (context.PushOpacity(drawGhost ? 0.5 : 1))
+                context.DrawLine(pen, new(0, 0), new(length, 0));
+    }
+
     public override void Render(DrawingContext context)
     {
         var scale = MapViewModel.Scale;
 
         context.FillRectangle((Brush)this.FindResource("BackgroundBrush")!, Bounds);
 
+        var noRender = new List<MapItem>();
+        noRender.AddRange(MapViewModel.MapEditorService.EditController.ItemsNotToRender);
+        foreach (var operation in MapViewModel.MapEditorService.OngoingNetworkOperations)
+        {
+            noRender.AddRange(operation.ItemsNotToRender);
+        }
+
         foreach (var (from, to, edge) in DrawnEdges)
         {
-            var pen = PenForRoadType(edge.Road.RoadType);
-
-            var length = double.Sqrt(double.Pow(from.X - to.X, 2) + double.Pow(from.Y - to.Y, 2));
-            var diffPoint = to - from;
-            var angle = double.Atan2(diffPoint.Y, diffPoint.X);
-
-            var matrix = Matrix.Identity *
-                Matrix.CreateRotation(angle) *
-                Matrix.CreateTranslation(from);
-
-            pen.Thickness = ThicknessForRoadType(edge.Road.RoadType) * scale;
-            if (pen.Brush is LinearGradientBrush gradBrush)
-            {
-                gradBrush.StartPoint = new RelativePoint(0, -pen.Thickness / 2, RelativeUnit.Absolute);
-                gradBrush.EndPoint = new RelativePoint(0, pen.Thickness / 2, RelativeUnit.Absolute);
-            }
-            using (context.PushPreTransform(matrix))
-                context.DrawLine(pen, new(0, 0), new(length, 0));
+            if (noRender.Contains(edge)) continue;
+            DrawEdge(context, edge.Road.RoadType, from, to);
         }
 
         if (scale >= 0.8)
         {
             foreach (var (rect, landmark) in DrawnLandmarks)
             {
+                if (noRender.Contains(landmark)) continue;
                 SKSvg? svg = null;
 
                 if (_svgCache.TryGetValue(landmark.Type, out var outSvg))
@@ -364,6 +377,7 @@ public partial class MapView : UserControl
             var nodeBrush = (Brush)this.FindResource("NodeFill")!;
             foreach (var (rect, node) in DrawnNodes)
             {
+                if (noRender.Contains(node)) continue;
                 context.DrawRectangle(nodeBrush, nodeBorder, rect);
             }
             

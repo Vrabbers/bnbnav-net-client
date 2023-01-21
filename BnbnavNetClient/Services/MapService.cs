@@ -88,6 +88,11 @@ public sealed class MapService : ReactiveObject
         _websocketService = websocketService;
     }
 
+    public Edge? OppositeEdge(Edge edge)
+    {
+        return _edges.Values.SingleOrDefault(x => x.To == edge.From && x.From == edge.To);
+    }
+
     public async Task<ServerResponse> Submit(string path, object json)
     {
         var resp = await HttpClient.PostAsync($"/api/{path}", JsonContent.Create(json, MediaTypeHeaderValue.Parse("application/json"), new()

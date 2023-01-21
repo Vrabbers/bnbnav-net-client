@@ -7,7 +7,7 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.NetworkOperations;
 
-public class NodeMoveOperation : INetworkOperation
+public class NodeMoveOperation : NetworkOperation
 {
     private readonly MapEditorService _editorService;
     private readonly Node _toUpdate;
@@ -20,7 +20,7 @@ public class NodeMoveOperation : INetworkOperation
         _updateTo = updateTo;
     }
 
-    public async Task PerformOperation()
+    public override async Task PerformOperation()
     {
         try
         {
@@ -35,7 +35,7 @@ public class NodeMoveOperation : INetworkOperation
         }
     }
 
-    public void Render(MapView mapView, DrawingContext context)
+    public override void Render(MapView mapView, DrawingContext context)
     {
         var nodeBorder = (Pen)mapView.FindResource("NodeBorder")!;
         var selNodeBrush = (Brush)mapView.FindResource("SelectedNodeFill")!;

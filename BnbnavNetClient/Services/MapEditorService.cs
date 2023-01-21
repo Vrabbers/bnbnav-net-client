@@ -12,7 +12,7 @@ namespace BnbnavNetClient.Services;
 
 public class MapEditorService : ReactiveObject
 {
-    private List<INetworkOperation> _networkOperations = new();
+    private List<NetworkOperation> _networkOperations = new();
     
     public MapEditorService()
     {
@@ -24,12 +24,13 @@ public class MapEditorService : ReactiveObject
                 EditModeControl.Select => new SelectEditController(),
                 EditModeControl.Join => new NodeJoinEditController(this),
                 EditModeControl.NodeMove => new NodeMoveEditController(this),
+                EditModeControl.Splice => new SpliceEditController(this),
                 _ => throw new ArgumentOutOfRangeException(nameof(x), x, null)
             };
         });
     }
 
-    public void TrackNetworkOperation(INetworkOperation operation)
+    public void TrackNetworkOperation(NetworkOperation operation)
     {
         _networkOperations.Add(operation);
         operation.PerformOperation().ContinueWith(x =>
@@ -52,9 +53,9 @@ public class MapEditorService : ReactiveObject
     [Reactive]
     public bool EditModeEnabled { get; set; }
     
-    public IEditController EditController { get; private set; }
+    public EditController EditController { get; private set; }
     
     public MapService? MapService { get; set; }
 
-    public IReadOnlyList<INetworkOperation> OngoingNetworkOperations => _networkOperations.AsReadOnly();
+    public IReadOnlyList<NetworkOperation> OngoingNetworkOperations => _networkOperations.AsReadOnly();
 }

@@ -10,7 +10,7 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.EditControllers;
 
-public class NodeJoinEditController : IEditController
+public class NodeJoinEditController : EditController
 {
     private readonly MapEditorService _editorService;
     private bool _mouseDown = false;
@@ -23,7 +23,7 @@ public class NodeJoinEditController : IEditController
         _editorService = editorService;
     }
     
-    public PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
+    public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
         var pointerPos = args.GetPosition(mapView);
         
@@ -38,7 +38,7 @@ public class NodeJoinEditController : IEditController
         return PointerPressedFlags.None;
     }
 
-    public void PointerMoved(MapView mapView, PointerEventArgs args)
+    public override void PointerMoved(MapView mapView, PointerEventArgs args)
     {
         if (_editorService.MapService is null) return;
         
@@ -78,7 +78,7 @@ public class NodeJoinEditController : IEditController
         _pointerPrevPosition = pointerPos;
     }
 
-    public void PointerReleased(MapView mapView, PointerReleasedEventArgs args)
+    public override void PointerReleased(MapView mapView, PointerReleasedEventArgs args)
     {
         if (_editorService.MapService is null) return;
 
@@ -102,7 +102,7 @@ public class NodeJoinEditController : IEditController
         }
     }
 
-    public void Render(MapView mapView, DrawingContext context)
+    public override void Render(MapView mapView, DrawingContext context)
     {
         if (_roadGhosts.Count != 0)
         {

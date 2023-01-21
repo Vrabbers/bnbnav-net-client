@@ -3,13 +3,14 @@
   "EDITNAV_PROMPT": "השתמש ב-/editnav כדי לקבל שובר. הזן אותו פה:",
   "EDITNAV_WATERMARK": "שובר",
   "EDIT_MODE": "מצב עריכה",
+  "FOLLOWING": "עוקב אחרי {{user}}",
   "FOLLOW_ME": "עקוב אחרי",
   "FOLLOW_ME_PROMPT": "הזו את שם המשתמש שלך ב-Minecraft:",
-  "FOLLOW_ME_WATERMARK": "שם משתמש",
   "FOLLOW_ME_TURN_RESTRICTIONS": "הצג צמתים עם הגבלות סיבוב",
-  "FOLLOWING": "עוקב אחרי {{user}}",
+  "FOLLOW_ME_WATERMARK": "שם משתמש",
   "LANG_CHANGE": "שנה שפה",
   "LANG_CHANGE_RESTART_REQUIRED": "עליך להפעיל bnbnav מחדש כדי להחל את ההגדרות שלך.",
   "OK": "אישור",
+  "SPLICE": "",
   "SPY_OPTIONS": "אפשרויות ריגול"
 }

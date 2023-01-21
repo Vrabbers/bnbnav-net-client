@@ -10,7 +10,7 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.EditControllers;
 
-public class NodeMoveEditController : IEditController
+public class NodeMoveEditController : EditController
 {
     private readonly MapEditorService _editorService;
     private Node? _movingNode = null;
@@ -21,7 +21,7 @@ public class NodeMoveEditController : IEditController
         _editorService = editorService;
     }
 
-    public PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
+    public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
         var pointerPos = args.GetPosition(mapView);
         
@@ -35,7 +35,7 @@ public class NodeMoveEditController : IEditController
         return PointerPressedFlags.None;
     }
 
-    public void PointerMoved(MapView mapView, PointerEventArgs args)
+    public override void PointerMoved(MapView mapView, PointerEventArgs args)
     {
         var pointerPos = args.GetPosition(mapView);
 
@@ -47,7 +47,7 @@ public class NodeMoveEditController : IEditController
         }
     }
 
-    public void PointerReleased(MapView mapView, PointerReleasedEventArgs args)
+    public override void PointerReleased(MapView mapView, PointerReleasedEventArgs args)
     {
         if (_movingNode is not null && _movedNode is not null)
         {
@@ -58,7 +58,7 @@ public class NodeMoveEditController : IEditController
         _movedNode = null;
     }
 
-    public void Render(MapView mapView, DrawingContext context)
+    public override void Render(MapView mapView, DrawingContext context)
     {
         if (_movingNode is not null && _movedNode is not null)
         {

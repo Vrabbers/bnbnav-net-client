@@ -54,6 +54,9 @@ public sealed class MainViewModel : ViewModel
     public bool IsInNodeMoveMode => MapEditorService.CurrentEditMode == EditModeControl.NodeMove;
     
     [ObservableAsProperty] 
+    public bool IsInSpliceMode => MapEditorService.CurrentEditMode == EditModeControl.Splice;
+    
+    [ObservableAsProperty] 
     public bool RoadControlsRequired => false;
 
     [ObservableAsProperty]
@@ -80,6 +83,10 @@ public sealed class MainViewModel : ViewModel
             .ToPropertyEx(this, x => x.IsInSelectMode);
         MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Join)
             .ToPropertyEx(this, x => x.IsInJoinMode);
+        MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.NodeMove)
+            .ToPropertyEx(this, x => x.IsInNodeMoveMode);
+        MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Splice)
+            .ToPropertyEx(this, x => x.IsInSpliceMode);
         MapEditorService.WhenAnyValue(x => x.CurrentEditMode, x => x.EditModeEnabled).Select(x =>
         {
             if (!x.Item2) return false;
@@ -179,6 +186,11 @@ public sealed class MainViewModel : ViewModel
     public void NodeMovePressed()
     {
         MapEditorService.CurrentEditMode = EditModeControl.NodeMove;
+    }
+    
+    public void SplicePressed()
+    {
+        MapEditorService.CurrentEditMode = EditModeControl.Splice;
     }
 
     public void FollowMePressed()
