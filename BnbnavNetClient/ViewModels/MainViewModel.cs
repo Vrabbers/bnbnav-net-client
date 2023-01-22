@@ -56,9 +56,6 @@ public sealed class MainViewModel : ViewModel
     [ObservableAsProperty] 
     public bool IsInSpliceMode => MapEditorService.CurrentEditMode == EditModeControl.Splice;
     
-    [ObservableAsProperty] 
-    public bool RoadControlsRequired => false;
-
     [ObservableAsProperty]
     public bool EditModeEnabled => false;
     
@@ -87,11 +84,6 @@ public sealed class MainViewModel : ViewModel
             .ToPropertyEx(this, x => x.IsInNodeMoveMode);
         MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Splice)
             .ToPropertyEx(this, x => x.IsInSpliceMode);
-        MapEditorService.WhenAnyValue(x => x.CurrentEditMode, x => x.EditModeEnabled).Select(x =>
-        {
-            if (!x.Item2) return false;
-            return x.Item1 is EditModeControl.Join;
-        }).ToPropertyEx(this, x => x.RoadControlsRequired);
         MapEditorService.WhenAnyValue(x => x.EditModeEnabled).ToPropertyEx(this, x => x.EditModeEnabled);
     }
 

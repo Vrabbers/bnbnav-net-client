@@ -1,4 +1,6 @@
 ﻿using System;
+using Avalonia;
+using BnbnavNetClient.I18Next.Services;
 
 namespace BnbnavNetClient.Models;
 
@@ -34,6 +36,26 @@ public static class RoadTypeExtensions
         RoadType.DuongWarp => 0,
         _ => throw new ArgumentOutOfRangeException(nameof(type))
     };
+
+    public static string HumanReadableName(this RoadType type)
+    {
+        var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        return type switch
+        {
+            RoadType.Unknown => t["ROAD_TYPE_UNKNOWN"],
+            RoadType.Local => t["ROAD_TYPE_LOCAL"],
+            RoadType.Main => t["ROAD_TYPE_MAIN"],
+            RoadType.Highway => t["ROAD_TYPE_HIGHWAY"],
+            RoadType.Expressway => t["ROAD_TYPE_EXPRESSWAY"],
+            RoadType.Motorway => t["ROAD_TYPE_MOTORWAY"],
+            RoadType.Footpath => t["ROAD_TYPE_FOOTPATH"],
+            RoadType.Waterway => t["ROAD_TYPE_WATERWAY"],
+            RoadType.Private => t["ROAD_TYPE_PRIVATE"],
+            RoadType.Roundabout => t["ROAD_TYPE_ROUNDABOUT"],
+            RoadType.DuongWarp => t["ROAD_TYPE_DUONGWARP"],
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
 }
 
 public sealed record Road(string Id, string Name, string Type)
@@ -52,4 +74,6 @@ public sealed record Road(string Id, string Name, string Type)
         "duong-warp" => RoadType.DuongWarp,
         _ => RoadType.Unknown
     };
+
+    public string HumanReadableName => $"{Name} [{RoadType.HumanReadableName()}]";
 }

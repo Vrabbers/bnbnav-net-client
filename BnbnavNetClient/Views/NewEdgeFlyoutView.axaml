@@ -2,13 +2,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:BnbnavNetClient.ViewModels"
              mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="450"
-             x:Class="BnbnavNetClient.Views.NewEdgeFlyoutView">
+             x:Class="BnbnavNetClient.Views.NewEdgeFlyoutView"
+             x:DataType="viewModels:NewEdgeFlyoutViewModel"
+             x:CompileBindings="True"
+             xmlns:str="using:BnbnavNetClient.I18Next"
+             >
   <StackPanel>
-    <TextBlock>New Edge</TextBlock>
-    <CheckBox>Make bidirectional</CheckBox>
-    <TabControl>
-      <TabItem Header="New">
+    <TextBlock Text="{str:Tr Key=NEW_EDGE}" />
+    <CheckBox IsChecked="{Binding Bidirectional}" Content="{str:Tr Key=MAKE_BIDIRECTIONAL}" />
+    <TabControl SelectedIndex="{Binding CurrentTabIndex}">
+      <TabItem Header="{str:Tr Key=NEW}">
         <StackPanel>
           <TextBlock>New Road</TextBlock>
           <TextBox Watermark="Road Name"/>
@@ -20,18 +25,21 @@
           </ComboBox>
         </StackPanel>
       </TabItem>
-      <TabItem Header="Existing">
+      <TabItem Header="{str:Tr Key=EXISTING}">
         <StackPanel>
-          <TextBlock>Existing Road</TextBlock>
-          <ComboBox HorizontalAlignment="Stretch">
-            <ComboBoxItem>Illegitimate Incline (Local Road)</ComboBoxItem>
-            <ComboBoxItem>Melted Cheese Drive (Motorway)</ComboBoxItem>
+          <TextBlock Text="{str:Tr Key=EXISTING_ROAD}" />
+          <ComboBox HorizontalAlignment="Stretch" Items="{Binding FoundRoads}" SelectedItem="{Binding SelectedRoad}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding HumanReadableName}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
           </ComboBox>
           <DockPanel HorizontalAlignment="Stretch" LastChildFill="True">
-            <Button DockPanel.Dock="Right" Grid.Column="1" MinWidth="0">
+            <Button DockPanel.Dock="Right" Grid.Column="1" MinWidth="0" Command="{Binding ActivateRoadSyringe}" IsVisible="False">
               [pick]
             </Button>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" IsVisible="False">
               <StackPanel.Styles>
                 <Style Selector=":is(TemplatedControl)">
                   <Setter Property="Foreground" Value="Red"/>
@@ -45,8 +53,8 @@
       </TabItem>
     </TabControl>
     <StackPanel Margin="0 4 0 0" HorizontalAlignment="Right" Orientation="Horizontal">
-      <Button>Cancel</Button>
-      <Button Classes="accent">Create</Button>
+      <Button Command="{Binding CancelClicked}" Content="{str:Tr Key=CANCEL}" />
+      <Button Classes="accent" IsEnabled="{Binding CreateButtonEnabled}" Command="{Binding CreateClicked}" Content="{str:Tr Key=CREATE}" />
     </StackPanel>
   </StackPanel>
   <UserControl.Resources>

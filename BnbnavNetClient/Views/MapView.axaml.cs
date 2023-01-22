@@ -414,6 +414,7 @@ public partial class MapView : UserControl
         MapViewModel.FlyoutViewModel = viewModel;
         var flyout = Flyout.GetAttachedFlyout(this);
         flyout!.ShowAt(this, showAtPointer: true);
+        if (viewModel is IOpenableAsFlyout ioaf) ioaf.Flyout = flyout;
         return flyout;
     }
 }

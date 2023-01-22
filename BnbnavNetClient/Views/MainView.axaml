@@ -27,18 +27,6 @@
       <Panel Name="MapPanel"/>
       <TextBlock Text="{Binding MapViewModel.Test}"/>
 
-      <!-- Road Controls -->
-      <Grid Grid.Row="1" IsVisible="{Binding RoadControlsRequired}">
-        <Grid ColumnDefinitions="Auto Auto Auto Auto Auto * Auto">
-          <ToggleButton Grid.Column="0" Content="Regobbldegook Street [Motorway]"/>
-          <ToggleButton Grid.Column="1" Content="Road Syringe..."/>
-          <ToggleButton Grid.Column="2" Content="Local Road"/>
-          <ToggleButton Grid.Column="3" Content="Motorway"/>
-          <ToggleButton Grid.Column="4" Content="Highway"/>
-          <ToggleButton Grid.Column="6" Content="Autobuild" IsEnabled="False"/>
-        </Grid>
-      </Grid>
-      
       <!-- Edit Controls -->
       <Grid Grid.Row="2" IsVisible="{Binding EditModeEnabled}">
         <Grid ColumnDefinitions="Auto Auto Auto * Auto">

@@ -88,10 +88,7 @@ public class NodeJoinEditController : EditController
         if (_roadGhosts.Count > 1)
         {
             _lockRoadGhosts = true;
-            var flyout = mapView.OpenFlyout(new NewEdgeFlyoutViewModel()
-            {
-                NodesToJoin = _roadGhosts
-            });
+            var flyout = mapView.OpenFlyout(new NewEdgeFlyoutViewModel(_editorService, _roadGhosts));
             
             flyout.Closed += (_, _) =>
             {
