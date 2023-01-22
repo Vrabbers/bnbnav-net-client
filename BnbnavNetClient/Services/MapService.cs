@@ -14,6 +14,7 @@ using System.Reactive.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using BnbnavNetClient.Services.NetworkOperations;
 
 namespace BnbnavNetClient.Services;
 
@@ -28,7 +29,7 @@ public sealed class MapService : ReactiveObject
         {
             if (StatusCode is < (HttpStatusCode) 200 or > (HttpStatusCode) 299)
             {
-                throw new Exception($"Server returned {StatusCode}");
+                throw new NetworkOperationException($"Server returned {StatusCode}");
             }
 
             return this;

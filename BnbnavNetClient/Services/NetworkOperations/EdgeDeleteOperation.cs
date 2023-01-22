@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Avalonia.Media;
 using BnbnavNetClient.Models;
@@ -25,7 +26,11 @@ public class EdgeDeleteOperation : NetworkOperation
         {
             (await _editorService.MapService!.Delete($"/edges/{_edge.Id}")).AssertSuccess();
         }
-        catch (Exception)
+        catch (HttpRequestException)
+        {
+
+        }
+        catch (NetworkOperationException)
         {
             
         }

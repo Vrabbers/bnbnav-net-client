@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia.Media;
@@ -42,9 +43,18 @@ public class RoadCreateOperation : NetworkOperation
             });
             PendingRoad.ProvideId(roadResponse!.Id);
         }
+        catch (HttpRequestException e)
+        {
+            PendingRoad.SetError(e);
+        }
+        catch (NetworkOperationException e)
+        {
+            PendingRoad.SetError(e);
+        }
         catch (Exception e)
         {
             PendingRoad.SetError(e);
+            throw;
         }
     }
 

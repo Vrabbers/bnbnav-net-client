@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Avalonia.Media;
 using BnbnavNetClient.Models;
@@ -37,7 +38,7 @@ public class EdgeCreateOperation : NetworkOperation
             {
                 roadId = _road.Id;
             }
-            
+
             var tasks = new List<Task<MapService.ServerResponse>>
             {
                 _editorService.MapService!.Submit("/edges/add", new
@@ -65,7 +66,11 @@ public class EdgeCreateOperation : NetworkOperation
                 response.AssertSuccess();
             }
         }
-        catch (Exception)
+        catch (HttpRequestException)
+        {
+
+        }
+        catch (NetworkOperationException)
         {
             
         }

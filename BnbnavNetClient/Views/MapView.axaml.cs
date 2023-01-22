@@ -68,10 +68,16 @@ public partial class MapView : UserControl
 
             _disablePan = false;
 
-            var flags = MapViewModel.MapEditorService.EditController.PointerPressed(this, eventArgs);
+            if (MapViewModel.IsInEditMode)
+            {
+                var flags = MapViewModel.MapEditorService.EditController.PointerPressed(this, eventArgs);
+                _disablePan = flags.HasFlag(PointerPressedFlags.DoNotPan);
+            }
+            else
+            {
+                _disablePan = false;
+            }
 
-            _disablePan = flags.HasFlag(PointerPressedFlags.DoNotPan);
-                
             _viewVelocity = Vector.Zero;
             _pointerVelocities.Clear();
         };
@@ -80,7 +86,8 @@ public partial class MapView : UserControl
         {
             var pointerPos = eventArgs.GetPosition(this);
             
-            MapViewModel.MapEditorService.EditController.PointerMoved(this, eventArgs);
+            if (MapViewModel.IsInEditMode) 
+                MapViewModel.MapEditorService.EditController.PointerMoved(this, eventArgs);
 
             var seenEdges = new List<Edge>();
             MapViewModel.ContextMenuItems.Clear();
@@ -154,7 +161,8 @@ public partial class MapView : UserControl
         {
             _pointerPressing = false;
 
-            MapViewModel.MapEditorService.EditController.PointerReleased(this, eventArgs);
+            if (MapViewModel.IsInEditMode) 
+                MapViewModel.MapEditorService.EditController.PointerReleased(this, eventArgs);
 
             foreach (var item in HitTest(eventArgs.GetPosition(this)))
             {

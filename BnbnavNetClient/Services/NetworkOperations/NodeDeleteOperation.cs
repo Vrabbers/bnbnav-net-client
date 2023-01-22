@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -26,7 +27,11 @@ public class NodeDeleteOperation : NetworkOperation
         {
             (await _editorService.MapService!.Delete($"/nodes/{_node.Id}")).AssertSuccess();
         }
-        catch (Exception)
+        catch (HttpRequestException)
+        {
+
+        }
+        catch (NetworkOperationException)
         {
             
         }

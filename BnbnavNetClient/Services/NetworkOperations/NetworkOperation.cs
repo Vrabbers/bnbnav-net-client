@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Media;
@@ -12,4 +13,12 @@ public abstract class NetworkOperation
     public abstract void Render(MapView mapView, DrawingContext context);
     
     public IList<MapItem> ItemsNotToRender { get; set; } = new List<MapItem>();
+}
+
+public class NetworkOperationException : Exception
+{
+    public NetworkOperationException(string message) : base(message)
+    {
+        
+    }
 }
