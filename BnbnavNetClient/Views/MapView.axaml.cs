@@ -18,9 +18,14 @@ using DynamicData;
 using BnbnavNetClient.Helpers;
 using Avalonia.Controls.Primitives;
 using System.Collections.Immutable;
+using System.ComponentModel.Design;
+using System.Reactive.Linq;
+using Avalonia.Collections;
 using Avalonia.Threading;
+using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.EditControllers;
 using BnbnavNetClient.Services.NetworkOperations;
+using ReactiveUI.Fody.Helpers;
 
 namespace BnbnavNetClient.Views;
 
@@ -43,6 +48,7 @@ public partial class MapView : UserControl
     public MapView()
     {
         _assetLoader = AvaloniaLocator.Current.GetService<IAssetLoader>()!;
+        _i18n = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
 
         InitializeComponent();
     }
@@ -79,6 +85,42 @@ public partial class MapView : UserControl
             var pointerPos = eventArgs.GetPosition(this);
             
             MapViewModel.MapEditorService.EditController.PointerMoved(this, eventArgs);
+
+            var seenEdges = new List<Edge>();
+            MapViewModel.ContextMenuItems.Clear();
+            MapViewModel.ContextMenuItems.AddRange(HitTest(pointerPos).Select(x =>
+            {
+                switch (x)
+                {
+                    case Node node:
+                        return new MenuItem
+                        {
+                            Header = _i18n["NODE_DELETE"],
+                            Command = ReactiveCommand.Create(() =>
+                            {
+                                MapViewModel.QueueDelete(node);
+                            })
+                        };
+                    case Edge edge when !seenEdges.Contains(edge):
+                    {
+                        seenEdges.Add(edge);
+                        if (MapViewModel.MapService.OppositeEdge(edge) is { } opposite)
+                        {
+                            seenEdges.Add(opposite);
+                        }
+                        return new()
+                        {
+                            Header = _i18n["EDGE_DELETE", ("roadName", edge.Road.Name)],
+                            Command = ReactiveCommand.Create(() =>
+                            {
+                                MapViewModel.QueueDelete(edge);
+                            })
+                        };
+                    }
+                    default:
+                        return null;
+                }
+            }).Where(x => x is not null)!);
 
             if (_pointerPressing)
             {
@@ -204,6 +246,7 @@ public partial class MapView : UserControl
 
     static readonly double LandmarkSize = 10;
     readonly Dictionary<string, SKSvg> _svgCache = new();
+    private readonly IAvaloniaI18Next _i18n;
 
     private List<(Point, Point, Edge)> DrawnEdges { get; set; } = new();
     private List<(Rect, Landmark)> DrawnLandmarks { get; set; } = new();

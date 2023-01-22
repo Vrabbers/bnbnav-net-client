@@ -1,6 +1,7 @@
 {
   "CANCEL": "Hủy",
   "CREATE": "",
+  "EDGE_DELETE": "",
   "EDITNAV_PROMPT": "Sử dụng lệnh /editnav để nhận mã và điền vào đây:",
   "EDITNAV_WATERMARK": "Mã",
   "EDIT_MODE": "Chế độ sửa đổi",
@@ -18,6 +19,7 @@
   "NEW": "",
   "NEW_EDGE": "",
   "NEW_ROAD": "",
+  "NODE_DELETE": "",
   "OK": "OK",
   "ROAD_NAME": "",
   "ROAD_TYPE": "",

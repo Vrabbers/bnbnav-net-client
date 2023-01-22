@@ -1,6 +1,7 @@
 {
   "CANCEL": "Cancelar",
   "CREATE": "",
+  "EDGE_DELETE": "",
   "EDITNAV_PROMPT": "Use /editnav para obter uma chave e a insira aqui:",
   "EDITNAV_WATERMARK": "Chave",
   "EDIT_MODE": "Modo editar",
@@ -18,6 +19,7 @@
   "NEW": "",
   "NEW_EDGE": "",
   "NEW_ROAD": "",
+  "NODE_DELETE": "",
   "OK": "OK",
   "ROAD_NAME": "",
   "ROAD_TYPE": "",

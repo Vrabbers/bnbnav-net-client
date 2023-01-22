@@ -1,6 +1,7 @@
 {
   "CANCEL": "Cancel",
   "CREATE": "Create",
+  "EDGE_DELETE": "Delete Edge {{roadName}}",
   "EDITNAV_PROMPT": "Use /editnav to obtain a token and enter here:",
   "EDITNAV_WATERMARK": "Token",
   "EDIT_MODE": "Edit Mode",
@@ -18,6 +19,7 @@
   "NEW": "New",
   "NEW_EDGE": "New Edge",
   "NEW_ROAD": "New Road",
+  "NODE_DELETE": "Delete Node",
   "OK": "OK",
   "ROAD_NAME": "Road Name",
   "ROAD_TYPE": "Road Type",

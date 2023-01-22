@@ -8,13 +8,7 @@
              x:DataType="vm:MapViewModel"
              x:CompileBindings="True">
   <UserControl.ContextMenu> 
-    <ContextMenu IsVisible="{Binding IsInEditMode}">
-      <MenuItem Header="Delete Node" Command="{Binding DeleteNodeCommand}">
-        <MenuItem.Icon>
-          <PathIcon Data="{DynamicResource delete_regular}"/>
-        </MenuItem.Icon>
-      </MenuItem>
-    </ContextMenu>
+    <ContextMenu IsVisible="{Binding IsInEditMode}" Items="{Binding ContextMenuItems}" />
   </UserControl.ContextMenu>
 
   <FlyoutBase.AttachedFlyout>    

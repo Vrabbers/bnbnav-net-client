@@ -1,6 +1,7 @@
 {
   "CANCEL": "ביטול",
   "CREATE": "",
+  "EDGE_DELETE": "",
   "EDITNAV_PROMPT": "השתמש ב-/editnav כדי לקבל שובר. הזן אותו פה:",
   "EDITNAV_WATERMARK": "שובר",
   "EDIT_MODE": "מצב עריכה",
@@ -17,6 +18,7 @@
   "NEW": "",
   "NEW_EDGE": "",
   "NEW_ROAD": "",
+  "NODE_DELETE": "",
   "OK": "אישור",
   "ROAD_NAME": "",
   "ROAD_TYPE": "",
