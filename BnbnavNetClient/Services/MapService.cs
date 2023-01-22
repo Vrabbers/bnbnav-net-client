@@ -62,7 +62,7 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Edge> Edges { get; }
     public ReadOnlyDictionary<string, Road> Roads { get; }
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
-    private List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
+    List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
 
     public static string? AuthenticationToken
@@ -114,7 +114,7 @@ public sealed class MapService : ReactiveObject
         };
     }
 
-    private async Task<ServerResponse> HandleUnauthorizedResponse(string path, object? json)
+    async Task<ServerResponse> HandleUnauthorizedResponse(string path, object? json)
     {
         var completionSource = new TaskCompletionSource<ServerResponse>();
         var showDialog = !PendingRequests.Any();
@@ -160,7 +160,7 @@ public sealed class MapService : ReactiveObject
         };
     }
 
-    private void CancelPendingRequests(Exception e)
+    void CancelPendingRequests(Exception e)
     {
         var requests = PendingRequests.ToList();
         PendingRequests.Clear();
@@ -170,7 +170,7 @@ public sealed class MapService : ReactiveObject
         }
     }
 
-    private async void ReplayPendingRequests()
+    async void ReplayPendingRequests()
     {
         var requests = PendingRequests.ToList();
         PendingRequests.Clear();

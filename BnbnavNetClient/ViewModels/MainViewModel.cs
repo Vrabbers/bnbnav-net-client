@@ -55,9 +55,9 @@ public sealed class MainViewModel : ViewModel
     
     [ObservableAsProperty] 
     public bool IsInSpliceMode => MapEditorService.CurrentEditMode == EditModeControl.Splice;
-    
+
     [ObservableAsProperty]
-    public bool EditModeEnabled => false;
+    public bool EditModeEnabled { get; } = false;
     
     public Interaction<bool, Unit>? AuthTokeInteraction { get; set; }
 
@@ -106,7 +106,7 @@ public sealed class MainViewModel : ViewModel
                 var token = await ShowAuthenticationPopup();
                 interaction.SetOutput(token);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 interaction.SetOutput(null);
             }

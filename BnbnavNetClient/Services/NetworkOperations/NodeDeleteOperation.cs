@@ -9,8 +9,8 @@ namespace BnbnavNetClient.Services.NetworkOperations;
 
 public class NodeDeleteOperation : NetworkOperation
 {
-    private readonly MapEditorService _editorService;
-    private readonly Node _node;
+    readonly MapEditorService _editorService;
+    readonly Node _node;
 
     public NodeDeleteOperation(MapEditorService editorService, Node node)
     {
@@ -26,7 +26,7 @@ public class NodeDeleteOperation : NetworkOperation
         {
             (await _editorService.MapService!.Delete($"/nodes/{_node.Id}")).AssertSuccess();
         }
-        catch (Exception e)
+        catch (Exception)
         {
             
         }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using System.Threading;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Services.EditControllers;
 using BnbnavNetClient.Services.NetworkOperations;
@@ -12,7 +11,7 @@ namespace BnbnavNetClient.Services;
 
 public class MapEditorService : ReactiveObject
 {
-    private List<NetworkOperation> _networkOperations = new();
+    List<NetworkOperation> _networkOperations = new();
     
     public MapEditorService()
     {

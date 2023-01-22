@@ -12,11 +12,11 @@ namespace BnbnavNetClient.Services.EditControllers;
 
 public class NodeJoinEditController : EditController
 {
-    private readonly MapEditorService _editorService;
-    private bool _mouseDown = false;
+    readonly MapEditorService _editorService;
+    bool _mouseDown = false;
     readonly List<Node> _roadGhosts = new();
-    private bool _lockRoadGhosts = false;
-    private Point _pointerPrevPosition;
+    bool _lockRoadGhosts = false;
+    Point _pointerPrevPosition;
 
     public NodeJoinEditController(MapEditorService editorService)
     {

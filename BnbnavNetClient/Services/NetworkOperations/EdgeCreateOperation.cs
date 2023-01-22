@@ -9,11 +9,11 @@ namespace BnbnavNetClient.Services.NetworkOperations;
 
 public class EdgeCreateOperation : NetworkOperation
 {
-    private readonly MapEditorService _editorService;
-    private readonly Road _road;
-    private readonly Node _from;
-    private readonly Node _to;
-    private readonly bool _twoWay;
+    readonly MapEditorService _editorService;
+    readonly Road _road;
+    readonly Node _from;
+    readonly Node _to;
+    readonly bool _twoWay;
 
     public EdgeCreateOperation(MapEditorService editorService, Road road, Node from, Node to, bool twoWay)
     {
@@ -40,7 +40,7 @@ public class EdgeCreateOperation : NetworkOperation
             
             var tasks = new List<Task<MapService.ServerResponse>>
             {
-                _editorService.MapService.Submit("/edges/add", new
+                _editorService.MapService!.Submit("/edges/add", new
                 {
                     Road = roadId,
                     Node1 = _from.Id,
@@ -65,7 +65,7 @@ public class EdgeCreateOperation : NetworkOperation
                 response.AssertSuccess();
             }
         }
-        catch (Exception e)
+        catch (Exception)
         {
             
         }

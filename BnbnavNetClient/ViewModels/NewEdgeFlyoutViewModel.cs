@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using Avalonia.Collections;
-using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Services;
@@ -27,9 +26,10 @@ public class RoadTypeHelper
 
 public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
 {
-    private readonly MapEditorService _mapEditorService;
+    readonly MapEditorService _mapEditorService;
 
-    public FlyoutBase Flyout { get; set; }
+    [Reactive]
+    public FlyoutBase? Flyout { get; set; }
     
     [Reactive]
     public bool Bidirectional { get; set; } = true;
@@ -57,9 +57,9 @@ public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
 
     [Reactive]
     public RoadTypeHelper? SelectedRoadType { get; set; }
-    
+
     [Reactive]
-    public string NewRoadName { get; set; }
+    public string NewRoadName { get; set; } = string.Empty;
 
     public NewEdgeFlyoutViewModel(MapEditorService mapEditorService, List<Node> nodesToJoin)
     {
@@ -67,7 +67,7 @@ public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
         _mapEditorService = mapEditorService;
 
         RoadTypes.AddRange(Enum.GetValues<RoadType>().Skip(1).Select(x => new RoadTypeHelper(x)));
-        
+
         this.WhenAnyValue(x => x.NodesToJoin, x => x.RoadPickedWithRoadSyringe).Subscribe(
             Observer.Create<ValueTuple<List<Node>, Road?>>(
                 tuple =>
@@ -77,7 +77,7 @@ public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
                     foreach (var node in NodesToJoin)
                     {
                         // Read all edges from the map and add to list if they go to or from this node
-                        roads.AddRange(mapEditorService.MapService.Edges.Values.Where(x => x.From == node || x.To == node).Select(x => x.Road));
+                        roads.AddRange(mapEditorService.MapService!.Edges.Values.Where(x => x.From == node || x.To == node).Select(x => x.Road));
                     }
 
                     FoundRoads.Clear();
@@ -127,12 +127,12 @@ public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
             
             _mapEditorService.TrackNetworkOperation(new EdgeCreateOperation(_mapEditorService, road, first, second, Bidirectional));
         }
-        Flyout.Hide();
+        Flyout?.Hide();
     }
 
     public void CancelClicked()
     {
-        Flyout.Hide();
+        Flyout?.Hide();
     }
 
 }

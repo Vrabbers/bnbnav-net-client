@@ -9,11 +9,11 @@ namespace BnbnavNetClient.Services.NetworkOperations;
 
 public class NodeMoveOperation : NetworkOperation
 {
-    private readonly MapEditorService _editorService;
-    private readonly Node _toUpdate;
-    private readonly Node _updateTo;
+    readonly MapEditorService? _editorService;
+    readonly Node _toUpdate;
+    readonly Node _updateTo;
 
-    public NodeMoveOperation(MapEditorService editorService, Node toUpdate, Node updateTo)
+    public NodeMoveOperation(MapEditorService? editorService, Node toUpdate, Node updateTo)
     {
         _editorService = editorService;
         _toUpdate = toUpdate;
@@ -24,12 +24,17 @@ public class NodeMoveOperation : NetworkOperation
     {
         try
         {
-            (await _editorService.MapService!.Submit($"/nodes/{_toUpdate.Id}", new
+            if (_editorService is not null)
             {
-                _updateTo.X, _updateTo.Y, _updateTo.Z
-            })).AssertSuccess();
+                (await _editorService.MapService!.Submit($"/nodes/{_toUpdate.Id}", new
+                {
+                    _updateTo.X,
+                    _updateTo.Y,
+                    _updateTo.Z
+                })).AssertSuccess();
+            }
         }
-        catch (Exception e)
+        catch (Exception)
         {
             
         }

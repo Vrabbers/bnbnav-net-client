@@ -4,16 +4,15 @@ using System.Threading.Tasks;
 using Avalonia.Media;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Views;
-using Newtonsoft.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace BnbnavNetClient.Services.NetworkOperations;
 
 public class RoadCreateOperation : NetworkOperation
 {
-    private readonly MapEditorService _editorService;
-    private readonly string _name;
-    private readonly RoadType _type;
+    readonly MapEditorService _editorService;
+    readonly string _name;
+    readonly RoadType _type;
     
     public PendingRoad PendingRoad { get; }
 
@@ -41,7 +40,7 @@ public class RoadCreateOperation : NetworkOperation
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
             });
-            PendingRoad.ProvideId(roadResponse.Id);
+            PendingRoad.ProvideId(roadResponse!.Id);
         }
         catch (Exception e)
         {
@@ -54,8 +53,8 @@ public class RoadCreateOperation : NetworkOperation
         //No need to render anything for a road creation
     }
 
-    private class RoadResponse
+    class RoadResponse
     {
-        public string Id { get; set; }
+        public required string Id { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Avalonia;
 namespace BnbnavNetClient.Helpers;
-internal static class GeoHelper
+static class GeoHelper
 {
     public static bool LineIntersects(Point from, Point to, Rect bounds)
     {

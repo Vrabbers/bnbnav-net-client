@@ -104,19 +104,19 @@ public class Road
     public string Name { get; set; }
     public string Type { get; set; }
 
-    public void Deconstruct(out string Id, out string Name, out string Type)
+    public void Deconstruct(out string id, out string name, out string type)
     {
-        Id = this.Id;
-        Name = this.Name;
-        Type = this.Type;
+        id = Id;
+        name = Name;
+        type = Type;
     }
 }
 
 public class PendingRoad : Road
 {
-    private readonly TaskCompletionSource<string> _completionSource = new();
+    readonly TaskCompletionSource<string> _completionSource = new();
 
-    public PendingRoad(string Id, string Name, string Type) : base(Id, Name, Type)
+    public PendingRoad(string id, string name, string type) : base(id, name, type)
     {
     }
 
@@ -131,12 +131,5 @@ public class PendingRoad : Road
     public void SetError(Exception ex)
     {
         _completionSource.SetException(ex);
-    }
-
-    public void Deconstruct(out string Id, out string Name, out string Type)
-    {
-        Id = this.Id;
-        Name = this.Name;
-        Type = this.Type;
     }
 }

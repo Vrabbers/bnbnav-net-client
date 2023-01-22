@@ -11,11 +11,13 @@ namespace BnbnavNetClient.Services.EditControllers;
 
 public class SpliceEditController : EditController
 {
-    private readonly MapEditorService _editorService;
-    private Point _pointerPrevPosition;
-    private Edge? _splicingEdge;
-    private Node? _splicingAt;
-    private bool _mouseDown;
+    readonly MapEditorService _editorService;
+    Point _pointerPrevPosition;
+    Edge? _splicingEdge;
+    Node? _splicingAt;
+#pragma warning disable CS0414 // The field is assigned but its value is never used
+    bool _mouseDown;
+#pragma warning restore CS0414 // C# compiler seems to be having a little weird moment here?
 
     public SpliceEditController(MapEditorService _editorService)
     {

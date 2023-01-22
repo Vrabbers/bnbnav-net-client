@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace BnbnavNetClient.Services;
 
-internal sealed class BnbnavWebsocketService
+sealed class BnbnavWebsocketService
 {
-    private ClientWebSocket _ws = null!;
+    ClientWebSocket _ws = null!;
 
     public async Task ConnectAsync(CancellationToken ct)
     {
@@ -43,7 +43,7 @@ internal sealed class BnbnavWebsocketService
         }
     }
 
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public async IAsyncEnumerable<BnbnavMessage> GetMessages([EnumeratorCancellation] CancellationToken token)
     {
@@ -58,7 +58,7 @@ internal sealed class BnbnavWebsocketService
         }
     }
 
-    private async Task<ReadOnlyMemory<byte>> NextMessageAsync(CancellationToken ct)
+    async Task<ReadOnlyMemory<byte>> NextMessageAsync(CancellationToken ct)
     {
         var writer = new ArrayBufferWriter<byte>();
 
@@ -91,12 +91,12 @@ internal sealed class BnbnavWebsocketService
 [JsonDerivedType(typeof(RemovedAnnotation), "annotationRemoved")]
 [JsonDerivedType(typeof(PlayerMoved), "playerMove")]
 [JsonDerivedType(typeof(PlayerLeft), "playerGone")]
-internal record BnbnavMessage
+record BnbnavMessage
 {
     public string? Id { get; init; }
 }
 
-internal abstract record NodeMessage : BnbnavMessage
+abstract record NodeMessage : BnbnavMessage
 {
     public required int X { get; init; }
     public required int Y { get; init; }
@@ -105,54 +105,54 @@ internal abstract record NodeMessage : BnbnavMessage
     public required string Player { get; init; }
 }
 
-internal sealed record NodeCreated : NodeMessage;
-internal sealed record UpdatedNode : NodeMessage;
+sealed record NodeCreated : NodeMessage;
+sealed record UpdatedNode : NodeMessage;
 
-internal abstract record RoadMessage : BnbnavMessage
+abstract record RoadMessage : BnbnavMessage
 {
     public required string Name { get; init; }
     public required string RoadType { get; init; }
 }
-internal sealed record RoadCreated : RoadMessage;
-internal sealed record UpdatedRoad : RoadMessage;
+sealed record RoadCreated : RoadMessage;
+sealed record UpdatedRoad : RoadMessage;
 
-internal sealed record EdgeCreated : BnbnavMessage
+sealed record EdgeCreated : BnbnavMessage
 {
     public required string Road { get; init; }
     public required string Node1 { get; init; }
     public required string Node2 { get; init; }
 }
 
-internal sealed record LandmarkCreated : BnbnavMessage
+sealed record LandmarkCreated : BnbnavMessage
 {
     public required string Node { get; init; }
     public required string Name { get; init; }
     public required string LandmarkType { get; init; }
 }
 
-internal sealed record EdgeRemoved : BnbnavMessage;
-internal sealed record RoadRemoved : BnbnavMessage;
-internal sealed record NodeRemoved : BnbnavMessage;
-internal sealed record LandmarkRemoved : BnbnavMessage;
+sealed record EdgeRemoved : BnbnavMessage;
+sealed record RoadRemoved : BnbnavMessage;
+sealed record NodeRemoved : BnbnavMessage;
+sealed record LandmarkRemoved : BnbnavMessage;
 
-internal sealed record UpdatedAnnotation : BnbnavMessage
+sealed record UpdatedAnnotation : BnbnavMessage
 {
     public required string Node { get; init; }
     public required string Name { get; init; }
     public required JsonElement Annotation { get; init; }
 }
 
-internal sealed record RemovedAnnotation : BnbnavMessage
+sealed record RemovedAnnotation : BnbnavMessage
 {
     public required string Node { get; init; }
     public required string Name { get; init; }
 }
 
-internal sealed record PlayerMoved : BnbnavMessage
+sealed record PlayerMoved : BnbnavMessage
 {
     public required double X { get; init; }
     public required double Y { get; init; }
     public required double Z { get; init; }
 }
 
-internal sealed record PlayerLeft : BnbnavMessage;
+sealed record PlayerLeft : BnbnavMessage;

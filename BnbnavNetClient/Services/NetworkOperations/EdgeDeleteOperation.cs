@@ -8,8 +8,8 @@ namespace BnbnavNetClient.Services.NetworkOperations;
 
 public class EdgeDeleteOperation : NetworkOperation
 {
-    private readonly MapEditorService _editorService;
-    private readonly Edge _edge;
+    readonly MapEditorService _editorService;
+    readonly Edge _edge;
 
     public EdgeDeleteOperation(MapEditorService editorService, Edge edge)
     {
@@ -25,7 +25,7 @@ public class EdgeDeleteOperation : NetworkOperation
         {
             (await _editorService.MapService!.Delete($"/edges/{_edge.Id}")).AssertSuccess();
         }
-        catch (Exception e)
+        catch (Exception)
         {
             
         }

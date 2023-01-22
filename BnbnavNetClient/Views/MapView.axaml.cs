@@ -17,15 +17,11 @@ using BnbnavNetClient.Models;
 using DynamicData;
 using BnbnavNetClient.Helpers;
 using Avalonia.Controls.Primitives;
-using System.Collections.Immutable;
-using System.ComponentModel.Design;
 using System.Reactive.Linq;
-using Avalonia.Collections;
 using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.EditControllers;
 using BnbnavNetClient.Services.NetworkOperations;
-using ReactiveUI.Fody.Helpers;
 
 namespace BnbnavNetClient.Views;
 
@@ -246,10 +242,10 @@ public partial class MapView : UserControl
 
     static readonly double LandmarkSize = 10;
     readonly Dictionary<string, SKSvg> _svgCache = new();
-    private readonly IAvaloniaI18Next _i18n;
+    readonly IAvaloniaI18Next _i18n;
 
-    private List<(Point, Point, Edge)> DrawnEdges { get; set; } = new();
-    private List<(Rect, Landmark)> DrawnLandmarks { get; set; } = new();
+    List<(Point, Point, Edge)> DrawnEdges { get; set; } = new();
+    List<(Rect, Landmark)> DrawnLandmarks { get; set; } = new();
     public List<(Rect, Node)> DrawnNodes { get; set; } = new();
 
     public IEnumerable<MapItem> HitTest(Point point)
