@@ -3,6 +3,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,11 +33,5 @@
   
   <ItemGroup>
     <ProjectReference Include="..\BnbnavNetClient.I18Next\BnbnavNetClient.I18Next.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Compile Update="Views\LanguageSelectView.axaml.cs">
-      <DependentUpon>LanguageSelectView.axaml</DependentUpon>
-    </Compile>
   </ItemGroup>
 </Project>

@@ -1,12 +1,16 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="using:System">
   <SolidColorBrush x:Key="BackgroundBrush" Color="WhiteSmoke"/>
   <SolidColorBrush x:Key="NodeFill" Color="White"/>
+  <SolidColorBrush x:Key="SelectedNodeFill" Color="DeepSkyBlue"/>
   <Pen x:Key="NodeBorder" Thickness="2">
     <Pen.Brush>
       <SolidColorBrush Color="Black"/>
     </Pen.Brush>
   </Pen>
+  <s:Double x:Key="RoadThickness">5</s:Double>
+  <s:Double x:Key="MotorwayThickness">10</s:Double>
   <Pen x:Key="UnknownRoadPen" Thickness="5" LineCap="Round">
     <Pen.Brush>
       <SolidColorBrush Color="DarkBlue"/>	
@@ -67,6 +71,16 @@
   <Pen x:Key="DuongWarpRoadPen" Thickness="5" LineCap="Round">
     <Pen.Brush>
       <SolidColorBrush Color="Transparent"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="RoadGhostPen" Thickness="5" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="#7f3f3fff"/>
+    </Pen.Brush>
+  </Pen>
+  <Pen x:Key="EditMovePen" Thickness="2" LineCap="Round">
+    <Pen.Brush>
+      <SolidColorBrush Color="#ffff0000"/>
     </Pen.Brush>
   </Pen>
 </ResourceDictionary>

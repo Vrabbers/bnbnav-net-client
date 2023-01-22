@@ -33,7 +33,6 @@ public partial class MainView : UserControl
         await vm.InitMapService();
 
         MapPanel.Children.Add(new MapView() { DataContext = vm.MapViewModel });
-
         if (_settings.Settings.NightMode)
         {
             DayNightButton.IsNightMode = true;

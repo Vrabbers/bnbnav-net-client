@@ -21,22 +21,36 @@
 
   <Grid>
     <!-- Main UI -->
-    <Grid RowDefinitions="* Auto">
+    <Grid RowDefinitions="* Auto Auto Auto">
+      <!-- Map -->
       <ProgressBar IsIndeterminate="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0"/>
       <Panel Name="MapPanel"/>
-      <Grid Grid.Row="1" ColumnDefinitions="Auto Auto Auto * Auto Auto">
-        <Button MinWidth="0" Command="{Binding LanguageButtonPressed}"><PathIcon Data="{StaticResource globe_regular}"/></Button>
+      <TextBlock Text="{Binding MapViewModel.Test}"/>
+
+      <!-- Edit Controls -->
+      <Grid Grid.Row="2" IsVisible="{Binding EditModeEnabled}">
+        <Grid ColumnDefinitions="Auto Auto Auto * Auto">
+          <ToggleButton Grid.Column="0" Command="{Binding SelectModePressed}" Content="Select" IsChecked="{Binding IsInSelectMode}"/>
+          <ToggleButton Grid.Column="1" Command="{Binding JoinModePressed}" Content="Join" IsChecked="{Binding IsInJoinMode}"/>
+          <ToggleButton Grid.Column="2" Command="{Binding NodeMovePressed}" Content="{str:Tr Key=MOVE_NODE}" IsChecked="{Binding IsInNodeMoveMode}"/>
+          <ToggleButton Grid.Column="3" Command="{Binding SplicePressed}" Content="{str:Tr Key=SPLICE}" IsChecked="{Binding IsInSpliceMode}"/>
+          <Button Grid.Column="5" IsVisible="{Binding EditModeEnabled}" Content="{str:Tr Key=SPY_OPTIONS}">
+            <Button.Flyout>
+              <Flyout>
+                <CheckBox Content="{str:Tr Key=FOLLOW_ME_TURN_RESTRICTIONS}" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
+              </Flyout>
+            </Button.Flyout>
+          </Button>
+        </Grid>
+      </Grid>
+      
+      <!-- Main Bar -->
+      <Grid Grid.Row="3" ColumnDefinitions="Auto Auto * Auto Auto">
+        <Button Classes="icon" Command="{Binding LanguageButtonPressed}"><PathIcon Data="{StaticResource globe_regular}"/></Button>
         <ToggleButton Grid.Column="1" Command="{Binding EditModePressed}" Content="{str:Tr Key=EDIT_MODE}" IsChecked="{Binding EditModeEnabled}"/>
-        <Button Grid.Column="2" IsVisible="{Binding EditModeEnabled}" Content="{str:Tr Key=SPY_OPTIONS}">
-          <Button.Flyout>
-            <Flyout>
-              <CheckBox Content="{str:Tr Key=FOLLOW_ME_TURN_RESTRICTIONS}" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
-            </Flyout>
-          </Button.Flyout>
-        </Button>
-        <TextBlock Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
-        <ToggleButton Grid.Column="4" Command="{Binding FollowMePressed}" IsChecked="{Binding FollowMeEnabled}" Content="{Binding FollowMeText}"/>
-        <controls:DayNightButton Name="DayNightButton" Grid.Column="5" Click="ColorModeSwitch"/>
+        <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
+        <ToggleButton Grid.Column="3" Command="{Binding FollowMePressed}" Content="{Binding FollowMeText}" IsChecked="{Binding FollowMeEnabled}"/>
+        <controls:DayNightButton Grid.Column="4" Click="ColorModeSwitch" x:Name="DayNightButton"/>
       </Grid>
     </Grid>
 

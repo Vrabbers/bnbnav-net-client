@@ -1,29 +1,61 @@
 ﻿using BnbnavNetClient.Models;
-
 using ReactiveUI;
-
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using BnbnavNetClient.Services.NetworkOperations;
 
 namespace BnbnavNetClient.Services;
 
 public sealed class MapService : ReactiveObject
 {
+    public class ServerResponse
+    {
+        public required HttpStatusCode StatusCode { get; init; }
+        public required Stream Stream { get; init; }
+
+        public ServerResponse AssertSuccess()
+        {
+            if (StatusCode is < (HttpStatusCode) 200 or > (HttpStatusCode) 299)
+            {
+                throw new NetworkOperationException($"Server returned {StatusCode}");
+            }
+
+            return this;
+        }
+    }
+
     public static readonly string BaseUrl = Environment.GetEnvironmentVariable("BNBNAV_BASEURL") ?? "https://bnbnav.aircs.racing/";
 
-    static readonly HttpClient HttpClient = new() { BaseAddress = new(BaseUrl) };
+    static readonly HttpClient HttpClient = new()
+    {
+        BaseAddress = new(BaseUrl),
+        DefaultRequestHeaders =
+        {
+            UserAgent =
+            {
+                new ProductInfoHeaderValue("bnbnav-dotnet", "1.0")                
+            }
+        }
+    };
 
     readonly Dictionary<string, Node> _nodes;
     readonly Dictionary<string, Edge> _edges;
     readonly Dictionary<string, Road> _roads;
     readonly Dictionary<string, Landmark> _landmarks;
     readonly Dictionary<string, Annotation> _annotations;
+    static string? _authenticationToken;
 
     readonly BnbnavWebsocketService _websocketService;
 
@@ -31,6 +63,18 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Edge> Edges { get; }
     public ReadOnlyDictionary<string, Road> Roads { get; }
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
+    List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
+    public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
+
+    public static string? AuthenticationToken
+    {
+        get => _authenticationToken;
+        set
+        {
+            _authenticationToken = value;
+            HttpClient.DefaultRequestHeaders.Authorization = value is not null ? new("Bearer", value) : null;
+        }
+    }
 
     MapService(IEnumerable<Node> nodes, IEnumerable<Edge> edges, IEnumerable<Road> roads, IEnumerable<Landmark> landmarks, IEnumerable<Annotation> annotations, BnbnavWebsocketService websocketService)
     {
@@ -47,6 +91,148 @@ public sealed class MapService : ReactiveObject
         _websocketService = websocketService;
     }
 
+    public Edge? OppositeEdge(Edge edge)
+    {
+        return _edges.Values.SingleOrDefault(x => x.To == edge.From && x.From == edge.To);
+    }
+
+    public async Task<ServerResponse> Submit(string path, object json)
+    {
+        var resp = await HttpClient.PostAsync($"/api/{path}", JsonContent.Create(json, MediaTypeHeaderValue.Parse("application/json"), new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }));
+
+        if (resp.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return await HandleUnauthorizedResponse(path, json);
+        }
+
+        return new()
+        {
+            StatusCode = resp.StatusCode,
+            Stream = await resp.Content.ReadAsStreamAsync()
+        };
+    }
+
+    async Task<ServerResponse> HandleUnauthorizedResponse(string path, object? json)
+    {
+        var completionSource = new TaskCompletionSource<ServerResponse>();
+        var showDialog = !PendingRequests.Any();
+        PendingRequests.Add((path, json, completionSource));
+        
+        if (showDialog)
+        {
+            try
+            {
+                //Request a new auth token from the user and then replay pending requests
+                AuthenticationToken = await AuthTokenInteraction.Handle(Unit.Default);
+                if (AuthenticationToken is null)
+                {
+                    CancelPendingRequests(new("Authentication token not provided"));
+                }
+                else
+                {
+                    ReplayPendingRequests();
+                }
+            }
+            catch (Exception e)
+            {
+                //Reject all the pending requests as an exception has occurred
+                CancelPendingRequests(e);
+            }
+        }
+
+        return await completionSource.Task;
+    }
+
+    public async Task<ServerResponse> Delete(string path)
+    {
+        var resp = await HttpClient.DeleteAsync($"/api/{path}");
+        if (resp.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return await HandleUnauthorizedResponse(path, null);
+        }
+        
+        return new()
+        {
+            StatusCode = resp.StatusCode,
+            Stream = await resp.Content.ReadAsStreamAsync()
+        };
+    }
+
+    void CancelPendingRequests(Exception e)
+    {
+        var requests = PendingRequests.ToList();
+        PendingRequests.Clear();
+        foreach (var (_, _, completionSource) in requests)
+        {
+            completionSource.SetException(e);
+        }
+    }
+
+    async void ReplayPendingRequests()
+    {
+        var requests = PendingRequests.ToList();
+        PendingRequests.Clear();
+        await Task.WhenAll(requests.Select(async x=>
+        {
+            var (path, payload, completionSource) = x;
+            if (payload is null)
+            {
+                completionSource.SetResult(await Delete(path));
+            }
+            else
+            {
+                completionSource.SetResult(await Submit(path, payload));
+            }
+        }));
+    }
+
+    public async Task DeleteNode(Node node)
+    {
+        await Delete($"/nodes/{node.Id}");
+    }
+
+    public async Task UpsertRoad(Road? road, string name, string type)
+    {
+        await Submit($"/roads/{road?.Id ?? "add"}", new
+        {
+            Name = name,
+            Type = type
+        });
+    }
+
+    public async Task AddEdge(Node first, Node second, Road road)
+    {
+        await Submit("/edges/add", new
+        {
+            Road = road.Id,
+            Node1 = first.Id,
+            Node2 = second.Id
+        });
+    }
+
+    public async Task AddTwoWayEdge(Node first, Node second, Road road)
+    {
+        await Task.WhenAll(AddEdge(first, second, road), AddEdge(second, first, road));
+    }
+
+    public async Task AttachLandmark(Node node, string name, string type)
+    {
+        await Submit("/landmarks/add", new
+        {
+            Node = node.Id,
+            Name = name,
+            Type = type
+        });
+    }
+    
+    public async Task DetachLandmark(Landmark landmark)
+    {
+        await Delete($"/landmarks/{landmark.Id}");
+    }
+
     public static async Task<MapService> DownloadInitialMapAsync()
     {
         var content = await HttpClient.GetStringAsync("/api/data");
@@ -55,6 +241,8 @@ public sealed class MapService : ReactiveObject
         if (jsonDom is null)
             throw new NullReferenceException(nameof(jsonDom));
 
+        //TODO: Gracefully fail if there is no such property - this might be a new server w/o landmarks, nodes, etc.
+        
         var root = jsonDom.RootElement;
         var jsonNodes = root.GetProperty("nodes"u8);
         var nodes = new Dictionary<string, Node>();
@@ -134,7 +322,9 @@ public sealed class MapService : ReactiveObject
 
                 case UpdatedNode node:
                     type = nameof(Nodes);
-                    _nodes[id] = new(id, node.X, node.Y, node.Z);
+                    _nodes[id].X = node.X;
+                    _nodes[id].Y = node.Y;
+                    _nodes[id].Z = node.Z;
                     break;
 
                 case NodeRemoved:
@@ -149,7 +339,8 @@ public sealed class MapService : ReactiveObject
 
                 case UpdatedRoad road:
                     type = nameof(Roads);
-                    _roads[id] = new(id, road.Name, road.RoadType);
+                    _roads[id].Name = road.Name;
+                    _roads[id].Type = road.RoadType;
                     break;
 
                 case RoadRemoved:
