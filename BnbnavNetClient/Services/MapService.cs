@@ -338,7 +338,8 @@ public sealed class MapService : ReactiveObject
 
                 case UpdatedRoad road:
                     type = nameof(Roads);
-                    _roads[id] = new(id, road.Name, road.RoadType);
+                    _roads[id].Name = road.Name;
+                    _roads[id].Type = road.RoadType;
                     break;
 
                 case RoadRemoved:
