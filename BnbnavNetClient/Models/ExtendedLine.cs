@@ -4,28 +4,17 @@ using Avalonia.Controls.Shapes;
 
 namespace BnbnavNetClient.Models;
 
-public struct ExtendedLine
+public readonly struct ExtendedLine
 {
     public Point Point1 { get; init; }
     public Point Point2 { get; init; }
 
-    public double Dx
-    {
-        get
-        {
-            return Point2.X - Point1.X;
-        }
-    }
+    public double Dx => Point2.X - Point1.X;
 
-    public double Dy
+    public double Dy => Point2.Y - Point1.Y;
+
+    public double Angle
     {
-        get
-        {
-            return Point2.Y - Point1.Y;
-        }
-    }
-    
-    public double Angle {
         get
         {
             var theta = Math.Atan(-Dy / Dx) * 360.0 / Math.Tau;
@@ -37,13 +26,7 @@ public struct ExtendedLine
         }
     }
 
-    public double Length
-    {
-        get
-        {
-            return Math.Sqrt(Dx * Dx + Dy * Dy);
-        }
-    }
+    public double Length => Math.Sqrt(Dx * Dx + Dy * Dy);
 
     public static implicit operator Line(ExtendedLine extendedLine) => new()
     {
@@ -68,18 +51,13 @@ public struct ExtendedLine
         };
     }
 
-    public Point Lerp(double t)
-    {
-        return new(Point1.X + (Point2.X - Point1.X) * t, Point1.Y + (Point2.Y - Point1.Y) * t);
-    }
+    public Point Lerp(double t) => 
+        new(Point1.X + (Point2.X - Point1.X) * t, Point1.Y + (Point2.Y - Point1.Y) * t);
 
-    public ExtendedLine UnitLine()
+    public ExtendedLine UnitLine() => this with
     {
-        return this with
-        {
-            Point2 = new(Point1.X + Dx / Length, Point1.Y + Dy / Length)
-        };
-    }
+        Point2 = new(Point1.X + Dx / Length, Point1.Y + Dy / Length)
+    };
 
     public ExtendedLine SetLength(double length)
     {
@@ -91,12 +69,9 @@ public struct ExtendedLine
         };
     }
 
-    public ExtendedLine FlipDirection()
+    public ExtendedLine FlipDirection() => new()
     {
-        return new()
-        {
-            Point1 = Point2,
-            Point2 = Point1
-        };
-    }
+        Point1 = Point2,
+        Point2 = Point1
+    };
 }
