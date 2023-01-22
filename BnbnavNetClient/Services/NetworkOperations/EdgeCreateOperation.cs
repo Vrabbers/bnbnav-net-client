@@ -28,11 +28,21 @@ public class EdgeCreateOperation : NetworkOperation
     {
         try
         {
+            string roadId;
+            if (_road is PendingRoad pendingRoad)
+            {
+                roadId = await pendingRoad.WaitForReadyTask;
+            }
+            else
+            {
+                roadId = _road.Id;
+            }
+            
             var tasks = new List<Task<MapService.ServerResponse>>
             {
                 _editorService.MapService.Submit("/edges/add", new
                 {
-                    Road = _road.Id,
+                    Road = roadId,
                     Node1 = _from.Id,
                     Node2 = _to.Id
                 })
@@ -43,7 +53,7 @@ public class EdgeCreateOperation : NetworkOperation
                 tasks.Add(
                     _editorService.MapService.Submit("/edges/add", new
                     {
-                        Road = _road.Id,
+                        Road = roadId,
                         Node1 = _to.Id,
                         Node2 = _from.Id
                     }));

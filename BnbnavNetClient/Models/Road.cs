@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Avalonia;
 using BnbnavNetClient.I18Next.Services;
 
@@ -56,9 +57,25 @@ public static class RoadTypeExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
+
+    public static string ServerName(this RoadType type) => type switch
+    {
+        RoadType.Unknown => "",
+        RoadType.Local => "local",
+        RoadType.Main => "main",
+        RoadType.Highway => "highway",
+        RoadType.Expressway => "expressway",
+        RoadType.Motorway => "motorway",
+        RoadType.Footpath => "footpath",
+        RoadType.Waterway => "waterway",
+        RoadType.Private => "private",
+        RoadType.Roundabout => "roundabout",
+        RoadType.DuongWarp => "duong-warp",
+        _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+    };
 }
 
-public sealed record Road(string Id, string Name, string Type)
+public record Road(string Id, string Name, string Type)
 {
     public RoadType RoadType => Type switch
     {
@@ -76,4 +93,21 @@ public sealed record Road(string Id, string Name, string Type)
     };
 
     public string HumanReadableName => $"{Name} [{RoadType.HumanReadableName()}]";
+}
+
+public record PendingRoad(string Id, string Name, string Type) : Road(Id, Name, Type)
+{
+    private readonly TaskCompletionSource<string> _completionSource = new();
+
+    public Task<string> WaitForReadyTask => _completionSource.Task;
+    
+    public void ProvideId(string id)
+    {
+        _completionSource.SetResult(id);
+    }
+
+    public void SetError(Exception ex)
+    {
+        _completionSource.SetException(ex);
+    }
 }

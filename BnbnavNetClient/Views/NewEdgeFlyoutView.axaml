@@ -15,13 +15,15 @@
     <TabControl SelectedIndex="{Binding CurrentTabIndex}">
       <TabItem Header="{str:Tr Key=NEW}">
         <StackPanel>
-          <TextBlock>New Road</TextBlock>
-          <TextBox Watermark="Road Name"/>
-          <TextBlock>Road Type</TextBlock>
-          <ComboBox HorizontalAlignment="Stretch">
-            <ComboBoxItem>Local Road</ComboBoxItem>
-            <ComboBoxItem>Waterway</ComboBoxItem>
-            <ComboBoxItem>Motorway</ComboBoxItem>
+          <TextBlock Text="{str:Tr Key=NEW_ROAD}" />
+          <TextBox Watermark="{str:Tr Key=ROAD_NAME}" Text="{Binding NewRoadName}"/>
+          <TextBlock Text="{str:Tr Key=ROAD_TYPE}" />
+          <ComboBox HorizontalAlignment="Stretch" Items="{Binding RoadTypes}" SelectedItem="{Binding SelectedRoadType}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding HumanReadableName}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
           </ComboBox>
         </StackPanel>
       </TabItem>

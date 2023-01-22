@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using Avalonia.Collections;
@@ -11,6 +12,19 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace BnbnavNetClient.ViewModels;
+
+public class RoadTypeHelper
+{
+    public RoadType RoadType { get; }
+
+    public RoadTypeHelper(RoadType roadType)
+    {
+        RoadType = roadType;
+    }
+
+    public string HumanReadableName => RoadType.HumanReadableName();
+}
+
 public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
 {
     private readonly MapEditorService _mapEditorService;
@@ -38,12 +52,24 @@ public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
     [Reactive]
     public int CurrentTabIndex { get; set; }
     
+    [Reactive]
+    public AvaloniaList<RoadTypeHelper> RoadTypes { get; set; } = new();
+
+    [Reactive]
+    public RoadTypeHelper? SelectedRoadType { get; set; }
+    
+    [Reactive]
+    public string NewRoadName { get; set; }
+
     public NewEdgeFlyoutViewModel(MapEditorService mapEditorService, List<Node> nodesToJoin)
     {
         NodesToJoin = nodesToJoin;
         _mapEditorService = mapEditorService;
+
+        RoadTypes.AddRange(Enum.GetValues<RoadType>().Skip(1).Select(x => new RoadTypeHelper(x)));
+        
         this.WhenAnyValue(x => x.NodesToJoin, x => x.RoadPickedWithRoadSyringe).Subscribe(
-            Observer.Create<System.ValueTuple<List<Node>, Road?>>(
+            Observer.Create<ValueTuple<List<Node>, Road?>>(
                 tuple =>
                 {
                     var roads = new List<Road>();
@@ -57,14 +83,14 @@ public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
                     FoundRoads.Clear();
                     FoundRoads.AddRange(roads.Distinct());
                 }));
-        this.WhenAnyValue(x => x.SelectedRoad, x => x.CurrentTabIndex).Subscribe(
-            Observer.Create<System.ValueTuple<Road?, int>>(tuple =>
+        this.WhenAnyValue(x => x.SelectedRoad, x => x.CurrentTabIndex, x => x.SelectedRoadType, x => x.NewRoadName).Subscribe(
+            Observer.Create<System.ValueTuple<Road?, int, RoadTypeHelper?, string>>(tuple =>
             {
                 var canCreate = true;
                 if (CurrentTabIndex == 0)
                 {
                     //Waiting on implementation
-                    canCreate = false;
+                    if (SelectedRoadType is null || string.IsNullOrWhiteSpace(NewRoadName)) canCreate = false;
                 }
                 else
                 {
@@ -81,12 +107,25 @@ public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
 
     public void CreateClicked()
     {
+        Road road;
+        if (CurrentTabIndex == 0) //New Road
+        {
+            var roadOp = new RoadCreateOperation(_mapEditorService, NewRoadName, SelectedRoadType!.RoadType);
+            _mapEditorService.TrackNetworkOperation(roadOp);
+
+            road = roadOp.PendingRoad;
+        }
+        else //Existing Road
+        {
+            road = SelectedRoad!;
+        }
+        
         for (var i = 0; i < NodesToJoin.Count - 1; i++)
         {
             var first = NodesToJoin[i];
             var second = NodesToJoin[i + 1];
             
-            _mapEditorService.TrackNetworkOperation(new EdgeCreateOperation(_mapEditorService, SelectedRoad, first, second, Bidirectional));
+            _mapEditorService.TrackNetworkOperation(new EdgeCreateOperation(_mapEditorService, road, first, second, Bidirectional));
         }
         Flyout.Hide();
     }

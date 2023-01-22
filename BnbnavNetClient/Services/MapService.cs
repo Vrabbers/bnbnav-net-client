@@ -24,12 +24,14 @@ public sealed class MapService : ReactiveObject
         public required HttpStatusCode StatusCode { get; init; }
         public required Stream Stream { get; init; }
 
-        public void AssertSuccess()
+        public ServerResponse AssertSuccess()
         {
             if (StatusCode is < (HttpStatusCode) 200 or > (HttpStatusCode) 299)
             {
                 throw new Exception($"Server returned {StatusCode}");
             }
+
+            return this;
         }
     }
 
