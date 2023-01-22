@@ -96,14 +96,8 @@ public class SpliceEditController : EditController
                 tempNode = new("temp", (int)Math.Round(coords.X), _splicingEdge.From.Y, (int)Math.Round(coords.Y));
             }
 
-            var edge1 = _splicingEdge with
-            {
-                To = tempNode
-            };
-            var edge2 = _splicingEdge with
-            {
-                From = tempNode
-            };
+            var edge1 = new Edge("temp", _splicingEdge.Road, _splicingEdge.From, tempNode);
+            var edge2 = new Edge("temp", _splicingEdge.Road, tempNode, _splicingEdge.To);
             var (from1, to1) = edge1.Extents(mapView);
             var (from2, to2) = edge2.Extents(mapView);
             

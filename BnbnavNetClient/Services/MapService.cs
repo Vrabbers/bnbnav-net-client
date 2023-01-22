@@ -321,7 +321,9 @@ public sealed class MapService : ReactiveObject
 
                 case UpdatedNode node:
                     type = nameof(Nodes);
-                    _nodes[id] = new(id, node.X, node.Y, node.Z);
+                    _nodes[id].X = node.X;
+                    _nodes[id].Y = node.Y;
+                    _nodes[id].Z = node.Z;
                     break;
 
                 case NodeRemoved:
