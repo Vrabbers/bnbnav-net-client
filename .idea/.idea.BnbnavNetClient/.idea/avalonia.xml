@@ -4,6 +4,7 @@
     <option name="projectPerEditor">
       <map>
         <entry key="BnbnavNetClient/App.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Controls/DayNightButton.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Resources/DayTheme.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Resources/NightTheme.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Views/AlertDialogView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
