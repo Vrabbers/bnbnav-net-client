@@ -24,8 +24,12 @@ public readonly struct ExtendedLine
     {
         get
         {
+            if (Dx == 0)
+            {
+                return Dy < 0 ? 90 : 270;
+            }
             var theta = Math.Atan(-Dy / Dx) * 360.0 / Math.Tau;
-            if (Dx <= 0) theta += 180;
+            if (Dx < 0) theta += 180;
             var thetaNormalized = theta < 0 ? theta + 360 : theta;
             if (Math.Abs(thetaNormalized - 360) < 0.01)
                 return 0;

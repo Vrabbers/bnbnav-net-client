@@ -46,8 +46,8 @@ public sealed class Player
 
     public ExtendedLine Velocity => new()
     {
-        Point1 = PosHistory.First().Item2,
-        Point2 = PosHistory.Last().Item2
+        Point1 = PosHistory.Last().Item2,
+        Point2 = PosHistory.First().Item2
     };
 
     public Player(string name, MapService mapService)
