@@ -115,6 +115,16 @@ public sealed class Player
         PosHistory.Insert(0, (DateTime.UtcNow, new(X, Z)));
         PosHistory = PosHistory.Where((x, i) => i <= 10 || DateTime.UtcNow - x.Item1 < TimeSpan.FromMilliseconds(500)).ToList();
 
+        if (SnappedEdge is not null)
+        {
+            //Ensure the snapped edge is still valid
+            if (!(GeoHelper.LineSegmentToPointDistance(new(SnappedEdge.From.X, SnappedEdge.From.Z), new(SnappedEdge.To.X, SnappedEdge.To.Z),
+                    new(evt.X, evt.Z)) <= 10))
+            {
+                SnappedEdge = null;
+            }
+        }
+
         Task.Run(() =>
         {
             if (!_lastSnapMutex.WaitOne(0)) return;
