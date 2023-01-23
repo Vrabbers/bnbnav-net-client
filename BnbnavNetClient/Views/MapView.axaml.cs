@@ -243,15 +243,18 @@ public partial class MapView : UserControl
         MapViewModel
             .WhenAnyPropertyChanged()
             .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
-        MapViewModel.MapService
-            .WhenAnyValue(x => x.Nodes, x => x.Edges, x => x.Landmarks)
-            .Subscribe(Observer.Create<ValueTuple<ReadOnlyDictionary<string, Node>, ReadOnlyDictionary<string, Edge>, ReadOnlyDictionary<string, Landmark>>>(_ => UpdateDrawnItems()));
         MapViewModel.MapEditorService
             .WhenAnyValue(x => x.OngoingNetworkOperations)
             .Subscribe(Observer.Create<IReadOnlyList<NetworkOperation>?>(_ => Dispatcher.UIThread.Post(InvalidateVisual)));
 
         MapViewModel.MapService.WhenPropertyChanged(x => x.Players)
             .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Player>>>(_ => InvalidateVisual()));
+        MapViewModel.MapService.WhenPropertyChanged(x => x.Nodes)
+            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Node>>>(_ => UpdateDrawnItems()));
+        MapViewModel.MapService.WhenPropertyChanged(x => x.Edges)
+            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Edge>>>(_ => UpdateDrawnItems()));
+        MapViewModel.MapService.WhenPropertyChanged(x => x.Landmarks)
+            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Landmark>>>(_ => UpdateDrawnItems()));
 
         MapViewModel.MapService.PlayerUpdateInteraction.RegisterHandler(interaction =>
         {
