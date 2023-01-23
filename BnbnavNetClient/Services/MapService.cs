@@ -129,7 +129,7 @@ public sealed class MapService : ReactiveObject
                 AuthenticationToken = await AuthTokenInteraction.Handle(Unit.Default);
                 if (AuthenticationToken is null)
                 {
-                    CancelPendingRequests(new("Authentication token not provided"));
+                    CancelPendingRequests(new NetworkOperationException("Authentication token not provided"));
                 }
                 else
                 {
