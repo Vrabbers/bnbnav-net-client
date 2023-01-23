@@ -3,11 +3,17 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <None Remove="Assets\logo.svg" />
+    <None Remove="locales\pt\translation.json" />
+    <None Remove="locales\ur\translation.json" />
     <TrimmerRootDescriptor Include="Roots.xml" />
   </ItemGroup>
 
@@ -25,8 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\EnterPopupView.axaml.cs">
-      <DependentUpon>EnterPopupView.axaml</DependentUpon>
-    </Compile>
+    <EmbeddedResource Include="locales/**/*" WithCulture="false" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\BnbnavNetClient.I18Next\BnbnavNetClient.I18Next.csproj" />
   </ItemGroup>
 </Project>

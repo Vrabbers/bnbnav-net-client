@@ -1,6 +1,8 @@
 ﻿using System;
 using Avalonia;
 using Avalonia.ReactiveUI;
+using BnbnavNetClient.I18Next;
+using BnbnavNetClient.Settings;
 
 namespace BnbnavNetClient.Desktop;
 
@@ -18,5 +20,7 @@ class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .LogToTrace()
-            .UseReactiveUI();
+            .UseReactiveUI()
+            .UseI18NextLocalization()
+            .UseSettings(new SettingsManagerDesktop());
 }

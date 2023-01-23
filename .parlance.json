@@ -1,0 +1,11 @@
+{
+  "name": "bnbnav",
+  "subprojects": [
+    {
+      "name": "bnbnav",
+      "type": "i18next",
+      "path": "/BnbnavNetClient/locales/{lang}/translation.json",
+      "baseLang": "en"
+    }
+  ]
+}

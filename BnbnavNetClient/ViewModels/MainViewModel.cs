@@ -2,15 +2,19 @@
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using BnbnavNetClient.Models;
+using BnbnavNetClient.I18Next.Services;
+using Avalonia;
+using Avalonia.Controls;
+using BnbnavNetClient.Settings;
 
 namespace BnbnavNetClient.ViewModels;
 
 public sealed class MainViewModel : ViewModel
 {
-    [Reactive]
-    public bool EditModeEnabled { get; set; }
 
     [Reactive]
     public bool HighlightTurnRestrictionsEnabled { get; set; }
@@ -19,10 +23,10 @@ public sealed class MainViewModel : ViewModel
     public bool FollowMeEnabled { get; set; }
 
     [ObservableAsProperty]
-    public string FollowMeText { get; } = "Follow Me";
+    public string LoginText { get; }
 
     [Reactive]
-    public string FollowMeUsername { get; set; } = string.Empty;
+    public string LoggedInUsername { get; set; } = string.Empty;
 
     [Reactive]
     public string? EditModeToken { get; set; }
@@ -32,89 +36,195 @@ public sealed class MainViewModel : ViewModel
 
     [Reactive]
     public MapViewModel? MapViewModel { get; private set; }
+    
+    public Button UserControlButton { get; set; } = null!;
 
     [ObservableAsProperty]
-    public string PanText { get; } = "x = 0; y = 0";
+    public string PanText { get; }
+    
+    [ObservableAsProperty]
+    public bool HaveLoggedInUser { get; set; }
+
+    readonly IAvaloniaI18Next _tr;
+
+    readonly ISettingsManager _settings;
+
+    //TODO: make this better
+    [ObservableAsProperty] 
+    public bool IsInSelectMode => MapEditorService.CurrentEditMode == EditModeControl.Select;
+
+    [ObservableAsProperty] 
+    public bool IsInJoinMode => MapEditorService.CurrentEditMode == EditModeControl.Join;
+    
+    [ObservableAsProperty] 
+    public bool IsInNodeMoveMode => MapEditorService.CurrentEditMode == EditModeControl.NodeMove;
+    
+    [ObservableAsProperty] 
+    public bool IsInSpliceMode => MapEditorService.CurrentEditMode == EditModeControl.Splice;
+    
+    [ObservableAsProperty] 
+    public bool IsInLandmarkMode => MapEditorService.CurrentEditMode == EditModeControl.Landmark;
+    
+    [ObservableAsProperty]
+    public bool EditModeEnabled { get; } = false;
+    
+    public Interaction<bool, Unit>? AuthTokeInteraction { get; set; }
+
+    public MapEditorService MapEditorService { get; set; }
 
     public MainViewModel()
     {
+        MapEditorService = new();
+        
+        _settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
+        _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
         var followMeText = this
-            .WhenAnyValue(me => me.FollowMeEnabled, me => me.FollowMeUsername)
-            .Select(x => x.Item1 ? $"Following {x.Item2}" : "Follow Me");
-        followMeText.ToPropertyEx(this, me => me.FollowMeText);
+            .WhenAnyValue(me => me.FollowMeEnabled, me => me.LoggedInUsername)
+            .Select(x => x.Item1 ? _tr["FOLLOWING", ("user", x.Item2)] : _tr["FOLLOW_ME"]);
+        followMeText.ToPropertyEx(this, me => me.LoginText);
+        LoginText = _tr["FOLLOW_ME"];
+        PanText = "x = 0; y = 0";
+
+        this.WhenAnyValue(x => x.LoggedInUsername).Select(x => !string.IsNullOrEmpty(x))
+            .ToPropertyEx(this, x => x.HaveLoggedInUser);
+
+        MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Select)
+            .ToPropertyEx(this, x => x.IsInSelectMode);
+        MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Join)
+            .ToPropertyEx(this, x => x.IsInJoinMode);
+        MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.NodeMove)
+            .ToPropertyEx(this, x => x.IsInNodeMoveMode);
+        MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Splice)
+            .ToPropertyEx(this, x => x.IsInSpliceMode);
+        MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Landmark)
+            .ToPropertyEx(this, x => x.IsInLandmarkMode);
+        MapEditorService.WhenAnyValue(x => x.EditModeEnabled).ToPropertyEx(this, x => x.EditModeEnabled);
     }
 
     public async Task InitMapService()
     {
         var mapService = await MapService.DownloadInitialMapAsync();
+        MapEditorService.MapService = mapService;
         MapViewModel = new(mapService, this);
         var panText = MapViewModel
             .WhenAnyValue(map => map.Pan)
             .Select(pt => $"x = {double.Round(pt.X)}; y = {double.Round(pt.Y)}");
         panText.ToPropertyEx(this, me => me.PanText);
+
+        this.WhenAnyValue(me => me.EditModeToken).Subscribe(token => MapService.AuthenticationToken = token);
+
+        MapViewModel.MapService.AuthTokenInteraction.RegisterHandler(async interaction =>
+        {
+            try
+            {
+                var token = await ShowAuthenticationPopup();
+                interaction.SetOutput(token);
+            }
+            catch (Exception)
+            {
+                interaction.SetOutput(null);
+            }
+        });
+    }
+    
+    public void LanguageButtonPressed()
+    {
+        var languagePopup = new LanguageSelectViewModel();
+        languagePopup.Ok.Subscribe(async lang =>
+        {
+            Popup = null;
+            _settings.Settings.Language = lang.Name;
+            await _settings.SaveAsync();
+        });
+        Popup = languagePopup;
+    }
+
+    Task<string> ShowAuthenticationPopup()
+    {
+        var cs = new TaskCompletionSource<string>();
+        var editModePopup = new EnterPopupViewModel(_tr["EDITNAV_PROMPT"], _tr["EDITNAV_WATERMARK"]);
+        editModePopup.Ok.Subscribe(token =>
+        {
+            EditModeToken = token;
+            MapEditorService.EditModeEnabled = true;
+            cs.SetResult(token);
+            Popup = null;
+        });
+        editModePopup.Cancel.Subscribe(_ =>
+        {
+            EditModeToken = null;
+            MapEditorService.EditModeEnabled = false;
+            cs.SetException(new Exception());
+            Popup = null;
+        });
+        Popup = editModePopup;
+        return cs.Task;
     }
 
     public void EditModePressed()
     {
-        EditModeEnabled = !EditModeEnabled;
-        if(!EditModeEnabled)
+        //MapEditorService.EditModeEnabled = !MapEditorService.EditModeEnabled;
+        if (!MapEditorService.EditModeEnabled)
         {
             if (EditModeToken is not null)
             {
-                EditModeEnabled = true;
+                MapEditorService.EditModeEnabled = true;
                 return;
             }
-            var editModePopup = new EnterPopupViewModel("Use /editnav to obtain a token and enter here:", "Token");
-            editModePopup.Ok.Subscribe(token =>
-            {
-                EditModeToken = token;
-                EditModeEnabled = true;
-                Popup = null;
-            });
-            editModePopup.Cancel.Subscribe(_ =>
-            {
-                EditModeEnabled = false;
-                Popup = null;
-            });
-            Popup = editModePopup;
-
+            ShowAuthenticationPopup();
         }
         else
         {
-            EditModeEnabled = false;
+            MapEditorService.EditModeEnabled = false;
         }
     }
 
-    public void FollowMePressed()
+    public void SelectModePressed()
     {
-        //annoyingly the button sets this for us...  so we undo it first
-        FollowMeEnabled = !FollowMeEnabled;
-        if (!FollowMeEnabled)
-        {
-            var followMePopup = new EnterPopupViewModel("Enter Minecraft username:", "Username");
-            Observable.Merge(
+        MapEditorService.CurrentEditMode = EditModeControl.Select;
+    }
+
+    public void JoinModePressed()
+    {
+        MapEditorService.CurrentEditMode = EditModeControl.Join;
+    }
+    
+    public void NodeMovePressed()
+    {
+        MapEditorService.CurrentEditMode = EditModeControl.NodeMove;
+    }
+    
+    public void SplicePressed()
+    {
+        MapEditorService.CurrentEditMode = EditModeControl.Splice;
+    }
+
+    public void LandmarkPressed()
+    {
+        MapEditorService.CurrentEditMode = EditModeControl.Landmark;
+    }
+
+    public void LoginPressed()
+    {
+        var followMePopup = new EnterPopupViewModel(_tr["FOLLOW_ME_PROMPT"], _tr["FOLLOW_ME_WATERMARK"]);
+        Observable.Merge(
                 followMePopup.Ok,
                 followMePopup.Cancel.Select(_ => (string?)null))
-                .Take(1)
-                .Subscribe(str =>
+            .Take(1)
+            .Subscribe(str =>
+            {
+                if (str is not null)
                 {
-                    if (str is null)
-                    {
-                        FollowMeEnabled = false;
-                    }
-                    else
-                    {
-                        FollowMeEnabled = true;
-                        FollowMeUsername = str;
-                    }
-                    Popup = null;
-                });
-            Popup = followMePopup;
-        }
-        else
-        { 
-            FollowMeEnabled = false;
-            FollowMeUsername = string.Empty;
-        }
+                    LoggedInUsername = str;
+                }
+                Popup = null;
+            });
+        Popup = followMePopup;
+    }
+
+    public void LogoutPressed()
+    {
+        LoggedInUsername = "";
+        UserControlButton.Flyout!.Hide();
     }
 }

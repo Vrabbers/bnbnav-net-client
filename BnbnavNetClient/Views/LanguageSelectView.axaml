@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:BnbnavNetClient.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="330" d:DesignHeight="150"
+             x:Class="BnbnavNetClient.Views.LanguageSelectView"
+             x:DataType="vm:LanguageSelectViewModel"
+             xmlns:str="using:BnbnavNetClient.I18Next"
+             x:CompileBindings="True">
+  <StackPanel VerticalAlignment="Center" Margin="15" Spacing="2">
+    <TextBlock Text="{str:Tr Key=LANG_CHANGE}"/>
+    <ComboBox HorizontalAlignment="Stretch" Items="{Binding AvailableLanguages}" SelectedItem="{Binding ChosenLanguage}">
+      <ComboBox.ItemTemplate>
+        <DataTemplate>
+          <TextBlock Text="{Binding PrettyPrint}"/>
+        </DataTemplate>
+      </ComboBox.ItemTemplate>
+    </ComboBox>
+    <TextBlock IsVisible="{Binding LangChanged}" Text="{str:Tr Key=LANG_CHANGE_RESTART_REQUIRED}"/>
+    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+      <Button Command="{Binding Ok}" Classes="accent" IsDefault="True" Content="{str:Tr Key=OK}"/>
+    </StackPanel>
+  </StackPanel>
+</UserControl>
