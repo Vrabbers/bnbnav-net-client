@@ -6,6 +6,13 @@ namespace BnbnavNetClient.Models;
 
 public readonly struct ExtendedLine
 {
+    public enum IntersectionType
+    {
+        Parallel,
+        Intersects,
+        IntersectsInterpolated
+    }
+    
     public Point Point1 { get; init; }
     public Point Point2 { get; init; }
 
@@ -18,7 +25,7 @@ public readonly struct ExtendedLine
         get
         {
             var theta = Math.Atan(-Dy / Dx) * 360.0 / Math.Tau;
-            if (Dx >= 0) theta += 180;
+            if (Dx <= 0) theta += 180;
             var thetaNormalized = theta < 0 ? theta + 360 : theta;
             if (Math.Abs(thetaNormalized - 360) < 0.01)
                 return 0;
@@ -59,6 +66,31 @@ public readonly struct ExtendedLine
         Point2 = new(Point1.X + Dx / Length, Point1.Y + Dy / Length)
     };
 
+    public ExtendedLine NormalLine() => this with
+    {
+        Point2 = Point1 + new Point(Dy, -Dx)
+    };
+
+    public IntersectionType TryIntersect(ExtendedLine other, out Point intersectionPoint)
+    {
+        intersectionPoint = new();
+        
+        var a = Point1 - Point2;
+        var b = other.Point1 - other.Point2;
+        var c = Point1 - other.Point1;
+
+        var denominator = a.Y * b.X - a.X * b.Y;
+        if (denominator == 0 || !Double.IsFinite(denominator)) return IntersectionType.Parallel;
+
+        var reciprocal = 1 / denominator;
+        var na = (b.Y * c.X - b.X * c.Y) * reciprocal;
+        intersectionPoint = Point1 + a * na;
+
+        if (na is < 0 or > 1) return IntersectionType.IntersectsInterpolated;
+        var nb = (a.X * c.Y - a.Y * c.X) * reciprocal;
+        return nb is < 0 or > 1 ? IntersectionType.IntersectsInterpolated : IntersectionType.Intersects;
+    }
+
     public ExtendedLine SetLength(double length)
     {
         var unit = UnitLine();
@@ -74,4 +106,12 @@ public readonly struct ExtendedLine
         Point1 = Point2,
         Point2 = Point1
     };
+
+    public double AngleTo(ExtendedLine other)
+    {
+        var delta = other.Angle - Angle;
+        var normalised = delta < 0 ? delta + 360 : delta;
+        if (Math.Abs(delta - 360) < 0.01) return 0;
+        return normalised;
+    }
 }

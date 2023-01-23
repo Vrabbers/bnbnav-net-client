@@ -13,6 +13,7 @@ using Avalonia.Platform;
 using Avalonia.Svg.Skia;
 using Svg.Skia;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using BnbnavNetClient.Models;
 using DynamicData;
@@ -242,11 +243,20 @@ public partial class MapView : UserControl
             .WhenAnyPropertyChanged()
             .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
         MapViewModel.MapService
-            .WhenAnyPropertyChanged()
-            .Subscribe(Observer.Create<MapService?>(_ => UpdateDrawnItems()));
+            .WhenAnyValue(x => x.Nodes, x => x.Edges, x => x.Landmarks)
+            .Subscribe(Observer.Create<ValueTuple<ReadOnlyDictionary<string, Node>, ReadOnlyDictionary<string, Edge>, ReadOnlyDictionary<string, Landmark>>>(_ => UpdateDrawnItems()));
         MapViewModel.MapEditorService
             .WhenAnyValue(x => x.OngoingNetworkOperations)
             .Subscribe(Observer.Create<IReadOnlyList<NetworkOperation>?>(_ => Dispatcher.UIThread.Post(InvalidateVisual)));
+
+        MapViewModel.MapService.WhenPropertyChanged(x => x.Players)
+            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Player>>>(_ => InvalidateVisual()));
+
+        MapViewModel.MapService.PlayerUpdateInteraction.RegisterHandler(interaction =>
+        {
+            interaction.SetOutput(Unit.Default);
+            InvalidateVisual();
+        });
     }
 
     readonly Dictionary<string, SKSvg> _svgCache = new();
@@ -451,6 +461,12 @@ public partial class MapView : UserControl
         foreach (var operation in MapViewModel.MapEditorService.OngoingNetworkOperations)
         {
             operation.Render(this, context);
+        }
+
+        foreach (var player in MapViewModel.MapService.Players.Values)
+        {
+            context.DrawEllipse(new SolidColorBrush(player.SnappedEdge is null ? new Color(255, 255, 0, 0) : new Color(255, 0, 255, 0)), null, ToScreen(player.MarkerCoordinates), 50, 50);
+            context.DrawLine(new Pen(new SolidColorBrush(new Color(255, 0, 255, 0))), ToScreen(player.Velocity.Point1), ToScreen(player.Velocity.Point2));
         }
 
         base.Render(context);

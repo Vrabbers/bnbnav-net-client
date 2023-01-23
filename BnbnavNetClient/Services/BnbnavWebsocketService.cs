@@ -91,7 +91,7 @@ sealed class BnbnavWebsocketService
 [JsonDerivedType(typeof(RemovedAnnotation), "annotationRemoved")]
 [JsonDerivedType(typeof(PlayerMoved), "playerMove")]
 [JsonDerivedType(typeof(PlayerLeft), "playerGone")]
-record BnbnavMessage
+public record BnbnavMessage
 {
     public string? Id { get; init; }
 }
@@ -148,7 +148,7 @@ sealed record RemovedAnnotation : BnbnavMessage
     public required string Name { get; init; }
 }
 
-sealed record PlayerMoved : BnbnavMessage
+public sealed record PlayerMoved : BnbnavMessage
 {
     public required double X { get; init; }
     public required double Y { get; init; }

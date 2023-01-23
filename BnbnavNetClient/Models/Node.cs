@@ -37,4 +37,6 @@ public sealed class Node : MapItem
         Y = this.Y;
         Z = this.Z;
     }
+
+    public Point Point => new(X, Z);
 }
