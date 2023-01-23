@@ -14,6 +14,16 @@
     <TabControl SelectedIndex="{Binding CurrentTabIndex}">
       <TabItem Header="{str:Tr Key=LANDMARK}">
         <StackPanel>
+          <TextBlock Text="{str:Tr Key=LANDMARK_NAME}" />
+          <TextBox Watermark="{str:Tr Key=LANDMARK_NAME}" Text="{Binding LandmarkName}"/>
+          <TextBlock Text="{str:Tr Key=LANDMARK_TYPE}" />
+          <ComboBox HorizontalAlignment="Stretch" Items="{Binding LandmarkTypes}" SelectedItem="{Binding SelectedLandmarkType}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding HumanReadableName}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
         </StackPanel>
       </TabItem>
       <TabItem Header="{str:Tr Key=LABEL}">
@@ -24,7 +34,7 @@
     <Grid Margin="0 4 0 0" HorizontalAlignment="Right" ColumnDefinitions="Auto * Auto Auto">
       <Button Grid.Column="0" IsEnabled="{Binding DeleteButtonEnabled}" Command="{Binding DeleteClicked}" Content="{str:Tr Key=LANDMARK_DELETE}" Classes="destructive" />
       <Button Grid.Column="2" Command="{Binding CancelClicked}" Content="{str:Tr Key=CANCEL}" />
-      <Button Grid.Column="3" Classes="accent" IsEnabled="{Binding CommitButtonEnabled}" Command="{Binding CommitClicked}" Content="{str:Tr Key=SAVE}" />
+      <Button Grid.Column="3" Classes="accent" IsEnabled="{Binding SaveButtonEnabled}" Command="{Binding CommitClicked}" Content="{str:Tr Key=SAVE}" />
     </Grid>
   </StackPanel>
 </UserControl>

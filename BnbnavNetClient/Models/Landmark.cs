@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia;
+using BnbnavNetClient.I18Next.Services;
+using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Models;
 
@@ -68,40 +71,48 @@ public static class LandmarkTypeExtensions
         LandmarkType.Tesco => "tesco",
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
     };
+
+    public static string HumanReadableName(this LandmarkType type)
+    {
+        var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        return type switch
+        {
+            LandmarkType.Unknown => "",
+            LandmarkType.AirCSStation => t["LANDMARK_AIRCS"],
+            LandmarkType.Airport => t["LANDMARK_AIRPORT"],
+            LandmarkType.Hospital => t["LANDMARK_HOSPITAL"],
+            LandmarkType.SquidTransitStation => t["LANDMARK_SQTR"],
+            LandmarkType.ParkingLot => t["LANDMARK_PARKING"],
+            LandmarkType.Walnut => t["LANDMARK_WALNUT"],
+            LandmarkType.ImmigrationCheckpoint => t["LANDMARK_IMMI"],
+            LandmarkType.TouristAttraction => t["LANDMARK_TOURIST_ATTRACTION"],
+            LandmarkType.Invisible => t["LANDMARK_INVISIBLE"],
+            LandmarkType.GenericBlue => t["LANDMARK_GENERIC_BLUE"],
+            LandmarkType.GenericGreen => t["LANDMARK_GENERIC_GREEN"],
+            LandmarkType.GenericRed => t["LANDMARK_GENERIC_RED"],
+            LandmarkType.GenericGray => t["LANDMARK_GENERIC_GRAY"],
+            LandmarkType.CityHall => t["LANDMARK_CITY_HALL"],
+            LandmarkType.CoffeeShop => t["LANDMARK_COFFEE_SHOP"],
+            LandmarkType.Store => t["LANDMARK_STORE"],
+            LandmarkType.Restaurant => t["LANDMARK_RESTAURANT"],
+            LandmarkType.Park => t["LANDMARK_PARK"],
+            LandmarkType.Courthouse => t["LANDMARK_COURTHOUSE"],
+            LandmarkType.Bank => t["LANDMARK_BANK"],
+            LandmarkType.Embassy => t["LANDMARK_EMBASSY"],
+            LandmarkType.PostOffice => t["LANDMARK_POST_OFFICE"],
+            LandmarkType.Hotel => t["LANDMARK_HOTEL"],
+            LandmarkType.FrivoloCoChocolates => t["LANDMARK_FRIVOLOCO"],
+            LandmarkType.Elc => t["LANDMARK_ELC"],
+            LandmarkType.Tesco => t["LANDMARK_TESCO"],
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
 }
 
 public sealed class Landmark : MapItem
 {
-    public readonly static Dictionary<string, string> LandmarkTypes = new()
-    {
-        { "aircs", "AirCS Station" },
-        { "airport", "Airport" },
-        { "hospital", "Hospital" },
-        { "squid-transit", "Squid Transit Station" },
-        { "parking", "Parking Lot" },
-        { "walnut", "Walnut" },
-        { "immigration-check", "Immigration Checkpoint"},
-        { "tourist-attraction", "Tourist Attraction" },
-        { "invisible", "Invisible" },
-        { "generic-blue", "Generic Blue" },
-        { "generic-green", "Generic Green" },
-        { "generic-red", "Generic Red" },
-        { "generic-gray", "Generic Gray" },
-        { "city-hall", "City Hall" },
-        { "cafe", "Coffee Shop" },
-        { "shopping", "Store" },
-        { "restaurant", "Restaurant" },
-        { "park", "Park" },
-        { "court", "Courthouse" },
-        { "bank", "Bank" },
-        { "embassy", "Embassy" },
-        { "postal-office", "Post Office" },
-        { "hotel", "Hotel" },
-        { "frivoloco", "FrivoloCo Chocolates" },
-        { "elc", "ELC" },
-        { "tesco", "TESCO" },
-    };
-
+    static readonly double LandmarkSize = 10;
+    
     public Landmark(string Id, Node Node, string Name, string Type)
     {
         this.Id = Id;
@@ -123,5 +134,15 @@ public sealed class Landmark : MapItem
         Node = this.Node;
         Name = this.Name;
         Type = this.Type;
+    }
+
+    public Rect BoundingRect(MapView mapView)
+    {
+        var pos = mapView.ToScreen(new(Node.X, Node.Z));
+        var rect = new Rect(
+            pos.X - LandmarkSize * mapView.MapViewModel.Scale / 2,
+            pos.Y - LandmarkSize * mapView.MapViewModel.Scale / 2,
+            LandmarkSize * mapView.MapViewModel.Scale, LandmarkSize * mapView.MapViewModel.Scale);
+        return rect;
     }
 }

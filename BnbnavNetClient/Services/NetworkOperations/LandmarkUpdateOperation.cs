@@ -1,18 +1,78 @@
+using System.Net.Http;
 using System.Threading.Tasks;
 using Avalonia.Media;
+using BnbnavNetClient.Models;
 using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.NetworkOperations;
 
 public class LandmarkUpdateOperation : NetworkOperation
 {
-    public async override Task PerformOperation()
+    private readonly MapEditorService _editorService;
+    private readonly Landmark? _toUpdate;
+    private readonly Landmark? _updateAs;
+
+    public LandmarkUpdateOperation(MapEditorService editorService, Landmark? toUpdate, Landmark? updateAs)
     {
-        
+        _editorService = editorService;
+        _toUpdate = toUpdate;
+        _updateAs = updateAs;
+    }
+    
+    public override async Task PerformOperation()
+    {
+
+        if (_toUpdate is not null)
+        {
+            ItemsNotToRender.Add(_toUpdate);
+            
+            try
+            {
+                (await _editorService.MapService!.Delete($"/landmarks/{_toUpdate.Id}")).AssertSuccess();
+            }
+            catch (HttpRequestException)
+            {
+                return;
+            }
+            catch (NetworkOperationException)
+            {
+                return;
+            }
+        }
+
+        if (_updateAs is not null)
+        {
+            try
+            {
+                (await _editorService.MapService!.Submit("/landmarks/add", new
+                {
+                    name = _updateAs.Name,
+                    type = _updateAs.Type,
+                    node = _updateAs.Node.Id
+                })).AssertSuccess();
+            }
+            catch (HttpRequestException)
+            {
+                return;
+            }
+            catch (NetworkOperationException)
+            {
+                return;
+            }
+        }
     }
 
     public override void Render(MapView mapView, DrawingContext context)
     {
-        
+        if (_updateAs is not null)
+        {
+            using (context.PushOpacity(0.5))
+                mapView.DrawLandmark(context, _updateAs, _updateAs.BoundingRect(mapView));
+        }
+        else if (_toUpdate is not null)
+        {
+            using (context.PushOpacity(0.5))
+                mapView.DrawLandmark(context, _toUpdate, _toUpdate.BoundingRect(mapView));
+        }
     }
 }

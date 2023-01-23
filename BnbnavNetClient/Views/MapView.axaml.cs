@@ -248,7 +248,6 @@ public partial class MapView : UserControl
             .Subscribe(Observer.Create<IReadOnlyList<NetworkOperation>?>(_ => Dispatcher.UIThread.Post(InvalidateVisual)));
     }
 
-    static readonly double LandmarkSize = 10;
     readonly Dictionary<string, SKSvg> _svgCache = new();
     readonly IAvaloniaI18Next _i18n;
 
@@ -284,7 +283,6 @@ public partial class MapView : UserControl
     void UpdateDrawnItems(Rect? boundsRect = null)
     {
         var mapService = MapViewModel.MapService;
-        var scale = MapViewModel.Scale;
 
         if (Bounds.Size.IsDefault && boundsRect is null)
         {
@@ -299,20 +297,11 @@ public partial class MapView : UserControl
             return (from, to, edge);
         }).Where(edge => GeoHelper.LineIntersects(edge.from, edge.to, bounds)).ToList();
 
-        DrawnLandmarks = mapService.Landmarks.Values.Select(landmark =>
-        {
-            var pos = ToScreen(new(landmark.Node.X, landmark.Node.Z));
-            var rect = new Rect(
-                pos.X - LandmarkSize * scale / 2,
-                pos.Y - LandmarkSize * scale / 2,
-                LandmarkSize * scale, LandmarkSize * scale);
-            return (rect, landmark);
-        }).Where(landmark => bounds.Intersects(landmark.rect)).ToList();
+        DrawnLandmarks = mapService.Landmarks.Values.Select(landmark => (landmark.BoundingRect(this), landmark))
+            .Where(landmark => bounds.Intersects(landmark.Item1)).ToList();
 
-        DrawnNodes = mapService.Nodes.Values.Select(node =>
-        {
-            return (node.BoundingRect(this), node);
-        }).Where(node => bounds.Intersects(node.Item1)).ToList();
+        DrawnNodes = mapService.Nodes.Values.Select(node => (node.BoundingRect(this), node))
+            .Where(node => bounds.Intersects(node.Item1)).ToList();
     }
 
     Pen PenForRoadType(RoadType type) => (Pen)(type switch
@@ -348,12 +337,51 @@ public partial class MapView : UserControl
         pen.Thickness = ThicknessForRoadType(roadType) * MapViewModel.Scale;
         if (pen.Brush is LinearGradientBrush gradBrush)
         {
-            gradBrush.StartPoint = new RelativePoint(0, -pen.Thickness / 2, RelativeUnit.Absolute);
-            gradBrush.EndPoint = new RelativePoint(0, pen.Thickness / 2, RelativeUnit.Absolute);
+            gradBrush.StartPoint = new(0, -pen.Thickness / 2, RelativeUnit.Absolute);
+            gradBrush.EndPoint = new(0, pen.Thickness / 2, RelativeUnit.Absolute);
         }
         using (context.PushPreTransform(matrix))
             using (context.PushOpacity(drawGhost ? 0.5 : 1))
                 context.DrawLine(pen, new(0, 0), new(length, 0));
+    }
+
+    public void DrawLandmark(DrawingContext context, Landmark landmark, Rect rect)
+    {
+        SKSvg? svg = null;
+
+        if (_svgCache.TryGetValue(landmark.Type, out var outSvg))
+        {
+            svg = outSvg;
+        }
+        else
+        {
+            var uri = new Uri($"avares://BnbnavNetClient/Assets/Landmarks/{landmark.Type}.svg");
+            if (_assetLoader.Exists(uri))
+            {
+                var asset = _assetLoader.Open(uri);
+
+                svg = new();
+                svg.Load(asset);
+                if (svg.Picture is null)
+                    return;
+                _svgCache.Add(landmark.Type, svg);
+            }
+        }
+
+        if (svg is null)
+            return;
+
+        var sourceSize = new Size(svg.Picture!.CullRect.Width, svg.Picture.CullRect.Height);
+        var scaleMatrix = Matrix.CreateScale(
+            rect.Width / sourceSize.Width,
+            rect.Height / sourceSize.Height);
+        var translateMatrix = Matrix.CreateTranslation(
+            rect.X * sourceSize.Width / rect.Width,
+            rect.Y * sourceSize.Height / rect.Height);
+
+        using (context.PushClip(rect))
+        using (context.PushPreTransform(translateMatrix * scaleMatrix))
+            context.Custom(new SvgCustomDrawOperation(rect, svg));
     }
 
     public override void Render(DrawingContext context)
@@ -380,41 +408,7 @@ public partial class MapView : UserControl
             foreach (var (rect, landmark) in DrawnLandmarks)
             {
                 if (noRender.Contains(landmark)) continue;
-                SKSvg? svg = null;
-
-                if (_svgCache.TryGetValue(landmark.Type, out var outSvg))
-                {
-                    svg = outSvg;
-                }
-                else
-                {
-                    var uri = new Uri($"avares://BnbnavNetClient/Assets/Landmarks/{landmark.Type}.svg");
-                    if (_assetLoader.Exists(uri))
-                    {
-                        var asset = _assetLoader.Open(uri);
-
-                        svg = new();
-                        svg.Load(asset);
-                        if (svg.Picture is null)
-                            continue;
-                        _svgCache.Add(landmark.Type, svg);
-                    }
-                }
-
-                if (svg is null)
-                    continue;
-
-                var sourceSize = new Size(svg.Picture!.CullRect.Width, svg.Picture.CullRect.Height);
-                var scaleMatrix = Matrix.CreateScale(
-                    rect.Width / sourceSize.Width,
-                    rect.Height / sourceSize.Height);
-                var translateMatrix = Matrix.CreateTranslation(
-                    rect.X * sourceSize.Width / rect.Width,
-                    rect.Y * sourceSize.Height / rect.Height);
-
-                using (context.PushClip(rect))
-                using (context.PushPreTransform(translateMatrix * scaleMatrix))
-                    context.Custom(new SvgCustomDrawOperation(rect, svg));
+                DrawLandmark(context, landmark, rect);
             }
         }
 
