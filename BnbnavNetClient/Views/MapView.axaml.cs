@@ -14,6 +14,7 @@ using Avalonia.Svg.Skia;
 using Svg.Skia;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using BnbnavNetClient.Models;
 using DynamicData;
@@ -386,13 +387,14 @@ public partial class MapView : UserControl
 
         SKSvg? svg = null;
 
-        if (_svgCache.TryGetValue(landmark.Type, out var outSvg))
+        var uriString = $"avares://BnbnavNetClient/Assets/Landmarks/{landmark.Type}.svg";
+        if (_svgCache.TryGetValue(uriString, out var outSvg))
         {
             svg = outSvg;
         }
         else
         {
-            var uri = new Uri($"avares://BnbnavNetClient/Assets/Landmarks/{landmark.Type}.svg");
+            var uri = new Uri(uriString);
             if (_assetLoader.Exists(uri))
             {
                 var asset = _assetLoader.Open(uri);
@@ -401,7 +403,7 @@ public partial class MapView : UserControl
                 svg.Load(asset);
                 if (svg.Picture is null)
                     return;
-                _svgCache.Add(landmark.Type, svg);
+                _svgCache.Add(uriString, svg);
             }
         }
 
@@ -421,6 +423,7 @@ public partial class MapView : UserControl
             context.Custom(new SvgCustomDrawOperation(rect, svg));
     }
 
+    [SuppressMessage("ReSharper", "PossibleLossOfFraction")]
     public override void Render(DrawingContext context)
     {
 
@@ -465,8 +468,55 @@ public partial class MapView : UserControl
 
         foreach (var player in MapViewModel.MapService.Players.Values)
         {
-            context.DrawEllipse(new SolidColorBrush(player.SnappedEdge is null ? new Color(255, 255, 0, 0) : new Color(255, 0, 255, 0)), null, ToScreen(player.MarkerCoordinates), 50, 50);
-            context.DrawLine(new Pen(new SolidColorBrush(new Color(255, 0, 255, 0))), ToScreen(player.Velocity.Point1), ToScreen(player.Velocity.Point2));
+            SKSvg? svg = null;
+
+            var uriString = $"avares://BnbnavNetClient/Assets/playermark.svg";
+            if (_svgCache.TryGetValue(uriString, out var outSvg))
+            {
+                svg = outSvg;
+            }
+            else
+            {
+                var uri = new Uri(uriString);
+                if (_assetLoader.Exists(uri))
+                {
+                    var asset = _assetLoader.Open(uri);
+
+                    svg = new();
+                    svg.Load(asset);
+                    if (svg.Picture is null)
+                        return;
+                    _svgCache.Add(uriString, svg);
+                }
+            }
+
+            if (svg is null)
+                return;
+
+            const int playerSize = 48;
+            var rect = new Rect(ToScreen(player.MarkerCoordinates) - new Point(playerSize, playerSize) / 2, new Size(playerSize, playerSize));
+
+            var sourceSize = new Size(svg.Picture!.CullRect.Width, svg.Picture.CullRect.Height);
+            var scaleMatrix = Matrix.CreateScale(
+                rect.Width / sourceSize.Width,
+                rect.Height / sourceSize.Height);
+            var translateMatrix = Matrix.CreateTranslation(
+                rect.X * sourceSize.Width / rect.Width,
+                rect.Y * sourceSize.Height / rect.Height);
+            var rotateMatrix = Matrix.CreateRotation(-player.MarkerAngle * Math.Tau / 360.0);
+            var preRotateMatrix = Matrix.CreateTranslation(-sourceSize.Width / 2, -sourceSize.Width / 2);
+
+            // context.DrawEllipse(new SolidColorBrush(player.SnappedEdge is null ? new Color(255, 255, 0, 0) : new Color(255, 0, 255, 0)), null, ToScreen(player.MarkerCoordinates), 50, 50);
+            // context.DrawLine(new Pen(new SolidColorBrush(new Color(255, 0, 255, 0))), ToScreen(player.Velocity.Point1), ToScreen(player.Velocity.Point2));
+            
+            using (context.PushClip(rect))
+            using (context.PushPreTransform(translateMatrix * scaleMatrix))
+            using (context.PushTransformContainer())
+            using (context.PushPostTransform(preRotateMatrix))
+            using (context.PushPostTransform(rotateMatrix))
+            using (context.PushPostTransform(preRotateMatrix.Invert()))
+                context.Custom(new SvgCustomDrawOperation(rect, svg));
+            
         }
 
         base.Render(context);
