@@ -362,7 +362,7 @@ public partial class MapView : UserControl
             if (scale < lowerScaleBound || scale > higherScaleBound) return;
 
             var text = new FormattedText(landmark.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                new("Noto Sans"), size * scale, new SolidColorBrush(new Color(255, 255, 255, 255)));
+                new("Noto Sans"), size * scale, (Brush)this.FindResource("ForegroundBrush")!);
 
             context.DrawText(text, rect.Center - new Point(text.Width / 2, text.Height / 2));
             return;

@@ -4,6 +4,7 @@
   <SolidColorBrush x:Key="BackgroundBrush" Color="#001e32"/>
   <SolidColorBrush x:Key="NodeFill" Color="Black"/>
   <SolidColorBrush x:Key="SelectedNodeFill" Color="#7f00ff"/>
+  <SolidColorBrush x:Key="ForegroundBrush" Color="White"/>
   <Pen x:Key="NodeBorder" Thickness="2">
     <Pen.Brush>
       <SolidColorBrush Color="White"/>
