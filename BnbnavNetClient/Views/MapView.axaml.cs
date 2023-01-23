@@ -13,6 +13,7 @@ using Avalonia.Platform;
 using Avalonia.Svg.Skia;
 using Svg.Skia;
 using System.Collections.Generic;
+using System.Globalization;
 using BnbnavNetClient.Models;
 using DynamicData;
 using BnbnavNetClient.Helpers;
@@ -347,6 +348,32 @@ public partial class MapView : UserControl
 
     public void DrawLandmark(DrawingContext context, Landmark landmark, Rect rect)
     {
+        var scale = MapViewModel.Scale;
+        if (landmark.LandmarkType.IsLabel())
+        {
+            // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
+            var (lowerScaleBound, higherScaleBound, size) = landmark.LandmarkType switch
+            {
+                LandmarkType.City => (0.3, 1.15, 60),
+                LandmarkType.Country => (0, 0.3, 120),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            if (scale < lowerScaleBound || scale > higherScaleBound) return;
+
+            var text = new FormattedText(landmark.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+                new("Noto Sans"), size * scale, new SolidColorBrush(new Color(255, 255, 255, 255)));
+
+            context.DrawText(text, rect.Center - new Point(text.Width / 2, text.Height / 2));
+            return;
+        }
+
+
+        if (!(scale >= 0.8))
+        {
+            return;
+        }
+
         SKSvg? svg = null;
 
         if (_svgCache.TryGetValue(landmark.Type, out var outSvg))
@@ -386,7 +413,6 @@ public partial class MapView : UserControl
 
     public override void Render(DrawingContext context)
     {
-        var scale = MapViewModel.Scale;
 
         context.FillRectangle((Brush)this.FindResource("BackgroundBrush")!, Bounds);
 
@@ -403,13 +429,10 @@ public partial class MapView : UserControl
             DrawEdge(context, edge.Road.RoadType, from, to);
         }
 
-        if (scale >= 0.8)
+        foreach (var (rect, landmark) in DrawnLandmarks)
         {
-            foreach (var (rect, landmark) in DrawnLandmarks)
-            {
-                if (noRender.Contains(landmark)) continue;
-                DrawLandmark(context, landmark, rect);
-            }
+            if (noRender.Contains(landmark)) continue;
+            DrawLandmark(context, landmark, rect);
         }
 
         if (MapViewModel.IsInEditMode)
