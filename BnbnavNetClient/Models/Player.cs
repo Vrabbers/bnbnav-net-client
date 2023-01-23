@@ -143,5 +143,5 @@ public sealed class Player
         _timer.Enabled = false;
     }
 
-    public event EventHandler<EventArgs> PlayerUpdateEvent;
+    public event EventHandler<EventArgs>? PlayerUpdateEvent;
 }

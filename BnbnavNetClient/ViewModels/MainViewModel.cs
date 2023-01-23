@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.I18Next.Services;
 using Avalonia;
+using Avalonia.Controls;
 using BnbnavNetClient.Settings;
 
 namespace BnbnavNetClient.ViewModels;
@@ -22,10 +23,10 @@ public sealed class MainViewModel : ViewModel
     public bool FollowMeEnabled { get; set; }
 
     [ObservableAsProperty]
-    public string FollowMeText { get; }
+    public string LoginText { get; }
 
     [Reactive]
-    public string FollowMeUsername { get; set; } = string.Empty;
+    public string LoggedInUsername { get; set; } = string.Empty;
 
     [Reactive]
     public string? EditModeToken { get; set; }
@@ -35,9 +36,14 @@ public sealed class MainViewModel : ViewModel
 
     [Reactive]
     public MapViewModel? MapViewModel { get; private set; }
+    
+    public Button UserControlButton { get; set; } = null!;
 
     [ObservableAsProperty]
     public string PanText { get; }
+    
+    [ObservableAsProperty]
+    public bool HaveLoggedInUser { get; set; }
 
     readonly IAvaloniaI18Next _tr;
 
@@ -73,11 +79,14 @@ public sealed class MainViewModel : ViewModel
         _settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
         _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
         var followMeText = this
-            .WhenAnyValue(me => me.FollowMeEnabled, me => me.FollowMeUsername)
+            .WhenAnyValue(me => me.FollowMeEnabled, me => me.LoggedInUsername)
             .Select(x => x.Item1 ? _tr["FOLLOWING", ("user", x.Item2)] : _tr["FOLLOW_ME"]);
-        followMeText.ToPropertyEx(this, me => me.FollowMeText);
-        FollowMeText = _tr["FOLLOW_ME"];
+        followMeText.ToPropertyEx(this, me => me.LoginText);
+        LoginText = _tr["FOLLOW_ME"];
         PanText = "x = 0; y = 0";
+
+        this.WhenAnyValue(x => x.LoggedInUsername).Select(x => !string.IsNullOrEmpty(x))
+            .ToPropertyEx(this, x => x.HaveLoggedInUser);
 
         MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Select)
             .ToPropertyEx(this, x => x.IsInSelectMode);
@@ -195,36 +204,27 @@ public sealed class MainViewModel : ViewModel
         MapEditorService.CurrentEditMode = EditModeControl.Landmark;
     }
 
-    public void FollowMePressed()
+    public void LoginPressed()
     {
-        //annoyingly the button sets this for us...  so we undo it first
-        FollowMeEnabled = !FollowMeEnabled;
-        if (!FollowMeEnabled)
-        {
-            var followMePopup = new EnterPopupViewModel(_tr["FOLLOW_ME_PROMPT"], _tr["FOLLOW_ME_WATERMARK"]);
-            Observable.Merge(
+        var followMePopup = new EnterPopupViewModel(_tr["FOLLOW_ME_PROMPT"], _tr["FOLLOW_ME_WATERMARK"]);
+        Observable.Merge(
                 followMePopup.Ok,
                 followMePopup.Cancel.Select(_ => (string?)null))
-                .Take(1)
-                .Subscribe(str =>
+            .Take(1)
+            .Subscribe(str =>
+            {
+                if (str is not null)
                 {
-                    if (str is null)
-                    {
-                        FollowMeEnabled = false;
-                    }
-                    else
-                    {
-                        FollowMeEnabled = true;
-                        FollowMeUsername = str;
-                    }
-                    Popup = null;
-                });
-            Popup = followMePopup;
-        }
-        else
-        { 
-            FollowMeEnabled = false;
-            FollowMeUsername = string.Empty;
-        }
+                    LoggedInUsername = str;
+                }
+                Popup = null;
+            });
+        Popup = followMePopup;
+    }
+
+    public void LogoutPressed()
+    {
+        LoggedInUsername = "";
+        UserControlButton.Flyout!.Hide();
     }
 }

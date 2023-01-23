@@ -16,6 +16,8 @@ namespace BnbnavNetClient.ViewModels;
 
 public class MapViewModel : ViewModel
 {
+    private readonly MainViewModel _mainViewModel;
+
     [Reactive]
     public Point Pan { get; set; }
 
@@ -46,15 +48,25 @@ public class MapViewModel : ViewModel
     public IReadOnlyList<MapItem> LastRightClickHitTest { get; set; } = Array.Empty<MapItem>();
 
     public ReactiveCommand<Unit, Unit> DeleteNodeCommand { get; }
+    
+    [ObservableAsProperty]
+    public bool FollowMeEnabled { get; set; }
+
+    [ObservableAsProperty] 
+    public string? LoggedInUsername { get; set; }
 
     [Reactive] public AvaloniaList<MenuItem> ContextMenuItems { get; set; } = new();
 
     public MapViewModel(MapService mapService, MainViewModel mainViewModel)
     {
+        _mainViewModel = mainViewModel;
         DeleteNodeCommand = ReactiveCommand.Create(() => { }, this.WhenAnyValue(me => me.LastRightClickHitTest).Select(list => list.Any(x => x is Node)));
         MapService = mapService;
         MapEditorService = mainViewModel.MapEditorService;
         MapEditorService.WhenAnyValue(x => x.EditModeEnabled).ToPropertyEx(this, x => x.IsInEditMode);
+
+        mainViewModel.WhenAnyValue(x => x.FollowMeEnabled).ToPropertyEx(this, x => x.FollowMeEnabled);
+        mainViewModel.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(this, x => x.LoggedInUsername);
     }
     
     public void QueueDelete(params MapItem[] mapItems)
@@ -78,6 +90,11 @@ public class MapViewModel : ViewModel
                 }
             }
         }
+    }
+
+    public void DisableFollowMe()
+    {
+        _mainViewModel.FollowMeEnabled = false;
     }
 }
 

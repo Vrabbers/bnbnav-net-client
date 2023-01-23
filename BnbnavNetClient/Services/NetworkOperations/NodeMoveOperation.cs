@@ -62,8 +62,8 @@ public class NodeMoveOperation : NetworkOperation
         lineBetween = lineBetween.SetLength(20).FlipDirection().SetLength(-(lineBetween.Length - 40));
 
         var headLength = lineBetween.Length < 50 ? lineBetween.Length / 2 : 25;
-        var arrowhead1 = lineBetween.FlipDirection().SetAngle(lineBetween.Angle - 45).SetLength(headLength);
-        var arrowhead2 = lineBetween.FlipDirection().SetAngle(lineBetween.Angle - -45).SetLength(headLength);
+        var arrowhead1 = lineBetween.FlipDirection().SetAngle(lineBetween.Angle - 135).SetLength(headLength);
+        var arrowhead2 = lineBetween.FlipDirection().SetAngle(lineBetween.Angle - -135).SetLength(headLength);
 
         PolylineGeometry geo = new();
         geo.Points.Add(arrowhead1.Point2);

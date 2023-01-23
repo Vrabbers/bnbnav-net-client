@@ -136,6 +136,9 @@ public partial class MapView : UserControl
                 } 
                 else
                 {
+                    //Turn off Follow Me
+                    MapViewModel.DisableFollowMe();
+                    
                     // We need to pan _more_ when scale is smaller:
                     MapViewModel.Pan += (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
                     
@@ -248,7 +251,11 @@ public partial class MapView : UserControl
             .Subscribe(Observer.Create<IReadOnlyList<NetworkOperation>?>(_ => Dispatcher.UIThread.Post(InvalidateVisual)));
 
         MapViewModel.MapService.WhenPropertyChanged(x => x.Players)
-            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Player>>>(_ => InvalidateVisual()));
+            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Player>>>(_ =>
+            {
+                InvalidateVisual();
+                UpdateFollowMeState();
+            }));
         MapViewModel.MapService.WhenPropertyChanged(x => x.Nodes)
             .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Node>>>(_ => UpdateDrawnItems()));
         MapViewModel.MapService.WhenPropertyChanged(x => x.Edges)
@@ -269,6 +276,17 @@ public partial class MapView : UserControl
     List<(Point, Point, Edge)> DrawnEdges { get; set; } = new();
     List<(Rect, Landmark)> DrawnLandmarks { get; set; } = new();
     public List<(Rect, Node)> DrawnNodes { get; set; } = new();
+
+    private void UpdateFollowMeState()
+    {
+        if (MapViewModel.FollowMeEnabled)
+        {
+            var exists = MapViewModel.MapService.Players.TryGetValue(MapViewModel.LoggedInUsername!, out var player);
+            if (!exists) return;
+
+            MapViewModel.Pan = player!.MarkerCoordinates - new Point(Bounds.Size.Width, Bounds.Size.Height) / MapViewModel.Scale / 2;
+        }
+    }
 
     public IEnumerable<MapItem> HitTest(Point point)
     {
@@ -553,7 +571,7 @@ public partial class MapView : UserControl
 
     public void Zoom(double deltaScale, Point origin)
     {
-        var newScale = double.Clamp(MapViewModel.Scale + deltaScale, 0.1, 5.0);
+        var newScale = double.Clamp(MapViewModel.Scale + deltaScale, 0.1, 20.0);
         
         var worldPrevPos = ToWorld(origin);
         MapViewModel.Scale = newScale;

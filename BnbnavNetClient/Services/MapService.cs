@@ -375,28 +375,28 @@ public sealed class MapService : ReactiveObject
                 
                 case PlayerMoved player:
                     type = nameof(Players);
-                    if (_players.ContainsKey(player.Id))
+                    if (_players.ContainsKey(player.Id!))
                     {
-                        _players[player.Id].HandlePlayerMovedEvent(player);
+                        _players[player.Id!].HandlePlayerMovedEvent(player);
                     }
                     else
                     {
-                        var p = new Player(player.Id, this);
+                        var p = new Player(player.Id!, this);
                         p.PlayerUpdateEvent += (_, _) =>
                         {
                             PlayerUpdateInteraction.Handle(Unit.Default);
                         };
                         p.HandlePlayerMovedEvent(player);
-                        _players.Add(player.Id, p);
+                        _players.Add(player.Id!, p);
                     }
 
                     break;
                 case PlayerLeft player:
                     type = nameof(Players);
-                    if (_players.ContainsKey(player.Id))
+                    if (_players.ContainsKey(player.Id!))
                     {
-                        _players[player.Id].HandlePlayerGoneEvent();
-                        _players.Remove(player.Id);
+                        _players[player.Id!].HandlePlayerGoneEvent();
+                        _players.Remove(player.Id!);
                     }
                     break;
             }
