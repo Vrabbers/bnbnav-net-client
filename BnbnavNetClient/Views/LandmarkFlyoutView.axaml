@@ -28,6 +28,16 @@
       </TabItem>
       <TabItem Header="{str:Tr Key=LABEL}">
         <StackPanel>
+          <TextBlock Text="{str:Tr Key=LABEL_NAME}" />
+          <TextBox Watermark="{str:Tr Key=LABEL_NAME}" Text="{Binding LabelName}"/>
+          <TextBlock Text="{str:Tr Key=LABEL_TYPE}" />
+          <ComboBox HorizontalAlignment="Stretch" Items="{Binding LabelTypes}" SelectedItem="{Binding SelectedLabelType}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding HumanReadableName}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
         </StackPanel>
       </TabItem>
     </TabControl>

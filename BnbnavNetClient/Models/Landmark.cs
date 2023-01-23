@@ -10,6 +10,8 @@ namespace BnbnavNetClient.Models;
 public enum LandmarkType
 {
     Unknown = 0,
+    City,
+    Country,
     AirCSStation,
     Airport,
     Hospital,
@@ -35,7 +37,7 @@ public enum LandmarkType
     Hotel,
     FrivoloCoChocolates,
     Elc,
-    Tesco
+    Tesco,
 }
 
 public static class LandmarkTypeExtensions
@@ -69,6 +71,8 @@ public static class LandmarkTypeExtensions
         LandmarkType.FrivoloCoChocolates => "frivoloco",
         LandmarkType.Elc => "elc",
         LandmarkType.Tesco => "tesco",
+        LandmarkType.City => "label-city",
+        LandmarkType.Country => "label-country",
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
     };
 
@@ -104,9 +108,14 @@ public static class LandmarkTypeExtensions
             LandmarkType.FrivoloCoChocolates => t["LANDMARK_FRIVOLOCO"],
             LandmarkType.Elc => t["LANDMARK_ELC"],
             LandmarkType.Tesco => t["LANDMARK_TESCO"],
+            LandmarkType.City => t["LABEL_CITY"],
+            LandmarkType.Country => t["LABEL_COUNTRY"],
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
+
+    public static bool IsLandmark(this LandmarkType type) => type != LandmarkType.Unknown && !type.IsLabel();
+    public static bool IsLabel(this LandmarkType type) => type.ServerName().StartsWith("label-");
 }
 
 public sealed class Landmark : MapItem
