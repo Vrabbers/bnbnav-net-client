@@ -308,8 +308,11 @@ public partial class MapView : UserControl
         DrawnLandmarks = mapService.Landmarks.Values.Select(landmark => (landmark.BoundingRect(this), landmark))
             .Where(landmark => bounds.Intersects(landmark.Item1)).ToList();
 
-        DrawnNodes = mapService.Nodes.Values.Select(node => (node.BoundingRect(this), node))
+        if (MapViewModel.IsInEditMode)
+        {
+            DrawnNodes = mapService.Nodes.Values.Select(node => (node.BoundingRect(this), node))
             .Where(node => bounds.Intersects(node.Item1)).ToList();
+        }
     }
 
     Pen PenForRoadType(RoadType type) => (Pen)(type switch
