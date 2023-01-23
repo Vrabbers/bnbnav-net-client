@@ -303,7 +303,7 @@ public partial class MapView : UserControl
         {
             var (from, to) = edge.Extents(this);
             return (from, to, edge);
-        }).Where(edge => GeoHelper.LineIntersects(edge.from, edge.to, bounds)).OrderBy(tuple => (tuple.from.Y + tuple.to.Y) / 2).ToList();
+        }).Where(edge => GeoHelper.LineIntersects(edge.from, edge.to, bounds)).OrderBy(tuple => (tuple.edge.From.Y + tuple.edge.To.Y) / 2).ToList();
 
         DrawnLandmarks = mapService.Landmarks.Values.Select(landmark => (landmark.BoundingRect(this), landmark))
             .Where(landmark => bounds.Intersects(landmark.Item1)).ToList();
