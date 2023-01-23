@@ -517,6 +517,26 @@ public partial class MapView : UserControl
             using (context.PushPostTransform(preRotateMatrix.Invert()))
                 context.Custom(new SvgCustomDrawOperation(rect, svg));
             
+            //Draw the player name
+            var textBrush = (Brush)this.FindResource("ForegroundBrush")!;
+            player.PlayerText.SetForegroundBrush(textBrush);
+
+            var textCenter = rect.Center + new Point(0, rect.Height / 2 + 10 + player.PlayerText.Height / 2);
+            context.DrawText(player.PlayerText, textCenter - new Point(player.PlayerText.Width, player.PlayerText.Height) / 2);
+
+            if (player.SnappedEdge is not null)
+            {
+                var roadText = new FormattedText(player.SnappedEdge.Road.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+                    new("Noto Sans"), 20, new SolidColorBrush(new Color(255, 255, 255, 255)));
+
+                var roadCenter = textCenter + new Point(0, player.PlayerText.Height / 2 + 10 + roadText.Height / 2);
+                var roadRect = new Rect(roadCenter - new Point(roadText.Width + 10, roadText.Height) / 2,
+                    new Size(roadText.Width + 10, roadText.Height));
+                var backingRect = roadRect.Inflate(3);
+                context.DrawRectangle(new SolidColorBrush(new Color(255, 0, 120, 130)), null, backingRect,
+                    backingRect.Height / 2, backingRect.Height / 2);
+                context.DrawText(roadText, roadCenter - new Point(roadText.Width / 2, roadText.Height / 2));
+            }
         }
 
         base.Render(context);
