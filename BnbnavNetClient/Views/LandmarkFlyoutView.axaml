@@ -8,5 +8,23 @@
              x:CompileBindings="True"
              xmlns:str="using:BnbnavNetClient.I18Next"
              xmlns:viewModels="clr-namespace:BnbnavNetClient.ViewModels">
-    Welcome to Avalonia!
+
+  <StackPanel>
+    <TextBlock Text="{str:Tr Key=EDIT_LANDMARK}" />
+    <TabControl SelectedIndex="{Binding CurrentTabIndex}">
+      <TabItem Header="{str:Tr Key=LANDMARK}">
+        <StackPanel>
+        </StackPanel>
+      </TabItem>
+      <TabItem Header="{str:Tr Key=LABEL}">
+        <StackPanel>
+        </StackPanel>
+      </TabItem>
+    </TabControl>
+    <Grid Margin="0 4 0 0" HorizontalAlignment="Right" ColumnDefinitions="Auto * Auto Auto">
+      <Button Grid.Column="0" IsEnabled="{Binding DeleteButtonEnabled}" Command="{Binding DeleteClicked}" Content="{str:Tr Key=LANDMARK_DELETE}" Classes="destructive" />
+      <Button Grid.Column="2" Command="{Binding CancelClicked}" Content="{str:Tr Key=CANCEL}" />
+      <Button Grid.Column="3" Classes="accent" IsEnabled="{Binding CommitButtonEnabled}" Command="{Binding CommitClicked}" Content="{str:Tr Key=SAVE}" />
+    </Grid>
+  </StackPanel>
 </UserControl>

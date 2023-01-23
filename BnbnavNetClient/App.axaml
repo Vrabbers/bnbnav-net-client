@@ -39,6 +39,15 @@
     <Style Selector="TextBlock">
       <Setter Property="Margin" Value="2"/>
     </Style>
+    <Style Selector="Button.destructive">
+      <Setter Property="Background" Value="#ffff0000" />
+    </Style>
+    <Style Selector="Button.destructive:pointerover">
+      <Setter Property="Background" Value="#ff00ff00" />
+    </Style>
+    <Style Selector="Button.destructive:pressed">
+      <Setter Property="Background" Value="#ff00ff00" />
+    </Style>
     <StyleInclude Source="/Controls/DayNightButton.axaml"/>
   </Application.Styles>
 </Application>

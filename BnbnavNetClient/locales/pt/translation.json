@@ -4,6 +4,7 @@
   "EDGE_DELETE": "",
   "EDITNAV_PROMPT": "Use /editnav para obter uma chave e a insira aqui:",
   "EDITNAV_WATERMARK": "Chave",
+  "EDIT_LANDMARK": "",
   "EDIT_MODE": "Modo editar",
   "EXISTING": "",
   "EXISTING_ROAD": "",
@@ -12,7 +13,9 @@
   "FOLLOW_ME_PROMPT": "Insira o nome do usuário do Minecraft:",
   "FOLLOW_ME_TURN_RESTRICTIONS": "Destacar nós com proibições de virada",
   "FOLLOW_ME_WATERMARK": "Nome do usuário",
+  "LABEL": "",
   "LANDMARK": "",
+  "LANDMARK_DELETE": "",
   "LANG_CHANGE": "Mudar linguagem:",
   "LANG_CHANGE_RESTART_REQUIRED": "Reinicie bnbnav para que as mudanças tenham efeito.",
   "MAKE_BIDIRECTIONAL": "",
@@ -21,6 +24,7 @@
   "NEW_EDGE": "",
   "NEW_ROAD": "",
   "NODE_DELETE": "",
+  "NONE": "",
   "OK": "OK",
   "ROAD_NAME": "",
   "ROAD_TYPE": "",
@@ -35,6 +39,7 @@
   "ROAD_TYPE_ROUNDABOUT": "",
   "ROAD_TYPE_UNKNOWN": "",
   "ROAD_TYPE_WATERWAY": "",
+  "SAVE": "",
   "SPLICE": "",
   "SPY_OPTIONS": "Espionar"
 }

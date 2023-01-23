@@ -4,6 +4,7 @@
   "EDGE_DELETE": "",
   "EDITNAV_PROMPT": "השתמש ב-/editnav כדי לקבל שובר. הזן אותו פה:",
   "EDITNAV_WATERMARK": "שובר",
+  "EDIT_LANDMARK": "",
   "EDIT_MODE": "מצב עריכה",
   "EXISTING": "",
   "EXISTING_ROAD": "",
@@ -12,7 +13,9 @@
   "FOLLOW_ME_PROMPT": "הזו את שם המשתמש שלך ב-Minecraft:",
   "FOLLOW_ME_TURN_RESTRICTIONS": "הצג צמתים עם הגבלות סיבוב",
   "FOLLOW_ME_WATERMARK": "שם משתמש",
+  "LABEL": "",
   "LANDMARK": "",
+  "LANDMARK_DELETE": "",
   "LANG_CHANGE": "שנה שפה",
   "LANG_CHANGE_RESTART_REQUIRED": "עליך להפעיל bnbnav מחדש כדי להחל את ההגדרות שלך.",
   "MAKE_BIDIRECTIONAL": "",
@@ -20,6 +23,7 @@
   "NEW_EDGE": "",
   "NEW_ROAD": "",
   "NODE_DELETE": "",
+  "NONE": "",
   "OK": "אישור",
   "ROAD_NAME": "",
   "ROAD_TYPE": "",
@@ -34,6 +38,7 @@
   "ROAD_TYPE_ROUNDABOUT": "",
   "ROAD_TYPE_UNKNOWN": "",
   "ROAD_TYPE_WATERWAY": "",
+  "SAVE": "",
   "SPLICE": "",
   "SPY_OPTIONS": "אפשרויות ריגול"
 }
