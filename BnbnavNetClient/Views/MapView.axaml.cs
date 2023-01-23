@@ -23,6 +23,7 @@ using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.EditControllers;
 using BnbnavNetClient.Services.NetworkOperations;
+using Microsoft.VisualBasic;
 
 namespace BnbnavNetClient.Views;
 
@@ -41,6 +42,8 @@ public partial class MapView : UserControl
     readonly IAssetLoader _assetLoader;
 
     public MapViewModel MapViewModel => (MapViewModel)DataContext!;
+
+    public List<Edge> HoveredEdges { get; set; } = new();
 
     public MapView()
     {
@@ -126,6 +129,8 @@ public partial class MapView : UserControl
                 }
             }).Where(x => x is not null)!);
 
+            HoveredEdges = new(HitTest(pointerPos).Where(x => x is Edge).Cast<Edge>());
+
             if (_pointerPressing)
             {
                 if (_disablePan)
@@ -156,6 +161,8 @@ public partial class MapView : UserControl
                 }
                 _pointerPrevPosition = pointerPos;
             }
+            
+            InvalidateVisual();
         };
 
         PointerReleased += (_, eventArgs) =>
@@ -296,7 +303,7 @@ public partial class MapView : UserControl
         {
             var (from, to) = edge.Extents(this);
             return (from, to, edge);
-        }).Where(edge => GeoHelper.LineIntersects(edge.from, edge.to, bounds)).ToList();
+        }).Where(edge => GeoHelper.LineIntersects(edge.from, edge.to, bounds)).OrderBy(tuple => (tuple.from.Y + tuple.to.Y) / 2).ToList();
 
         DrawnLandmarks = mapService.Landmarks.Values.Select(landmark => (landmark.BoundingRect(this), landmark))
             .Where(landmark => bounds.Intersects(landmark.Item1)).ToList();
@@ -322,7 +329,7 @@ public partial class MapView : UserControl
 
     public double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? this.FindResource("MotorwayThickness")! : this.FindResource("RoadThickness")!);
 
-    public void DrawEdge(DrawingContext context, RoadType roadType, Point from, Point to, bool drawGhost = false)
+    public void DrawEdge(DrawingContext context, RoadType roadType, Point from, Point to, bool drawGhost = false, bool drawHighlight = false)
     {
             
         var pen = PenForRoadType(roadType);
@@ -341,6 +348,9 @@ public partial class MapView : UserControl
             gradBrush.StartPoint = new(0, -pen.Thickness / 2, RelativeUnit.Absolute);
             gradBrush.EndPoint = new(0, pen.Thickness / 2, RelativeUnit.Absolute);
         }
+
+        if (drawHighlight) pen = new(new SolidColorBrush(new Color(255, 0, 0, 255)), pen.Thickness, pen.DashStyle, pen.LineCap, pen.LineJoin, pen.MiterLimit);
+
         using (context.PushPreTransform(matrix))
             using (context.PushOpacity(drawGhost ? 0.5 : 1))
                 context.DrawLine(pen, new(0, 0), new(length, 0));
@@ -426,7 +436,7 @@ public partial class MapView : UserControl
         foreach (var (from, to, edge) in DrawnEdges)
         {
             if (noRender.Contains(edge)) continue;
-            DrawEdge(context, edge.Road.RoadType, from, to);
+            DrawEdge(context, edge.Road.RoadType, from, to, false, MapViewModel.IsInEditMode && (HoveredEdges.LastOrDefault() == edge || MapViewModel.MapService.OppositeEdge(HoveredEdges.LastOrDefault()) == edge));
         }
 
         foreach (var (rect, landmark) in DrawnLandmarks)

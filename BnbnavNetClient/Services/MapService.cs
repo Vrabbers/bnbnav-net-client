@@ -91,8 +91,9 @@ public sealed class MapService : ReactiveObject
         _websocketService = websocketService;
     }
 
-    public Edge? OppositeEdge(Edge edge)
+    public Edge? OppositeEdge(Edge? edge)
     {
+        if (edge is null) return null;
         return _edges.Values.SingleOrDefault(x => x.To == edge.From && x.From == edge.To);
     }
 
