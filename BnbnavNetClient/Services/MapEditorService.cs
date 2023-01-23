@@ -24,6 +24,7 @@ public class MapEditorService : ReactiveObject
                 EditModeControl.Join => new NodeJoinEditController(this),
                 EditModeControl.NodeMove => new NodeMoveEditController(this),
                 EditModeControl.Splice => new SpliceEditController(this),
+                EditModeControl.Landmark => new LandmarkEditController(this),
                 _ => throw new ArgumentOutOfRangeException(nameof(x), x, null)
             };
         });

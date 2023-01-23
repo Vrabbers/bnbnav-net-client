@@ -55,7 +55,10 @@ public sealed class MainViewModel : ViewModel
     
     [ObservableAsProperty] 
     public bool IsInSpliceMode => MapEditorService.CurrentEditMode == EditModeControl.Splice;
-
+    
+    [ObservableAsProperty] 
+    public bool IsInLandmarkMode => MapEditorService.CurrentEditMode == EditModeControl.Landmark;
+    
     [ObservableAsProperty]
     public bool EditModeEnabled { get; } = false;
     
@@ -84,6 +87,8 @@ public sealed class MainViewModel : ViewModel
             .ToPropertyEx(this, x => x.IsInNodeMoveMode);
         MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Splice)
             .ToPropertyEx(this, x => x.IsInSpliceMode);
+        MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Landmark)
+            .ToPropertyEx(this, x => x.IsInLandmarkMode);
         MapEditorService.WhenAnyValue(x => x.EditModeEnabled).ToPropertyEx(this, x => x.EditModeEnabled);
     }
 
@@ -183,6 +188,11 @@ public sealed class MainViewModel : ViewModel
     public void SplicePressed()
     {
         MapEditorService.CurrentEditMode = EditModeControl.Splice;
+    }
+
+    public void LandmarkPressed()
+    {
+        MapEditorService.CurrentEditMode = EditModeControl.Landmark;
     }
 
     public void FollowMePressed()

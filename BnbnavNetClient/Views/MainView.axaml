@@ -29,12 +29,13 @@
 
       <!-- Edit Controls -->
       <Grid Grid.Row="2" IsVisible="{Binding EditModeEnabled}">
-        <Grid ColumnDefinitions="Auto Auto Auto * Auto">
+        <Grid ColumnDefinitions="Auto Auto Auto Auto Auto * Auto">
           <ToggleButton Grid.Column="0" Command="{Binding SelectModePressed}" Content="Select" IsChecked="{Binding IsInSelectMode}"/>
           <ToggleButton Grid.Column="1" Command="{Binding JoinModePressed}" Content="Join" IsChecked="{Binding IsInJoinMode}"/>
-          <ToggleButton Grid.Column="2" Command="{Binding NodeMovePressed}" Content="{str:Tr Key=MOVE_NODE}" IsChecked="{Binding IsInNodeMoveMode}"/>
-          <ToggleButton Grid.Column="3" Command="{Binding SplicePressed}" Content="{str:Tr Key=SPLICE}" IsChecked="{Binding IsInSpliceMode}"/>
-          <Button Grid.Column="5" IsVisible="{Binding EditModeEnabled}" Content="{str:Tr Key=SPY_OPTIONS}">
+          <ToggleButton Grid.Column="2" Command="{Binding LandmarkPressed}" Content="{str:Tr Key=LANDMARK}" IsChecked="{Binding IsInLandmarkMode}"/>
+          <ToggleButton Grid.Column="3" Command="{Binding NodeMovePressed}" Content="{str:Tr Key=MOVE_NODE}" IsChecked="{Binding IsInNodeMoveMode}"/>
+          <ToggleButton Grid.Column="4" Command="{Binding SplicePressed}" Content="{str:Tr Key=SPLICE}" IsChecked="{Binding IsInSpliceMode}"/>
+          <Button Grid.Column="6" IsVisible="{Binding EditModeEnabled}" Content="{str:Tr Key=SPY_OPTIONS}">
             <Button.Flyout>
               <Flyout>
                 <CheckBox Content="{str:Tr Key=FOLLOW_ME_TURN_RESTRICTIONS}" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
