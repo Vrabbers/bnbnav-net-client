@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Media;
 using BnbnavNetClient.Helpers;
 using BnbnavNetClient.Services;
+using Timer = System.Timers.Timer;
 
 namespace BnbnavNetClient.Models;
 
@@ -16,7 +17,7 @@ public sealed class Player
 {
     private readonly MapService _mapService;
     private readonly Timer _timer;
-    private DateTime _lastSnapCheck = DateTime.MinValue;
+    private Mutex _lastSnapMutex = new();
     
     public string Name { get; }
 
@@ -114,29 +115,27 @@ public sealed class Player
         PosHistory.Insert(0, (DateTime.UtcNow, new(X, Z)));
         PosHistory = PosHistory.Where((x, i) => i <= 10 || DateTime.UtcNow - x.Item1 < TimeSpan.FromMilliseconds(500)).ToList();
 
-        //Guard snapping
-        if (DateTime.UtcNow - _lastSnapCheck > TimeSpan.FromMilliseconds(200))
+        Task.Run(() =>
         {
-            Task.Run(() =>
-            {
-                var candidateEdges = _mapService.Edges.Values.AsParallel().Where(edge => edge.CanSnapTo() && GeoHelper.LineSegmentToPointDistance(new(edge.From.X, edge.From.Z), new(edge.To.X, edge.To.Z), new(evt.X, evt.Z)) <= 10 /* TODO: Get the road thickness from resources somehow */).Where(
-                    edge =>
-                    {
-                        var angle = edge.Line.AngleTo(Velocity);
-                        if (angle > 180) angle = -360 + angle;
-                        return Math.Abs(angle) < 45;
-                    }).ToArray(); //TODO: Order by whether the edge is part of the current route or not in order to prioritise snapping to the current route in Go Mode
-
-                var shouldChangeEdge = SnappedEdge is null || !candidateEdges.Contains(SnappedEdge);
-                //TODO: Also change edge if the current route contains the edge to change to or if the current route does not contain the currently snapped edge
-                if (shouldChangeEdge)
+            if (!_lastSnapMutex.WaitOne(0)) return;
+            
+            var candidateEdges = _mapService.Edges.Values.AsParallel().Where(edge => edge.CanSnapTo() && GeoHelper.LineSegmentToPointDistance(new(edge.From.X, edge.From.Z), new(edge.To.X, edge.To.Z), new(evt.X, evt.Z)) <= 10 /* TODO: Get the road thickness from resources somehow */).Where(
+                edge =>
                 {
-                    SnappedEdge = candidateEdges.FirstOrDefault();
-                }
-            });
+                    var angle = edge.Line.AngleTo(Velocity);
+                    if (angle > 180) angle = -360 + angle;
+                    return Math.Abs(angle) < 45;
+                }).ToArray(); //TODO: Order by whether the edge is part of the current route or not in order to prioritise snapping to the current route in Go Mode
 
-            _lastSnapCheck = DateTime.UtcNow;
-        }
+            var shouldChangeEdge = SnappedEdge is null || !candidateEdges.Contains(SnappedEdge);
+            //TODO: Also change edge if the current route contains the edge to change to or if the current route does not contain the currently snapped edge
+            if (shouldChangeEdge)
+            {
+                SnappedEdge = candidateEdges.FirstOrDefault();
+            }
+
+            _lastSnapMutex.ReleaseMutex();
+        });
     }
 
     public void HandlePlayerGoneEvent()
