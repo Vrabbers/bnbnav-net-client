@@ -9,7 +9,7 @@
              xmlns:str="using:BnbnavNetClient.I18Next"
              xmlns:viewModels="clr-namespace:BnbnavNetClient.ViewModels">
     <StackPanel>
-        <TextBlock Text="{str:Tr Key=NEW_ROAD}" />
+        <TextBlock Text="{str:Tr Key=EDIT_ROAD}" />
         <TextBox Watermark="{str:Tr Key=ROAD_NAME}" Text="{Binding RoadName}"/>
         <TextBlock Text="{str:Tr Key=ROAD_TYPE}" />
         <ComboBox HorizontalAlignment="Stretch" Items="{Binding RoadTypes}" SelectedItem="{Binding SelectedRoadType}">
