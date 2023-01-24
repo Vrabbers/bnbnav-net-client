@@ -85,6 +85,8 @@ public sealed class MainViewModel : ViewModel
         LoginText = _tr["FOLLOW_ME"];
         PanText = "x = 0; y = 0";
 
+        LoggedInUsername = _settings.Settings.LoggedInUser;
+
         this.WhenAnyValue(x => x.LoggedInUsername).Select(x => !string.IsNullOrEmpty(x))
             .ToPropertyEx(this, x => x.HaveLoggedInUser);
 
@@ -204,6 +206,13 @@ public sealed class MainViewModel : ViewModel
         MapEditorService.CurrentEditMode = EditModeControl.Landmark;
     }
 
+    private async Task SetLogin(string loggedInUsername)
+    {
+        LoggedInUsername = loggedInUsername;
+        _settings.Settings.LoggedInUser = loggedInUsername;
+        await _settings.SaveAsync();
+    }
+
     public void LoginPressed()
     {
         var followMePopup = new EnterPopupViewModel(_tr["FOLLOW_ME_PROMPT"], _tr["FOLLOW_ME_WATERMARK"]);
@@ -211,20 +220,20 @@ public sealed class MainViewModel : ViewModel
                 followMePopup.Ok,
                 followMePopup.Cancel.Select(_ => (string?)null))
             .Take(1)
-            .Subscribe(str =>
+            .Subscribe(async str =>
             {
                 if (str is not null)
                 {
-                    LoggedInUsername = str;
+                    await SetLogin(str);
                 }
                 Popup = null;
             });
         Popup = followMePopup;
     }
 
-    public void LogoutPressed()
+    public async Task LogoutPressed()
     {
-        LoggedInUsername = "";
+        await SetLogin("");
         UserControlButton.Flyout!.Hide();
     }
 }
