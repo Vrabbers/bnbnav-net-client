@@ -6,6 +6,7 @@
   "EDITNAV_WATERMARK": "Token",
   "EDIT_LANDMARK": "Wahrzeichen bearbeiten",
   "EDIT_MODE": "Bearbeitungsmodus",
+  "EDIT_ROAD": "",
   "EXISTING": "bestehenden",
   "EXISTING_ROAD": "Bestehende Straßen",
   "FOLLOWING": "Folge {{user}}",
@@ -73,5 +74,6 @@
   "ROAD_TYPE_WATERWAY": "",
   "SAVE": "",
   "SPLICE": "",
-  "SPY_OPTIONS": ""
+  "SPY_OPTIONS": "",
+  "UPDATE": ""
 }

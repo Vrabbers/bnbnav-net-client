@@ -53,11 +53,7 @@ public class NodeMoveOperation : NetworkOperation
         var movingRect = _toUpdate.BoundingRect(mapView);
         var movedRect = _updateTo.BoundingRect(mapView);
 
-        ExtendedLine lineBetween = new()
-        {
-            Point1 = movingRect.Center,
-            Point2 = movedRect.Center
-        };
+        var lineBetween = new ExtendedLine(movingRect.Center, movedRect.Center);
 
         lineBetween = lineBetween.SetLength(20).FlipDirection().SetLength(-(lineBetween.Length - 40));
 
@@ -65,7 +61,7 @@ public class NodeMoveOperation : NetworkOperation
         var arrowhead1 = lineBetween.FlipDirection().SetAngle(lineBetween.Angle - 45).SetLength(headLength);
         var arrowhead2 = lineBetween.FlipDirection().SetAngle(lineBetween.Angle - -45).SetLength(headLength);
 
-        PolylineGeometry geo = new();
+        var geo = new PolylineGeometry();
         geo.Points.Add(arrowhead1.Point2);
         geo.Points.Add(arrowhead1.Point1);
         geo.Points.Add(arrowhead2.Point2);

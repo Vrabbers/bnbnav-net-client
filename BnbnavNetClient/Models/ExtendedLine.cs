@@ -6,6 +6,12 @@ namespace BnbnavNetClient.Models;
 
 public readonly struct ExtendedLine
 {
+    public ExtendedLine(Point point1, Point point2)
+    {
+        Point1 = point1;
+        Point2 = point2;
+    }
+
     public Point Point1 { get; init; }
     public Point Point2 { get; init; }
 
@@ -34,11 +40,7 @@ public readonly struct ExtendedLine
         EndPoint = extendedLine.Point2
     };
 
-    public static implicit operator ExtendedLine(Line line) => new()
-    {
-        Point1 = line.StartPoint,
-        Point2 = line.EndPoint
-    };
+    public static implicit operator ExtendedLine(Line line) => new(line.StartPoint, line.EndPoint);
 
     public ExtendedLine SetAngle(double angle)
     {
@@ -69,9 +71,5 @@ public readonly struct ExtendedLine
         };
     }
 
-    public ExtendedLine FlipDirection() => new()
-    {
-        Point1 = Point2,
-        Point2 = Point1
-    };
+    public ExtendedLine FlipDirection() => new(Point2, Point1);
 }

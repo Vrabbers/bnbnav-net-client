@@ -6,6 +6,7 @@
   "EDITNAV_WATERMARK": "שובר",
   "EDIT_LANDMARK": "",
   "EDIT_MODE": "מצב עריכה",
+  "EDIT_ROAD": "",
   "EXISTING": "",
   "EXISTING_ROAD": "",
   "FOLLOWING": "עוקב אחרי {{user}}",
@@ -72,5 +73,6 @@
   "ROAD_TYPE_WATERWAY": "",
   "SAVE": "",
   "SPLICE": "",
-  "SPY_OPTIONS": "אפשרויות ריגול"
+  "SPY_OPTIONS": "אפשרויות ריגול",
+  "UPDATE": ""
 }

@@ -15,6 +15,7 @@
         <entry key="BnbnavNetClient/Views/MainWindow.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Views/MapView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Views/NewEdgeFlyoutView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Views/RoadEditView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
       </map>
     </option>
   </component>
