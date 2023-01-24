@@ -122,8 +122,7 @@ public sealed class Player : IDisposable
         if (SnappedEdge is not null)
         {
             //Ensure the snapped edge is still valid
-            if (!(GeoHelper.LineSegmentToPointDistance(new(SnappedEdge.From.X, SnappedEdge.From.Z), new(SnappedEdge.To.X, SnappedEdge.To.Z),
-                    new(evt.X, evt.Z)) <= 10))
+            if (!CanSnapToEdge(SnappedEdge))
             {
                 SnappedEdge = null;
             }
@@ -132,24 +131,31 @@ public sealed class Player : IDisposable
         Task.Run(() =>
         {
             if (!_lastSnapMutex.WaitOne(0)) return;
-            
-            var candidateEdges = _mapService.Edges.Values.AsParallel().Where(edge => edge.CanSnapTo && GeoHelper.LineSegmentToPointDistance(new(edge.From.X, edge.From.Z), new(edge.To.X, edge.To.Z), new(evt.X, evt.Z)) <= 10 /* TODO: Get the road thickness from resources somehow */).Where(
-                edge =>
-                {
-                    var angle = edge.Line.AngleTo(Velocity);
-                    if (angle > 180) angle = -360 + angle;
-                    return double.Abs(angle) < 45;
-                }).ToArray(); //TODO: Order by whether the edge is part of the current route or not in order to prioritise snapping to the current route in Go Mode
 
-            var shouldChangeEdge = SnappedEdge is null || !candidateEdges.Contains(SnappedEdge);
+            var shouldChangeEdge = SnappedEdge is null;
             //TODO: Also change edge if the current route contains the edge to change to or if the current route does not contain the currently snapped edge
             if (shouldChangeEdge)
             {
-                SnappedEdge = candidateEdges.FirstOrDefault();
+                //TODO: Prioritise edges that are part of the current route
+                SnappedEdge = _mapService.Edges.Values.FirstOrDefault(CanSnapToEdge);
             }
 
             _lastSnapMutex.ReleaseMutex();
         });
+    }
+
+    private bool CanSnapToEdge(Edge edge)
+    {
+        if (!edge.CanSnapTo) return false;
+        
+        // TODO: Get the road thickness from resources somehow
+        // We are not using GeoHelper because that takes into account the extra space at the end of a road
+        if (edge.Line.SetLength(10).NormalLine().MoveCenter(new(X, Z)).TryIntersect(edge.Line, out _) !=
+            ExtendedLine.IntersectionType.Intersects) return false;
+        
+        var angle = edge.Line.AngleTo(Velocity);
+        if (angle > 180) angle = -360 + angle;
+        return double.Abs(angle) < 45;
     }
 
     public void HandlePlayerGoneEvent()

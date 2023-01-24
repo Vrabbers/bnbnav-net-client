@@ -67,7 +67,7 @@ public readonly struct ExtendedLine
     {
         intersectionPoint = new();
         
-        var a = Point1 - Point2;
+        var a = Point2 - Point1;
         var b = other.Point1 - other.Point2;
         var c = Point1 - other.Point1;
 
@@ -102,5 +102,23 @@ public readonly struct ExtendedLine
     public double AngleTo(ExtendedLine other)
     {
         return double.Ieee754Remainder(other.Angle - Angle, 360);
+    }
+
+    public ExtendedLine MovePoint1(Point point)
+    {
+        return new()
+        {
+            Point1 = point, 
+            Point2 = point + new Point(Dx, Dy)
+        };
+    }
+
+    public ExtendedLine MoveCenter(Point point)
+    {
+        return new()
+        {
+            Point1 = point - new Point(Dx, Dy) / 2,
+            Point2 = point + new Point(Dx, Dy) / 2
+        };
     }
 }
