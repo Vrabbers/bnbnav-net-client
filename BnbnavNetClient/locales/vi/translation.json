@@ -6,6 +6,7 @@
   "EDITNAV_WATERMARK": "Mã",
   "EDIT_LANDMARK": "",
   "EDIT_MODE": "Chế độ sửa đổi",
+  "EDIT_ROAD": "",
   "EXISTING": "",
   "EXISTING_ROAD": "",
   "FOLLOWING": "Đang theo dõi {{user}}",
@@ -75,5 +76,6 @@
   "ROAD_TYPE_WATERWAY": "",
   "SAVE": "",
   "SPLICE": "",
-  "SPY_OPTIONS": "Tùy chọn tỏa sáng"
+  "SPY_OPTIONS": "Tùy chọn tỏa sáng",
+  "UPDATE": ""
 }

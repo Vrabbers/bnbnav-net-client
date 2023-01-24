@@ -6,6 +6,7 @@
   "EDITNAV_WATERMARK": "Chave",
   "EDIT_LANDMARK": "",
   "EDIT_MODE": "Modo editar",
+  "EDIT_ROAD": "",
   "EXISTING": "",
   "EXISTING_ROAD": "",
   "FOLLOWING": "Seguindo {{user}}",
@@ -75,5 +76,6 @@
   "ROAD_TYPE_WATERWAY": "",
   "SAVE": "",
   "SPLICE": "",
-  "SPY_OPTIONS": "Espionar"
+  "SPY_OPTIONS": "Espionar",
+  "UPDATE": ""
 }

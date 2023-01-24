@@ -21,6 +21,7 @@ using DynamicData;
 using BnbnavNetClient.Helpers;
 using Avalonia.Controls.Primitives;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.EditControllers;
@@ -94,18 +95,21 @@ public partial class MapView : UserControl
 
             var seenEdges = new List<Edge>();
             MapViewModel.ContextMenuItems.Clear();
-            MapViewModel.ContextMenuItems.AddRange(HitTest(pointerPos).Select(x =>
+            MapViewModel.ContextMenuItems.AddRange(HitTest(pointerPos).SelectMany(x =>
             {
                 switch (x)
                 {
                     case Node node:
-                        return new MenuItem
+                        return new MenuItem[]
                         {
-                            Header = _i18n["NODE_DELETE"],
-                            Command = ReactiveCommand.Create(() =>
+                            new()
                             {
-                                MapViewModel.QueueDelete(node);
-                            })
+                                Header = _i18n["NODE_DELETE"],
+                                Command = ReactiveCommand.Create(() =>
+                                {
+                                    MapViewModel.QueueDelete(node);
+                                })
+                            }
                         };
                     case Edge edge when !seenEdges.Contains(edge):
                     {
@@ -114,19 +118,24 @@ public partial class MapView : UserControl
                         {
                             seenEdges.Add(opposite);
                         }
-                        return new()
+
+                        return new MenuItem[]
                         {
-                            Header = _i18n["EDGE_DELETE", ("roadName", edge.Road.Name)],
-                            Command = ReactiveCommand.Create(() =>
+                            new()
                             {
-                                MapViewModel.QueueDelete(edge);
-                            })
+                                Header = _i18n["EDGE_DELETE", ("roadName", edge.Road.Name)],
+                                Command = ReactiveCommand.Create(() =>
+                                {
+                                    MapViewModel.QueueDelete(edge);
+                                })
+                            }
                         };
+
                     }
                     default:
-                        return null;
+                        return Enumerable.Empty<MenuItem>();
                 }
-            }).Where(x => x is not null)!);
+            }));
 
             if (_pointerPressing)
             {
@@ -335,6 +344,8 @@ public partial class MapView : UserControl
 
         DrawnNodes = mapService.Nodes.Values.Select(node => (node.BoundingRect(this), node))
             .Where(node => bounds.Intersects(node.Item1)).ToList();
+        
+        InvalidateVisual();
     }
 
     Pen PenForRoadType(RoadType type) => (Pen)(type switch
