@@ -58,6 +58,7 @@
   "NODE_DELETE": "Delete Node",
   "NONE": "None",
   "OK": "OK",
+  "ROAD_EDIT": "Modify Road {{roadName}}",
   "ROAD_NAME": "Road Name",
   "ROAD_TYPE": "Road Type",
   "ROAD_TYPE_DUONGWARP": "Warp Road",
@@ -73,5 +74,6 @@
   "ROAD_TYPE_WATERWAY": "Waterway",
   "SAVE": "Save",
   "SPLICE": "Splice",
-  "SPY_OPTIONS": "Spy Options"
+  "SPY_OPTIONS": "Spy Options",
+  "UPDATE": "Update"
 }

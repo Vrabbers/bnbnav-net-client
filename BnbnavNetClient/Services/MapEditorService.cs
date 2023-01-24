@@ -15,12 +15,12 @@ public class MapEditorService : ReactiveObject
     
     public MapEditorService()
     {
-        EditController = new SelectEditController();
+        EditController = new SelectEditController(this);
         this.ObservableForProperty(x => x.CurrentEditMode).Subscribe(x =>
         {
             EditController = x.Value switch
             {
-                EditModeControl.Select => new SelectEditController(),
+                EditModeControl.Select => new SelectEditController(this),
                 EditModeControl.Join => new NodeJoinEditController(this),
                 EditModeControl.NodeMove => new NodeMoveEditController(this),
                 EditModeControl.Splice => new SpliceEditController(this),

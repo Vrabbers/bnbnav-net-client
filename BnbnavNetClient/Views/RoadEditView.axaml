@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="BnbnavNetClient.Views.RoadEditView"
+             x:DataType="viewModels:RoadEditViewModel"
+             x:CompileBindings="True"
+             xmlns:str="using:BnbnavNetClient.I18Next"
+             xmlns:viewModels="clr-namespace:BnbnavNetClient.ViewModels">
+    <StackPanel>
+        <TextBlock Text="{str:Tr Key=NEW_ROAD}" />
+        <TextBox Watermark="{str:Tr Key=ROAD_NAME}" Text="{Binding RoadName}"/>
+        <TextBlock Text="{str:Tr Key=ROAD_TYPE}" />
+        <ComboBox HorizontalAlignment="Stretch" Items="{Binding RoadTypes}" SelectedItem="{Binding SelectedRoadType}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding HumanReadableName}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <StackPanel Margin="0 4 0 0" HorizontalAlignment="Right" Orientation="Horizontal">
+            <Button Command="{Binding CancelClicked}" Content="{str:Tr Key=CANCEL}" />
+            <Button Classes="accent" IsEnabled="{Binding UpdateButtonEnabled}" Command="{Binding UpdateClicked}" Content="{str:Tr Key=UPDATE}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>
