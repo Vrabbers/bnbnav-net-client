@@ -1,6 +1,8 @@
 using System;
 using Avalonia;
 using Avalonia.Controls.Shapes;
+using Avalonia.Utilities;
+using BnbnavNetClient.Helpers;
 
 namespace BnbnavNetClient.Models;
 
@@ -28,7 +30,7 @@ public readonly struct ExtendedLine
 
     public double Angle
     {
-        get => double.Atan2(-Dy, Dx) * 360.0 / double.Tau;
+        get => MathHelper.ToDeg(double.Atan2(-Dy, Dx));
     }
 
     public double Length => double.Sqrt(Dx * Dx + Dy * Dy);
@@ -43,7 +45,7 @@ public readonly struct ExtendedLine
 
     public ExtendedLine SetAngle(double angle)
     {
-        var angleR = angle * double.Tau / 360.0;
+        var angleR = MathHelper.ToRad(angle);
         var dx = double.Cos(angleR) * Length;
         var dy = -double.Sin(angleR) * Length;
         
