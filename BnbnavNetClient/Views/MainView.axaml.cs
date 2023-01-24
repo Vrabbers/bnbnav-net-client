@@ -30,14 +30,17 @@ public partial class MainView : UserControl
         if (DataContext is not MainViewModel vm)
             return;
 
-        await vm.InitMapService();
-
-        MapPanel.Children.Add(new MapView() { DataContext = vm.MapViewModel });
         if (_settings.Settings.NightMode)
         {
             DayNightButton.IsNightMode = true;
             ColorModeSwitch(null, null);
         }
+
+        vm.UserControlButton = UserControlButton;
+        
+        await vm.InitMapService();
+
+        MapPanel.Children.Add(new MapView() { DataContext = vm.MapViewModel });
     }
 
     public async void ColorModeSwitch(object? _, RoutedEventArgs? __)

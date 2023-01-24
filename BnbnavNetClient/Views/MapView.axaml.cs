@@ -13,6 +13,8 @@ using Avalonia.Platform;
 using Avalonia.Svg.Skia;
 using Svg.Skia;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using BnbnavNetClient.Models;
 using DynamicData;
@@ -143,6 +145,9 @@ public partial class MapView : UserControl
                 } 
                 else
                 {
+                    //Turn off Follow Me
+                    MapViewModel.DisableFollowMe();
+                    
                     // We need to pan _more_ when scale is smaller:
                     MapViewModel.Pan += (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
                     
@@ -156,7 +161,7 @@ public partial class MapView : UserControl
 
                     _viewVelocity = new(xAverage, yAverage);
 
-                    if (Math.Abs(_viewVelocity.Y) < 7 && Math.Abs(_viewVelocity.Y) < 7)
+                    if (double.Abs(_viewVelocity.Y) < 7 && double.Abs(_viewVelocity.Y) < 7)
                         _viewVelocity = Vector.Zero;
 
                     // The actual view velocity should be the average of the last 5
@@ -210,7 +215,7 @@ public partial class MapView : UserControl
                     return;
 
                 // Stop the timer, don't waste resources.
-                if (Math.Abs(_viewVelocity.X) < 4 && Math.Abs(_viewVelocity.Y) < 4)
+                if (double.Abs(_viewVelocity.X) < 4 && double.Abs(_viewVelocity.Y) < 4)
                     _viewVelocity = Vector.Zero;
                 else
                     MapViewModel.Pan += _viewVelocity / MapViewModel.Scale;
@@ -250,12 +255,28 @@ public partial class MapView : UserControl
         MapViewModel
             .WhenAnyPropertyChanged()
             .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
-        MapViewModel.MapService
-            .WhenAnyPropertyChanged()
-            .Subscribe(Observer.Create<MapService?>(_ => UpdateDrawnItems()));
         MapViewModel.MapEditorService
             .WhenAnyValue(x => x.OngoingNetworkOperations)
             .Subscribe(Observer.Create<IReadOnlyList<NetworkOperation>?>(_ => Dispatcher.UIThread.Post(InvalidateVisual)));
+
+        MapViewModel.MapService.WhenPropertyChanged(x => x.Players)
+            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Player>>>(_ =>
+            {
+                InvalidateVisual();
+                UpdateFollowMeState();
+            }));
+        MapViewModel.MapService.WhenPropertyChanged(x => x.Nodes)
+            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Node>>>(_ => UpdateDrawnItems()));
+        MapViewModel.MapService.WhenPropertyChanged(x => x.Edges)
+            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Edge>>>(_ => UpdateDrawnItems()));
+        MapViewModel.MapService.WhenPropertyChanged(x => x.Landmarks)
+            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Landmark>>>(_ => UpdateDrawnItems()));
+
+        MapViewModel.MapService.PlayerUpdateInteraction.RegisterHandler(interaction =>
+        {
+            interaction.SetOutput(Unit.Default);
+            InvalidateVisual();
+        });
     }
 
     readonly Dictionary<string, SKSvg> _svgCache = new();
@@ -264,6 +285,17 @@ public partial class MapView : UserControl
     List<(Point, Point, Edge)> DrawnEdges { get; set; } = new();
     List<(Rect, Landmark)> DrawnLandmarks { get; set; } = new();
     public List<(Rect, Node)> DrawnNodes { get; set; } = new();
+
+    private void UpdateFollowMeState()
+    {
+        if (MapViewModel.FollowMeEnabled)
+        {
+            var exists = MapViewModel.MapService.Players.TryGetValue(MapViewModel.LoggedInUsername!, out var player);
+            if (!exists) return;
+
+            MapViewModel.Pan = player!.MarkerCoordinates - new Point(Bounds.Size.Width, Bounds.Size.Height) / MapViewModel.Scale / 2;
+        }
+    }
 
     public IEnumerable<MapItem> HitTest(Point point)
     {
@@ -373,7 +405,7 @@ public partial class MapView : UserControl
             if (scale < lowerScaleBound || scale > higherScaleBound) return;
 
             var text = new FormattedText(landmark.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                new("Noto Sans"), size * scale, (Brush)this.FindResource("ForegroundBrush")!);
+                new(FontFamily), size * scale, (Brush)this.FindResource("ForegroundBrush")!);
 
             context.DrawText(text, rect.Center - new Point(text.Width / 2, text.Height / 2));
             return;
@@ -387,13 +419,14 @@ public partial class MapView : UserControl
 
         SKSvg? svg = null;
 
-        if (_svgCache.TryGetValue(landmark.Type, out var outSvg))
+        var uriString = $"avares://BnbnavNetClient/Assets/Landmarks/{landmark.Type}.svg";
+        if (_svgCache.TryGetValue(uriString, out var outSvg))
         {
             svg = outSvg;
         }
         else
         {
-            var uri = new Uri($"avares://BnbnavNetClient/Assets/Landmarks/{landmark.Type}.svg");
+            var uri = new Uri(uriString);
             if (_assetLoader.Exists(uri))
             {
                 var asset = _assetLoader.Open(uri);
@@ -402,7 +435,7 @@ public partial class MapView : UserControl
                 svg.Load(asset);
                 if (svg.Picture is null)
                     return;
-                _svgCache.Add(landmark.Type, svg);
+                _svgCache.Add(uriString, svg);
             }
         }
 
@@ -422,6 +455,7 @@ public partial class MapView : UserControl
             context.Custom(new SvgCustomDrawOperation(rect, svg));
     }
 
+    [SuppressMessage("ReSharper", "PossibleLossOfFraction")]
     public override void Render(DrawingContext context)
     {
 
@@ -464,6 +498,84 @@ public partial class MapView : UserControl
             operation.Render(this, context);
         }
 
+        foreach (var player in MapViewModel.MapService.Players.Values)
+        {
+            SKSvg? svg = null;
+
+            var uriString = $"avares://BnbnavNetClient/Assets/playermark.svg";
+            if (_svgCache.TryGetValue(uriString, out var outSvg))
+            {
+                svg = outSvg;
+            }
+            else
+            {
+                var uri = new Uri(uriString);
+                if (_assetLoader.Exists(uri))
+                {
+                    var asset = _assetLoader.Open(uri);
+
+                    svg = new();
+                    svg.Load(asset);
+                    if (svg.Picture is null)
+                        return;
+                    _svgCache.Add(uriString, svg);
+                }
+            }
+
+            if (svg is null)
+                return;
+
+            const int playerSize = 48;
+            var rect = new Rect(ToScreen(player.MarkerCoordinates) - new Point(playerSize, playerSize) / 2, new Size(playerSize, playerSize));
+
+            var sourceSize = new Size(svg.Picture!.CullRect.Width, svg.Picture.CullRect.Height);
+            var scaleMatrix = Matrix.CreateScale(
+                rect.Width / sourceSize.Width,
+                rect.Height / sourceSize.Height);
+            var translateMatrix = Matrix.CreateTranslation(
+                rect.X * sourceSize.Width / rect.Width,
+                rect.Y * sourceSize.Height / rect.Height);
+            var rotateMatrix = Matrix.CreateRotation(-player.MarkerAngle * double.Tau / 360.0);
+            var preRotateMatrix = Matrix.CreateTranslation(-sourceSize.Width / 2, -sourceSize.Width / 2);
+
+            // context.DrawEllipse(new SolidColorBrush(player.SnappedEdge is null ? new Color(255, 255, 0, 0) : new Color(255, 0, 255, 0)), null, ToScreen(player.MarkerCoordinates), 50, 50);
+            // context.DrawLine(new Pen(new SolidColorBrush(new Color(255, 0, 255, 0))), ToScreen(player.Velocity.Point1), ToScreen(player.Velocity.Point2));
+            
+            using (context.PushClip(rect))
+            using (context.PushPreTransform(translateMatrix * scaleMatrix))
+            using (context.PushTransformContainer())
+            using (context.PushPostTransform(preRotateMatrix))
+            using (context.PushPostTransform(rotateMatrix))
+            using (context.PushPostTransform(preRotateMatrix.Invert()))
+                context.Custom(new SvgCustomDrawOperation(rect, svg));
+            
+            //Draw the player name
+            var textBrush = (Brush)this.FindResource("ForegroundBrush")!;
+
+            if (player.PlayerText is null)
+            {
+                player.GeneratePlayerText(FontFamily);
+            }
+            player.PlayerText!.SetForegroundBrush(textBrush);
+
+            var textCenter = rect.Center + new Point(0, rect.Height / 2 + 10 + player.PlayerText.Height / 2);
+            context.DrawText(player.PlayerText, textCenter - new Point(player.PlayerText.Width, player.PlayerText.Height) / 2);
+
+            if (player.SnappedEdge is not null)
+            {
+                var roadText = new FormattedText(player.SnappedEdge.Road.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+                    new(FontFamily), 20, new SolidColorBrush(new Color(255, 255, 255, 255)));
+
+                var roadCenter = textCenter + new Point(0, player.PlayerText.Height / 2 + 10 + roadText.Height / 2);
+                var roadRect = new Rect(roadCenter - new Point(roadText.Width + 10, roadText.Height) / 2,
+                    new Size(roadText.Width + 10, roadText.Height));
+                var backingRect = roadRect.Inflate(3);
+                context.DrawRectangle(new SolidColorBrush(new Color(255, 0, 120, 130)), null, backingRect,
+                    backingRect.Height / 2, backingRect.Height / 2);
+                context.DrawText(roadText, roadCenter - new Point(roadText.Width / 2, roadText.Height / 2));
+            }
+        }
+
         base.Render(context);
     }
 
@@ -475,7 +587,7 @@ public partial class MapView : UserControl
 
     public void Zoom(double deltaScale, Point origin)
     {
-        var newScale = double.Clamp(MapViewModel.Scale + deltaScale, 0.1, 5.0);
+        var newScale = double.Clamp(MapViewModel.Scale + deltaScale, 0.1, 20.0);
         
         var worldPrevPos = ToWorld(origin);
         MapViewModel.Scale = newScale;

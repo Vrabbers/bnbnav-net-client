@@ -32,4 +32,12 @@ public sealed class Edge : MapItem
         From = this.From;
         To = this.To;
     }
+
+    public bool CanSnapTo => Road.RoadType != RoadType.DuongWarp;
+
+    public ExtendedLine Line => new ExtendedLine()
+    {
+        Point1 = From.Point,
+        Point2 = To.Point
+    };
 }

@@ -55,6 +55,7 @@ public sealed class MapService : ReactiveObject
     readonly Dictionary<string, Road> _roads;
     readonly Dictionary<string, Landmark> _landmarks;
     readonly Dictionary<string, Annotation> _annotations;
+    readonly Dictionary<string, Player> _players;
     static string? _authenticationToken;
 
     readonly BnbnavWebsocketService _websocketService;
@@ -63,8 +64,10 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Edge> Edges { get; }
     public ReadOnlyDictionary<string, Road> Roads { get; }
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
+    public ReadOnlyDictionary<string, Player> Players { get; }
     List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
+    public Interaction<Unit, Unit> PlayerUpdateInteraction { get; } = new();
 
     public static string? AuthenticationToken
     {
@@ -88,6 +91,8 @@ public sealed class MapService : ReactiveObject
         _landmarks = new Dictionary<string, Landmark>(landmarks.ToDictionary(l => l.Id));
         Landmarks = _landmarks.AsReadOnly();
         _annotations = new Dictionary<string, Annotation>(annotations.ToDictionary(a => a.Id));
+        _players = new();
+        Players = _players.AsReadOnly();
         _websocketService = websocketService;
     }
 
@@ -366,6 +371,33 @@ public sealed class MapService : ReactiveObject
                 case LandmarkRemoved:
                     type = nameof(Landmarks);
                     _landmarks.Remove(id);
+                    break;
+                
+                case PlayerMoved player:
+                    type = nameof(Players);
+                    if (_players.ContainsKey(player.Id!))
+                    {
+                        _players[player.Id!].HandlePlayerMovedEvent(player);
+                    }
+                    else
+                    {
+                        var p = new Player(player.Id!, this);
+                        p.PlayerUpdateEvent += (_, _) =>
+                        {
+                            PlayerUpdateInteraction.Handle(Unit.Default);
+                        };
+                        p.HandlePlayerMovedEvent(player);
+                        _players.Add(player.Id!, p);
+                    }
+
+                    break;
+                case PlayerLeft player:
+                    type = nameof(Players);
+                    if (_players.ContainsKey(player.Id!))
+                    {
+                        _players[player.Id!].HandlePlayerGoneEvent();
+                        _players.Remove(player.Id!);
+                    }
                     break;
             }
 

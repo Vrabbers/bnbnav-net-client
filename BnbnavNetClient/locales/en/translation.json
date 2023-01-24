@@ -51,6 +51,8 @@
   "LANDMARK_WALNUT": "Walnut",
   "LANG_CHANGE": "Change Language:",
   "LANG_CHANGE_RESTART_REQUIRED": "Please restart bnbnav for setting to take effect.",
+  "LOG_IN": "Log In",
+  "LOG_OUT": "Log Out",
   "MAKE_BIDIRECTIONAL": "Make Bidirectional",
   "MOVE_NODE": "Move Node",
   "NEW": "New",

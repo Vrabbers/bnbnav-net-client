@@ -12,6 +12,13 @@ public readonly struct ExtendedLine
         Point2 = point2;
     }
 
+    public enum IntersectionType
+    {
+        Parallel,
+        Intersects,
+        IntersectsInterpolated
+    }
+    
     public Point Point1 { get; init; }
     public Point Point2 { get; init; }
 
@@ -21,18 +28,10 @@ public readonly struct ExtendedLine
 
     public double Angle
     {
-        get
-        {
-            var theta = Math.Atan(-Dy / Dx) * 360.0 / Math.Tau;
-            if (Dx >= 0) theta += 180;
-            var thetaNormalized = theta < 0 ? theta + 360 : theta;
-            if (Math.Abs(thetaNormalized - 360) < 0.01)
-                return 0;
-            return thetaNormalized;
-        }
+        get => double.Atan2(-Dy, Dx) * 360.0 / double.Tau;
     }
 
-    public double Length => Math.Sqrt(Dx * Dx + Dy * Dy);
+    public double Length => double.Sqrt(Dx * Dx + Dy * Dy);
 
     public static implicit operator Line(ExtendedLine extendedLine) => new()
     {
@@ -44,9 +43,9 @@ public readonly struct ExtendedLine
 
     public ExtendedLine SetAngle(double angle)
     {
-        var angleR = angle * Math.Tau / 360.0;
-        var dx = Math.Cos(angleR) * Length;
-        var dy = -Math.Sin(angleR) * Length;
+        var angleR = angle * double.Tau / 360.0;
+        var dx = double.Cos(angleR) * Length;
+        var dy = -double.Sin(angleR) * Length;
         
         return this with { 
             Point2 = new(Point1.X + dx, Point1.Y + dy)
@@ -61,6 +60,31 @@ public readonly struct ExtendedLine
         Point2 = new(Point1.X + Dx / Length, Point1.Y + Dy / Length)
     };
 
+    public ExtendedLine NormalLine() => this with
+    {
+        Point2 = Point1 + new Point(Dy, -Dx)
+    };
+
+    public IntersectionType TryIntersect(ExtendedLine other, out Point intersectionPoint)
+    {
+        intersectionPoint = new();
+        
+        var a = Point2 - Point1;
+        var b = other.Point1 - other.Point2;
+        var c = Point1 - other.Point1;
+
+        var denominator = a.Y * b.X - a.X * b.Y;
+        if (denominator == 0 || !double.IsFinite(denominator)) return IntersectionType.Parallel;
+
+        var reciprocal = double.ReciprocalEstimate(denominator);
+        var na = (b.Y * c.X - b.X * c.Y) * reciprocal;
+        intersectionPoint = Point1 + a * na;
+
+        if (na is < 0 or > 1) return IntersectionType.IntersectsInterpolated;
+        var nb = (a.X * c.Y - a.Y * c.X) * reciprocal;
+        return nb is < 0 or > 1 ? IntersectionType.IntersectsInterpolated : IntersectionType.Intersects;
+    }
+
     public ExtendedLine SetLength(double length)
     {
         var unit = UnitLine();
@@ -72,4 +96,27 @@ public readonly struct ExtendedLine
     }
 
     public ExtendedLine FlipDirection() => new(Point2, Point1);
+
+    public double AngleTo(ExtendedLine other)
+    {
+        return double.Ieee754Remainder(other.Angle - Angle, 360);
+    }
+
+    public ExtendedLine MovePoint1(Point point)
+    {
+        return new()
+        {
+            Point1 = point, 
+            Point2 = point + new Point(Dx, Dy)
+        };
+    }
+
+    public ExtendedLine MoveCenter(Point point)
+    {
+        return new()
+        {
+            Point1 = point - new Point(Dx, Dy) / 2,
+            Point2 = point + new Point(Dx, Dy) / 2
+        };
+    }
 }
