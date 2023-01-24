@@ -37,11 +37,7 @@ public class LandmarkEditController : EditController
     {
         var pointerPos = args.GetPosition(mapView);
         
-        if (new ExtendedLine
-            {
-                Point1 = pointerPos,
-                Point2 = _initialPointerPosition
-            }.Length < 0.5)
+        if (new ExtendedLine(pointerPos, _initialPointerPosition).Length < 0.5)
         {
             var mapItem = mapView.HitTest(pointerPos).FirstOrDefault(x => x is Node);
             if (mapItem is Node node)

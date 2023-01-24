@@ -12,7 +12,7 @@ public abstract class NetworkOperation
     public abstract Task PerformOperation();
     public abstract void Render(MapView mapView, DrawingContext context);
     
-    public List<MapItem> ItemsNotToRender { get; set; } = new List<MapItem>();
+    public List<MapItem> ItemsNotToRender { get; } = new();
 }
 
 public class NetworkOperationException : Exception

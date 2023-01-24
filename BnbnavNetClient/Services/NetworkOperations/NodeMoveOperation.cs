@@ -53,11 +53,7 @@ public class NodeMoveOperation : NetworkOperation
         var movingRect = _toUpdate.BoundingRect(mapView);
         var movedRect = _updateTo.BoundingRect(mapView);
 
-        ExtendedLine lineBetween = new()
-        {
-            Point1 = movingRect.Center,
-            Point2 = movedRect.Center
-        };
+        ExtendedLine lineBetween = new(movingRect.Center, movedRect.Center);
 
         lineBetween = lineBetween.SetLength(20).FlipDirection().SetLength(-(lineBetween.Length - 40));
 

@@ -10,8 +10,8 @@ namespace BnbnavNetClient.Services.EditControllers;
 
 public class SelectEditController : EditController
 {
-    private readonly MapEditorService _mapEditorService;
-    private Point _initialPointerPosition;
+    readonly MapEditorService _mapEditorService;
+    Point _initialPointerPosition;
 
     public SelectEditController(MapEditorService mapEditorService)
     {
@@ -35,11 +35,7 @@ public class SelectEditController : EditController
     {
         var pointerPos = args.GetPosition(mapView);
 
-        if (new ExtendedLine
-            {
-                Point1 = pointerPos,
-                Point2 = _initialPointerPosition
-            }.Length >= 0.5) return;
+        if (new ExtendedLine(pointerPos, _initialPointerPosition).Length >= 0.5) return;
             
         var item = mapView.HitTest(pointerPos).FirstOrDefault(x => x is Edge or Node);
         switch (item)
@@ -48,13 +44,10 @@ public class SelectEditController : EditController
                 mapView.OpenFlyout(new RoadEditViewModel(_mapEditorService, edge.Road));
                 break;
             case Node node:
-            {
                 if (_mapEditorService.MapService!.Landmarks.Values.Any(x => x.Node == node))
-                {
                     mapView.OpenFlyout(new LandmarkFlyoutViewModel(_mapEditorService, node));
-                }
+
                 break;
-            }
         }
     }
 
