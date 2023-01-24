@@ -33,10 +33,7 @@ public sealed class Edge : MapItem
         To = this.To;
     }
 
-    public bool CanSnapTo()
-    {
-        return Road.RoadType != RoadType.DuongWarp;
-    }
+    public bool CanSnapTo => Road.RoadType != RoadType.DuongWarp;
 
     public ExtendedLine Line => new ExtendedLine()
     {

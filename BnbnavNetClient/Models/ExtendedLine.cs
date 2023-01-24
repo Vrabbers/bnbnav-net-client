@@ -22,22 +22,10 @@ public readonly struct ExtendedLine
 
     public double Angle
     {
-        get
-        {
-            if (Dx == 0)
-            {
-                return Dy < 0 ? 90 : 270;
-            }
-            var theta = Math.Atan(-Dy / Dx) * 360.0 / Math.Tau;
-            if (Dx < 0) theta += 180;
-            var thetaNormalized = theta < 0 ? theta + 360 : theta;
-            if (Math.Abs(thetaNormalized - 360) < 0.01)
-                return 0;
-            return thetaNormalized;
-        }
+        get => double.Atan2(-Dy, Dx) * 360.0 / double.Tau;
     }
 
-    public double Length => Math.Sqrt(Dx * Dx + Dy * Dy);
+    public double Length => double.Sqrt(Dx * Dx + Dy * Dy);
 
     public static implicit operator Line(ExtendedLine extendedLine) => new()
     {
@@ -53,9 +41,9 @@ public readonly struct ExtendedLine
 
     public ExtendedLine SetAngle(double angle)
     {
-        var angleR = angle * Math.Tau / 360.0;
-        var dx = Math.Cos(angleR) * Length;
-        var dy = -Math.Sin(angleR) * Length;
+        var angleR = angle * double.Tau / 360.0;
+        var dx = double.Cos(angleR) * Length;
+        var dy = -double.Sin(angleR) * Length;
         
         return this with { 
             Point2 = new(Point1.X + dx, Point1.Y + dy)
@@ -84,9 +72,9 @@ public readonly struct ExtendedLine
         var c = Point1 - other.Point1;
 
         var denominator = a.Y * b.X - a.X * b.Y;
-        if (denominator == 0 || !Double.IsFinite(denominator)) return IntersectionType.Parallel;
+        if (denominator == 0 || !double.IsFinite(denominator)) return IntersectionType.Parallel;
 
-        var reciprocal = 1 / denominator;
+        var reciprocal = double.ReciprocalEstimate(denominator);
         var na = (b.Y * c.X - b.X * c.Y) * reciprocal;
         intersectionPoint = Point1 + a * na;
 
@@ -113,9 +101,6 @@ public readonly struct ExtendedLine
 
     public double AngleTo(ExtendedLine other)
     {
-        var delta = other.Angle - Angle;
-        var normalised = delta < 0 ? delta + 360 : delta;
-        if (Math.Abs(delta - 360) < 0.01) return 0;
-        return normalised;
+        return double.Ieee754Remainder(other.Angle - Angle, 360);
     }
 }

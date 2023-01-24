@@ -40,7 +40,7 @@ public class NodeMoveEditController : EditController
         if (_movingNode is not null && _movedNode is not null)
         {
             var newCoords = mapView.ToWorld(pointerPos);
-            _movedNode = new("temp", (int)Math.Round(newCoords.X), _movingNode.Y, (int)Math.Round(newCoords.Y));
+            _movedNode = new("temp", (int)double.Round(newCoords.X), _movingNode.Y, (int)double.Round(newCoords.Y));
             mapView.InvalidateVisual();
         }
     }
