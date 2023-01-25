@@ -5,9 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Animation;
 using Avalonia.Media;
-using BnbnavNetClient.Helpers;
 using BnbnavNetClient.Services;
 using Timer = System.Timers.Timer;
 

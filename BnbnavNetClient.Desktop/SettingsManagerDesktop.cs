@@ -26,7 +26,8 @@ public sealed class SettingsManagerDesktop : ISettingsManager
             await SaveAsync();
             return;
         }
-        using var stream = File.Open(SettingsFilePath, FileMode.Open);
+
+        await using var stream = File.Open(SettingsFilePath, FileMode.Open);
         var des = JsonSerializer.Deserialize<SettingsObject>(stream);
         if (des is null)
         {
@@ -39,8 +40,7 @@ public sealed class SettingsManagerDesktop : ISettingsManager
 
     public async Task SaveAsync()
     {
-        using var stream = File.Create(SettingsFilePath);
+        await using var stream = File.Create(SettingsFilePath);
         await JsonSerializer.SerializeAsync(stream, Settings);
-        return;
     }
 }

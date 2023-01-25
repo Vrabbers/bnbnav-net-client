@@ -34,7 +34,7 @@ public sealed class TrString : AvaloniaObject
         AvaloniaProperty.RegisterDirect<TrString, IEnumerable<TrArgument>>(nameof(Arguments), 
             me => me.Arguments, (me, val) => me.Arguments = val);
 
-    public TrString() : base()
+    public TrString()
     {
         _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
     }
@@ -75,6 +75,4 @@ public sealed class TrArgument : AvaloniaObject
     }
     public static readonly DirectProperty<TrArgument, object?> ValueProperty =
         AvaloniaProperty.RegisterDirect<TrArgument, object?>(nameof(Value), me => me.Value, (me, val) => me.Value = val);
-
-    public TrArgument() : base() { }
 }

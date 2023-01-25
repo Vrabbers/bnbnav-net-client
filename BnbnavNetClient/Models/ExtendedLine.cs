@@ -1,7 +1,5 @@
-using System;
 using Avalonia;
 using Avalonia.Controls.Shapes;
-using Avalonia.Utilities;
 using BnbnavNetClient.Helpers;
 
 namespace BnbnavNetClient.Models;

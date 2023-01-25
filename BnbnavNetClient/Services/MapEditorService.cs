@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Services.EditControllers;
 using BnbnavNetClient.Services.NetworkOperations;
@@ -33,18 +32,12 @@ public class MapEditorService : ReactiveObject
     public void TrackNetworkOperation(NetworkOperation operation)
     {
         _networkOperations.Add(operation);
-        operation.PerformOperation().ContinueWith(x =>
+        operation.PerformOperation().ContinueWith(_ =>
         {
             _networkOperations.Remove(operation);
             this.RaisePropertyChanged(nameof(OngoingNetworkOperations));
         });
         this.RaisePropertyChanged(nameof(OngoingNetworkOperations));
-    }
-
-    enum ClickAction
-    {
-        Pan,
-        JoinRoad
     }
 
     [Reactive]

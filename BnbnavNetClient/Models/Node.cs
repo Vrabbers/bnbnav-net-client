@@ -22,7 +22,7 @@ public sealed class Node : MapItem
 
     public Rect BoundingRect(MapView mapView)
     {
-        var pos = mapView.ToScreen(new(this.X, this.Z));
+        var pos = mapView.ToScreen(new(X, Z));
         var rect = new Rect(
             pos.X - NodeSize / 2, 
             pos.Y - NodeSize / 2,
@@ -30,12 +30,12 @@ public sealed class Node : MapItem
         return rect;
     }
 
-    public void Deconstruct(out string Id, out int X, out int Y, out int Z)
+    public void Deconstruct(out string id, out int x, out int y, out int z)
     {
-        Id = this.Id;
-        X = this.X;
-        Y = this.Y;
-        Z = this.Z;
+        id = Id;
+        x = X;
+        y = Y;
+        z = Z;
     }
 
     public Point Point => new(X, Z);

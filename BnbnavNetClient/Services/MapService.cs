@@ -82,15 +82,15 @@ public sealed class MapService : ReactiveObject
     MapService(IEnumerable<Node> nodes, IEnumerable<Edge> edges, IEnumerable<Road> roads, IEnumerable<Landmark> landmarks, IEnumerable<Annotation> annotations, BnbnavWebsocketService websocketService)
     {
 
-        _nodes = new Dictionary<string, Node>(nodes.ToDictionary(n => n.Id));
+        _nodes = new(nodes.ToDictionary(n => n.Id));
         Nodes = _nodes.AsReadOnly();
-        _edges = new Dictionary<string, Edge>(edges.ToDictionary(e => e.Id));
+        _edges = new(edges.ToDictionary(e => e.Id));
         Edges = _edges.AsReadOnly();
-        _roads = new Dictionary<string, Road>(roads.ToDictionary(r => r.Id));
+        _roads = new(roads.ToDictionary(r => r.Id));
         Roads = _roads.AsReadOnly();
-        _landmarks = new Dictionary<string, Landmark>(landmarks.ToDictionary(l => l.Id));
+        _landmarks = new(landmarks.ToDictionary(l => l.Id));
         Landmarks = _landmarks.AsReadOnly();
-        _annotations = new Dictionary<string, Annotation>(annotations.ToDictionary(a => a.Id));
+        _annotations = new(annotations.ToDictionary(a => a.Id));
         _players = new();
         Players = _players.AsReadOnly();
         _websocketService = websocketService;
@@ -258,7 +258,7 @@ public sealed class MapService : ReactiveObject
             var x = obj.GetProperty("x"u8).GetInt32();
             var y = obj.GetProperty("y"u8).GetInt32();
             var z = obj.GetProperty("z"u8).GetInt32();
-            nodes.Add(id, new Node(id, x, y, z));
+            nodes.Add(id, new(id, x, y, z));
         }
 
         var jsonLandmarks = root.GetProperty("landmarks"u8);
@@ -270,7 +270,7 @@ public sealed class MapService : ReactiveObject
             var name = obj.GetProperty("name"u8).GetString()!;
             var type = obj.GetProperty("type"u8).GetString()!;
             var node = nodes[obj.GetProperty("node"u8).GetString()!];
-            landmarks.Add(new Landmark(id, node, name, type));
+            landmarks.Add(new(id, node, name, type));
         }
 
         var jsonRoads = root.GetProperty("roads"u8);
@@ -281,7 +281,7 @@ public sealed class MapService : ReactiveObject
             var obj = jsonRoad.Value;
             var name = obj.GetProperty("name"u8).GetString()!;
             var type = obj.GetProperty("type"u8).GetString()!;
-            roads.Add(id, new Road(id, name, type));
+            roads.Add(id, new(id, name, type));
         }
 
         var jsonEdges = root.GetProperty("edges"u8);
@@ -293,7 +293,7 @@ public sealed class MapService : ReactiveObject
             var road = roads[obj.GetProperty("road"u8).GetString()!];
             var node1 = nodes[obj.GetProperty("node1"u8).GetString()!];
             var node2 = nodes[obj.GetProperty("node2"u8).GetString()!];
-            edges.Add(new Edge(id, road, node1, node2));
+            edges.Add(new(id, road, node1, node2));
         }
 
         var jsonAnnotations = root.GetProperty("annotations"u8);
@@ -302,7 +302,7 @@ public sealed class MapService : ReactiveObject
         {
             var id = jsonAnnotation.Name;
             var obj = jsonAnnotation.Value;
-            annotations.Add(new Annotation(id, obj.Clone()));
+            annotations.Add(new(id, obj.Clone()));
         }
         
         var ws = new BnbnavWebsocketService();

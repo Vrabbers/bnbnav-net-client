@@ -37,6 +37,6 @@ public class DayNightButton : TemplatedControl
     void ButtonClick(object? sender, RoutedEventArgs e)
     {
         IsNightMode = !IsNightMode;
-        RaiseEvent(new RoutedEventArgs(ClickEvent));
+        RaiseEvent(new(ClickEvent));
     }
 }

@@ -6,11 +6,10 @@ using BnbnavNetClient.Settings;
 using BnbnavNetClient.ViewModels;
 using BnbnavNetClient.Views;
 using System;
-using System.Globalization;
 
 namespace BnbnavNetClient;
 
-public partial class App : Application
+public class App : Application
 {
     public override void Initialize()
     {
@@ -21,7 +20,7 @@ public partial class App : Application
         var pseudo = Environment.GetEnvironmentVariable("PSEUDOLOCALIZATION") == "true";
         var i18n = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
         i18n.Initialize("BnbnavNetClient.locales", pseudo);
-        i18n.CurrentLanguage = new CultureInfo(settings.Settings.Language);
+        i18n.CurrentLanguage = new(settings.Settings.Language);
     }
 
     public override void OnFrameworkInitializationCompleted()

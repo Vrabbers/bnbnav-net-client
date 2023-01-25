@@ -53,11 +53,11 @@ public class LandmarkUpdateOperation : NetworkOperation
             }
             catch (HttpRequestException)
             {
-                return;
+                
             }
             catch (NetworkOperationException)
             {
-                return;
+                
             }
         }
     }

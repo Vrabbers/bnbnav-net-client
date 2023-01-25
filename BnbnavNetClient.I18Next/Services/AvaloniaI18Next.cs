@@ -1,13 +1,12 @@
 ﻿using I18Next.Net;
 using I18Next.Net.Plugins;
 using System.Globalization;
+using BnbnavNetClient.I18Next.Pseudo;
 
 namespace BnbnavNetClient.I18Next.Services;
 sealed class AvaloniaI18Next : IAvaloniaI18Next
 {
     I18NextNet? _i18Next;
-
-    internal AvaloniaI18Next() { }
 
     public string this[string key, Dictionary<string, object?>? arguments]
     {

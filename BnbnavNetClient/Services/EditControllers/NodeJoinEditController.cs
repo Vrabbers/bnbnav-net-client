@@ -13,9 +13,9 @@ namespace BnbnavNetClient.Services.EditControllers;
 public class NodeJoinEditController : EditController
 {
     readonly MapEditorService _editorService;
-    bool _mouseDown = false;
+    bool _mouseDown;
     readonly List<Node> _roadGhosts = new();
-    bool _lockRoadGhosts = false;
+    bool _lockRoadGhosts;
     Point _pointerPrevPosition;
 
     public NodeJoinEditController(MapEditorService editorService)
@@ -116,7 +116,7 @@ public class NodeJoinEditController : EditController
         }
         var nodeBorder = (Pen)mapView.FindResource("NodeBorder")!;
         var selNodeBrush = (Brush)mapView.FindResource("SelectedNodeFill")!;
-        foreach (var (rect, node) in mapView.DrawnNodes.Where(x => _roadGhosts.Contains(x.Item2)))
+        foreach (var (rect, _) in mapView.DrawnNodes.Where(x => _roadGhosts.Contains(x.Item2)))
         {
             context.DrawRectangle(selNodeBrush, nodeBorder, rect);
         }
