@@ -33,4 +33,4 @@ jobs:
         name: "Upload Artifact"
         with:
           name: "bnbnav-android"
-          path: "./"
+          path: "./BnbnavNetClient.Android/bin/Release/net7.0-android/publish/io.github.Vrabbers.Bnbnav-Signed.apk"
