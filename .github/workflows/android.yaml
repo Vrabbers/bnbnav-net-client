@@ -24,7 +24,7 @@ jobs:
           dotnet-version: '7.0.x'
       - name: "Install Android Workload"
         run: |
-          sudo dotnet workload install android
+          sudo dotnet workload restore BnbnavNetClient.Android/BnbnavNetClient.Android.csproj
       - name: "Build Project"
         run: dotnet build BnbnavNetClient.Android/BnbnavNetClient.Android.csproj -c Release
       - name: "Publish Project"
@@ -32,5 +32,5 @@ jobs:
       - uses: actions/upload-artifact@v3
         name: "Upload Artifact"
         with:
-          name: "bnbnav-linux.AppImage"
-          path: "./BnbnavNetClient.Android/bin/Release/net7.0/"
+          name: "bnbnav-android"
+          path: "./BnbnavNetClient/bin/Release/net7.0/"
