@@ -47,4 +47,4 @@ jobs:
       - name: "Upload to Release"
         uses: softprops/action-gh-release@v1
         with:
-          files: ${{steps.download.outputs.download-path}}/bnbnav-win.zip
+          files: bnbnav-win.zip
