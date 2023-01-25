@@ -44,9 +44,7 @@ jobs:
           path: "bnbnav-win"
       - run: |
           zip -r bnbnav-win.zip bnbnav-win
-      - name: "Upload to release"
-        uses: JasonEtco/upload-to-release@master
+      - name: "Upload to Release"
+        uses: softprops/action-gh-release@v1
         with:
-          args: "${{steps.download.outputs.download-path}}/bnbnav-win.zip"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: bnbnav-win.zip
