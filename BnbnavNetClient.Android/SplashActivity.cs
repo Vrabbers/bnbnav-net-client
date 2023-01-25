@@ -5,6 +5,8 @@ using Application = Android.App.Application;
 using Avalonia;
 using Avalonia.Android;
 using Avalonia.ReactiveUI;
+using BnbnavNetClient.I18Next;
+using BnbnavNetClient.Settings;
 
 namespace BnbnavNetClient.Android;
 
@@ -14,7 +16,9 @@ public class SplashActivity : AvaloniaSplashActivity<App>
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
         return base.CustomizeAppBuilder(builder)
-            .UseReactiveUI();
+            .UseReactiveUI()
+            .UseI18NextLocalization()
+            .UseSettings(new SettingsManagerAndroid());
     }
 
     protected override void OnCreate(Bundle? savedInstanceState)
