@@ -36,8 +36,25 @@ jobs:
           curl https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool-x86_64.AppImage -L
           chmod +x appimagetool-x86_64.AppImage
           ./appimagetool-x86_64.AppImage --appimage-extract-and-run bnbnav.AppDir
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v3
         name: "Upload Artifact"
         with:
           name: "bnbnav-linux.AppImage"
           path: "./bnbnav-x86_64.AppImage"
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/download-artifact@v3
+        name: "Download Artifact"
+        id: download
+        with:
+          name: "bnbnav-linux.AppImage"
+      - name: "Upload to release"
+        uses: JasonEtco/upload-to-release@master
+        with:
+          args: bnbnav-linux.AppImage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

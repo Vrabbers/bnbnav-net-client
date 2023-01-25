@@ -31,8 +31,28 @@ jobs:
         working-directory: dist
       - name: "Create Disk Image"
         run: appdmg dist/app-dmg-spec.json ./bnbnav.dmg
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v3
         name: "Upload Artifact"
         with:
           name: "bnbnav-mac-${{ matrix.arch }}.dmg"
           path: "./bnbnav.dmg"
+  release:
+    strategy:
+      matrix:
+        arch: [ x64, arm64 ]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/download-artifact@v3
+        name: "Download Artifact"
+        id: download
+        with:
+          name: "bnbnav-mac-${{ matrix.arch }}.dmg"
+      - name: "Upload to release"
+        uses: JasonEtco/upload-to-release@master
+        with:
+          args: "bnbnav-mac-${{ matrix.arch }}.dmg"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
