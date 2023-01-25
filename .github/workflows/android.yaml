@@ -33,4 +33,4 @@ jobs:
         name: "Upload Artifact"
         with:
           name: "bnbnav-android"
-          path: "./BnbnavNetClient/bin/Release/net7.0/"
+          path: "./"
