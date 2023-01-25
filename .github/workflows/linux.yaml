@@ -56,5 +56,5 @@ jobs:
       - name: "Upload to Release"
         uses: softprops/action-gh-release@v1
         with:
-          files: bnbnav-linux.AppImage
+          files: bnbnav-x86_64.AppImage
 

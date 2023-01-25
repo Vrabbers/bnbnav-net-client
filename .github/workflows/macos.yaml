@@ -32,12 +32,12 @@ jobs:
           BUILD_ARCH: ${{ matrix.arch }}
         working-directory: dist
       - name: "Create Disk Image"
-        run: appdmg dist/app-dmg-spec.json ./bnbnav.dmg
+        run: appdmg dist/app-dmg-spec.json ./bnbnav-mac-${{ matrix.arch }}.dmg
       - uses: actions/upload-artifact@v3
         name: "Upload Artifact"
         with:
           name: "bnbnav-mac-${{ matrix.arch }}.dmg"
-          path: "./bnbnav.dmg"
+          path: "./bnbnav-mac-${{ matrix.arch }}.dmg"
   release:
     strategy:
       matrix:
