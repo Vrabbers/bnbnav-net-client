@@ -13,11 +13,11 @@ using Timer = System.Timers.Timer;
 
 namespace BnbnavNetClient.Models;
 
-public sealed class Player
+public sealed class Player : IDisposable
 {
-    private readonly MapService _mapService;
-    private readonly Timer _timer;
-    private Mutex _lastSnapMutex = new();
+    readonly MapService _mapService;
+    readonly Timer _timer;
+    readonly Mutex _lastSnapMutex = new();
     
     public string Name { get; }
 
@@ -28,10 +28,11 @@ public sealed class Player
     public Edge? SnappedEdge { get; private set; }
 
     public double MarkerAngle { get; private set; }
-    
-    public FormattedText PlayerText { get; }
-    
-    public Point MarkerCoordinates {
+
+    public FormattedText? PlayerText { get; set; }
+
+    public Point MarkerCoordinates 
+    {
         get
         {
             if (SnappedEdge is null) return new(X, Z);
@@ -60,9 +61,6 @@ public sealed class Player
     {
         _mapService = mapService;
         Name = name;
-        
-        PlayerText = new(Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-            new("Noto Sans"), 20, null);
 
         _timer = new(50);
         _timer.Elapsed += (_, _) =>
@@ -97,7 +95,13 @@ public sealed class Player
         };
         _timer.Enabled = true;
     }
-    
+
+    public void GeneratePlayerText(FontFamily fontFamily)
+    {
+        PlayerText = new(Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+            new(fontFamily), 20, null);
+    }
+
     public void HandlePlayerMovedEvent(PlayerMoved evt)
     {
         var newX = evt.X;
@@ -118,8 +122,7 @@ public sealed class Player
         if (SnappedEdge is not null)
         {
             //Ensure the snapped edge is still valid
-            if (!(GeoHelper.LineSegmentToPointDistance(new(SnappedEdge.From.X, SnappedEdge.From.Z), new(SnappedEdge.To.X, SnappedEdge.To.Z),
-                    new(evt.X, evt.Z)) <= 10))
+            if (!CanSnapToEdge(SnappedEdge))
             {
                 SnappedEdge = null;
             }
@@ -128,24 +131,31 @@ public sealed class Player
         Task.Run(() =>
         {
             if (!_lastSnapMutex.WaitOne(0)) return;
-            
-            var candidateEdges = _mapService.Edges.Values.AsParallel().Where(edge => edge.CanSnapTo() && GeoHelper.LineSegmentToPointDistance(new(edge.From.X, edge.From.Z), new(edge.To.X, edge.To.Z), new(evt.X, evt.Z)) <= 10 /* TODO: Get the road thickness from resources somehow */).Where(
-                edge =>
-                {
-                    var angle = edge.Line.AngleTo(Velocity);
-                    if (angle > 180) angle = -360 + angle;
-                    return Math.Abs(angle) < 45;
-                }).ToArray(); //TODO: Order by whether the edge is part of the current route or not in order to prioritise snapping to the current route in Go Mode
 
-            var shouldChangeEdge = SnappedEdge is null || !candidateEdges.Contains(SnappedEdge);
+            var shouldChangeEdge = SnappedEdge is null;
             //TODO: Also change edge if the current route contains the edge to change to or if the current route does not contain the currently snapped edge
             if (shouldChangeEdge)
             {
-                SnappedEdge = candidateEdges.FirstOrDefault();
+                //TODO: Prioritise edges that are part of the current route
+                SnappedEdge = _mapService.Edges.Values.FirstOrDefault(CanSnapToEdge);
             }
 
             _lastSnapMutex.ReleaseMutex();
         });
+    }
+
+    private bool CanSnapToEdge(Edge edge)
+    {
+        if (!edge.CanSnapTo) return false;
+        
+        // TODO: Get the road thickness from resources somehow
+        // We are not using GeoHelper because that takes into account the extra space at the end of a road
+        if (edge.Line.SetLength(10).NormalLine().MoveCenter(new(X, Z)).TryIntersect(edge.Line, out _) !=
+            ExtendedLine.IntersectionType.Intersects) return false;
+        
+        var angle = edge.Line.AngleTo(Velocity);
+        if (angle > 180) angle = -360 + angle;
+        return double.Abs(angle) < 45;
     }
 
     public void HandlePlayerGoneEvent()
@@ -154,4 +164,10 @@ public sealed class Player
     }
 
     public event EventHandler<EventArgs>? PlayerUpdateEvent;
+
+    public void Dispose()
+    {
+        _timer.Dispose();
+        _lastSnapMutex.Dispose();
+    }
 }

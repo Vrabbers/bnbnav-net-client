@@ -21,6 +21,7 @@ using DynamicData;
 using BnbnavNetClient.Helpers;
 using Avalonia.Controls.Primitives;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.EditControllers;
@@ -94,18 +95,21 @@ public partial class MapView : UserControl
 
             var seenEdges = new List<Edge>();
             MapViewModel.ContextMenuItems.Clear();
-            MapViewModel.ContextMenuItems.AddRange(HitTest(pointerPos).Select(x =>
+            MapViewModel.ContextMenuItems.AddRange(HitTest(pointerPos).SelectMany(x =>
             {
                 switch (x)
                 {
                     case Node node:
-                        return new MenuItem
+                        return new MenuItem[]
                         {
-                            Header = _i18n["NODE_DELETE"],
-                            Command = ReactiveCommand.Create(() =>
+                            new()
                             {
-                                MapViewModel.QueueDelete(node);
-                            })
+                                Header = _i18n["NODE_DELETE"],
+                                Command = ReactiveCommand.Create(() =>
+                                {
+                                    MapViewModel.QueueDelete(node);
+                                })
+                            }
                         };
                     case Edge edge when !seenEdges.Contains(edge):
                     {
@@ -114,19 +118,24 @@ public partial class MapView : UserControl
                         {
                             seenEdges.Add(opposite);
                         }
-                        return new()
+
+                        return new MenuItem[]
                         {
-                            Header = _i18n["EDGE_DELETE", ("roadName", edge.Road.Name)],
-                            Command = ReactiveCommand.Create(() =>
+                            new()
                             {
-                                MapViewModel.QueueDelete(edge);
-                            })
+                                Header = _i18n["EDGE_DELETE", ("roadName", edge.Road.Name)],
+                                Command = ReactiveCommand.Create(() =>
+                                {
+                                    MapViewModel.QueueDelete(edge);
+                                })
+                            }
                         };
+
                     }
                     default:
-                        return null;
+                        return Enumerable.Empty<MenuItem>();
                 }
-            }).Where(x => x is not null)!);
+            }));
 
             if (_pointerPressing)
             {
@@ -152,7 +161,7 @@ public partial class MapView : UserControl
 
                     _viewVelocity = new(xAverage, yAverage);
 
-                    if (Math.Abs(_viewVelocity.Y) < 7 && Math.Abs(_viewVelocity.Y) < 7)
+                    if (double.Abs(_viewVelocity.Y) < 7 && double.Abs(_viewVelocity.Y) < 7)
                         _viewVelocity = Vector.Zero;
 
                     // The actual view velocity should be the average of the last 5
@@ -206,7 +215,7 @@ public partial class MapView : UserControl
                     return;
 
                 // Stop the timer, don't waste resources.
-                if (Math.Abs(_viewVelocity.X) < 4 && Math.Abs(_viewVelocity.Y) < 4)
+                if (double.Abs(_viewVelocity.X) < 4 && double.Abs(_viewVelocity.Y) < 4)
                     _viewVelocity = Vector.Zero;
                 else
                     MapViewModel.Pan += _viewVelocity / MapViewModel.Scale;
@@ -335,6 +344,8 @@ public partial class MapView : UserControl
 
         DrawnNodes = mapService.Nodes.Values.Select(node => (node.BoundingRect(this), node))
             .Where(node => bounds.Intersects(node.Item1)).ToList();
+        
+        InvalidateVisual();
     }
 
     Pen PenForRoadType(RoadType type) => (Pen)(type switch
@@ -394,7 +405,7 @@ public partial class MapView : UserControl
             if (scale < lowerScaleBound || scale > higherScaleBound) return;
 
             var text = new FormattedText(landmark.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                new("Noto Sans"), size * scale, (Brush)this.FindResource("ForegroundBrush")!);
+                new(FontFamily), size * scale, (Brush)this.FindResource("ForegroundBrush")!);
 
             context.DrawText(text, rect.Center - new Point(text.Width / 2, text.Height / 2));
             return;
@@ -524,7 +535,7 @@ public partial class MapView : UserControl
             var translateMatrix = Matrix.CreateTranslation(
                 rect.X * sourceSize.Width / rect.Width,
                 rect.Y * sourceSize.Height / rect.Height);
-            var rotateMatrix = Matrix.CreateRotation(-player.MarkerAngle * Math.Tau / 360.0);
+            var rotateMatrix = Matrix.CreateRotation(-player.MarkerAngle * double.Tau / 360.0);
             var preRotateMatrix = Matrix.CreateTranslation(-sourceSize.Width / 2, -sourceSize.Width / 2);
 
             // context.DrawEllipse(new SolidColorBrush(player.SnappedEdge is null ? new Color(255, 255, 0, 0) : new Color(255, 0, 255, 0)), null, ToScreen(player.MarkerCoordinates), 50, 50);
@@ -540,7 +551,12 @@ public partial class MapView : UserControl
             
             //Draw the player name
             var textBrush = (Brush)this.FindResource("ForegroundBrush")!;
-            player.PlayerText.SetForegroundBrush(textBrush);
+
+            if (player.PlayerText is null)
+            {
+                player.GeneratePlayerText(FontFamily);
+            }
+            player.PlayerText!.SetForegroundBrush(textBrush);
 
             var textCenter = rect.Center + new Point(0, rect.Height / 2 + 10 + player.PlayerText.Height / 2);
             context.DrawText(player.PlayerText, textCenter - new Point(player.PlayerText.Width, player.PlayerText.Height) / 2);
@@ -548,7 +564,7 @@ public partial class MapView : UserControl
             if (player.SnappedEdge is not null)
             {
                 var roadText = new FormattedText(player.SnappedEdge.Road.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                    new("Noto Sans"), 20, new SolidColorBrush(new Color(255, 255, 255, 255)));
+                    new(FontFamily), 20, new SolidColorBrush(new Color(255, 255, 255, 255)));
 
                 var roadCenter = textCenter + new Point(0, player.PlayerText.Height / 2 + 10 + roadText.Height / 2);
                 var roadRect = new Rect(roadCenter - new Point(roadText.Width + 10, roadText.Height) / 2,

@@ -6,6 +6,7 @@
   "EDITNAV_WATERMARK": "Token",
   "EDIT_LANDMARK": "Edit Landmark",
   "EDIT_MODE": "Edit Mode",
+  "EDIT_ROAD": "Edit Road",
   "EXISTING": "Existing",
   "EXISTING_ROAD": "Existing Road",
   "FOLLOWING": "Following {{user}}",
@@ -75,5 +76,6 @@
   "ROAD_TYPE_WATERWAY": "Waterway",
   "SAVE": "Save",
   "SPLICE": "Splice",
-  "SPY_OPTIONS": "Spy Options"
+  "SPY_OPTIONS": "Spy Options",
+  "UPDATE": "Update"
 }
