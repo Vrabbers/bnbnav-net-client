@@ -5,7 +5,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>BnbnavNetClient</string>
 	<key>CFBundleIdentifier</key>
-	<string>companyName.BnbnavNetClient</string>
+	<string>io.github.Vrabbers.bnbnav</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>

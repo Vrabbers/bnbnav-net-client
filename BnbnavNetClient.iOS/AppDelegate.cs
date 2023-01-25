@@ -5,6 +5,8 @@ using Avalonia.Controls;
 using Avalonia.iOS;
 using Avalonia.Media;
 using Avalonia.ReactiveUI;
+using BnbnavNetClient.I18Next;
+using BnbnavNetClient.Settings;
 
 namespace BnbnavNetClient.iOS;
 
@@ -16,6 +18,9 @@ public partial class AppDelegate : AvaloniaAppDelegate<App>
 {
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
-        return builder.UseReactiveUI();
+        return builder
+            .UseReactiveUI()
+            .UseI18NextLocalization()
+            .UseSettings(new SettingsManagerI());
     }
 }
