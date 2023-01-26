@@ -74,7 +74,7 @@ public sealed class MainViewModel : ViewModel
 
     public MainViewModel()
     {
-        MapEditorService = new();
+        MapEditorService = new MapEditorService();
         
         _settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
         _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
@@ -107,7 +107,7 @@ public sealed class MainViewModel : ViewModel
     {
         var mapService = await MapService.DownloadInitialMapAsync();
         MapEditorService.MapService = mapService;
-        MapViewModel = new(mapService, this);
+        MapViewModel = new MapViewModel(mapService, this);
         var panText = MapViewModel
             .WhenAnyValue(map => map.Pan)
             .Select(pt => $"x = {double.Round(pt.X)}; y = {double.Round(pt.Y)}");
