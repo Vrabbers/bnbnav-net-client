@@ -8,6 +8,7 @@
         <entry key="BnbnavNetClient/Resources/DayTheme.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Resources/NightTheme.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Views/AlertDialogView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Views/CornerView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Views/EnterPopupView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Views/LandmarkFlyoutView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Views/LanguageSelectView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
@@ -15,8 +16,8 @@
         <entry key="BnbnavNetClient/Views/MainWindow.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Views/MapView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Views/NewEdgeFlyoutView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
-        <entry key="BnbnavNetClient/Views/UserDetailsFlyoutView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Views/RoadEditView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Views/UserDetailsFlyoutView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
       </map>
     </option>
   </component>

@@ -135,6 +135,8 @@ public sealed class Landmark : MapItem
     public string Type { get; init; }
 
     public LandmarkType LandmarkType => Enum.GetValues<LandmarkType>().FirstOrDefault(x => x.ServerName() == Type);
+    
+    public string HumanReadableType => LandmarkType.HumanReadableName();
 
     public void Deconstruct(out string id, out Node node, out string name, out string type)
     {

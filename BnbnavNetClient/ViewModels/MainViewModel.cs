@@ -37,6 +37,9 @@ public sealed class MainViewModel : ViewModel
     [Reactive]
     public MapViewModel? MapViewModel { get; private set; }
     
+    [Reactive]
+    public CornerViewModel? CornerViewModel { get; private set; }
+    
     public Button UserControlButton { get; set; } = null!;
 
     [ObservableAsProperty]
@@ -108,6 +111,8 @@ public sealed class MainViewModel : ViewModel
         var mapService = await MapService.DownloadInitialMapAsync();
         MapEditorService.MapService = mapService;
         MapViewModel = new MapViewModel(mapService, this);
+        CornerViewModel = new CornerViewModel(mapService);
+        
         var panText = MapViewModel
             .WhenAnyValue(map => map.Pan)
             .Select(pt => $"x = {double.Round(pt.X)}; y = {double.Round(pt.Y)}");
@@ -127,6 +132,7 @@ public sealed class MainViewModel : ViewModel
                 interaction.SetOutput(null);
             }
         });
+        CornerViewModel.WhenAnyValue(x => x.SelectedLandmark).ToPropertyEx(MapViewModel, x => x.SelectedLandmark);
     }
     
     public void LanguageButtonPressed()

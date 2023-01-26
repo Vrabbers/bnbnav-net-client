@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="BnbnavNetClient.Views.CornerView"
+             x:DataType="viewModels:CornerViewModel"
+             xmlns:str="using:BnbnavNetClient.I18Next"
+             xmlns:viewModels="clr-namespace:BnbnavNetClient.ViewModels"
+             x:CompileBindings="True">
+    <StackPanel>
+        <StackPanel>
+            <TextBox Watermark="Search..." Text="{Binding SearchQuery}" VerticalAlignment="Top" />
+            <StackPanel IsVisible="{Binding SelectedLandmark, Converter={x:Static ObjectConverters.IsNull}}" VerticalAlignment="Stretch">
+                <ListBox Items="{Binding SearchResults}" SelectedItem="{Binding SelectedLandmark}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}"></TextBlock>
+                                <TextBlock Text="{Binding HumanReadableType}"></TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+            <StackPanel IsVisible="{Binding SelectedLandmark, Converter={x:Static ObjectConverters.IsNotNull}}" VerticalAlignment="Stretch">
+                <TextBlock Text="Selected Landmark:"></TextBlock>
+                <TextBlock Text="{Binding SelectedLandmark.Name, FallbackValue=.}"></TextBlock>
+                <TextBlock Text="{Binding SelectedLandmark.HumanReadableType, FallbackValue=.}"></TextBlock>
+            </StackPanel>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

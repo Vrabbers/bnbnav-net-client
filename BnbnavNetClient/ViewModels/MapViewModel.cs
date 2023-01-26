@@ -58,6 +58,9 @@ public class MapViewModel : ViewModel
     public string? LoggedInUsername { get; set; }
 
     [Reactive] public AvaloniaList<MenuItem> ContextMenuItems { get; set; } = new();
+    
+    [ObservableAsProperty]
+    public Landmark? SelectedLandmark { get; set; }
 
     public MapViewModel(MapService mapService, MainViewModel mainViewModel)
     {

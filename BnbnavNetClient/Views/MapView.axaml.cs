@@ -274,6 +274,11 @@ public partial class MapView : UserControl
             interaction.SetOutput(Unit.Default);
             InvalidateVisual();
         });
+
+        MapViewModel.WhenAnyValue(x => x.SelectedLandmark).Subscribe(Observer.Create<Landmark?>(_ =>
+        {
+            if (MapViewModel.SelectedLandmark is not null) PanTo(MapViewModel.SelectedLandmark.Node.Point);
+        }));
     }
 
     readonly Dictionary<string, SKSvg> _svgCache = new();
@@ -283,16 +288,18 @@ public partial class MapView : UserControl
     List<(Rect, Landmark)> DrawnLandmarks { get; set; } = new();
     public List<(Rect, Node)> DrawnNodes { get; set; } = new();
 
-    private void UpdateFollowMeState()
+    void UpdateFollowMeState()
     {
         if (MapViewModel.FollowMeEnabled)
         {
             var exists = MapViewModel.MapService.Players.TryGetValue(MapViewModel.LoggedInUsername!, out var player);
             if (!exists) return;
 
-            MapViewModel.Pan = player!.MarkerCoordinates - new Point(Bounds.Size.Width, Bounds.Size.Height) / MapViewModel.Scale / 2;
+            PanTo(player!.MarkerCoordinates);
         }
     }
+
+    void PanTo(Point worldCoords, double xOffset = 0.5, double yOffset = 0.5) => MapViewModel.Pan = worldCoords - new Point(Bounds.Size.Width * xOffset, Bounds.Size.Height * yOffset) / MapViewModel.Scale;
 
     public IEnumerable<MapItem> HitTest(Point point)
     {

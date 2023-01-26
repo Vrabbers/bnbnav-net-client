@@ -26,6 +26,7 @@
       <ProgressBar IsIndeterminate="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0"/>
       <Panel Name="MapPanel"/>
       <TextBlock Text="{Binding MapViewModel.Test}"/>
+      <ContentControl Content="{Binding CornerViewModel}" Margin="12 12 12 12" Width="400" HorizontalAlignment="Left" />
 
       <!-- Edit Controls -->
       <Grid Grid.Row="2" IsVisible="{Binding EditModeEnabled}">
