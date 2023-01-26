@@ -10,7 +10,7 @@ using System.Globalization;
 
 namespace BnbnavNetClient;
 
-public partial class App : Application
+public class App : Application
 {
     public override void Initialize()
     {

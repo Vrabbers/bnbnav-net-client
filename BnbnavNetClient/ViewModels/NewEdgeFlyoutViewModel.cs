@@ -70,7 +70,7 @@ public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
 
         this.WhenAnyValue(x => x.NodesToJoin, x => x.RoadPickedWithRoadSyringe).Subscribe(
             Observer.Create<ValueTuple<List<Node>, Road?>>(
-                tuple =>
+                _ =>
                 {
                     var roads = new List<Road>();
                     if (RoadPickedWithRoadSyringe is not null) roads.Add(RoadPickedWithRoadSyringe);
@@ -84,7 +84,7 @@ public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
                     FoundRoads.AddRange(roads.Distinct());
                 }));
         this.WhenAnyValue(x => x.SelectedRoad, x => x.CurrentTabIndex, x => x.SelectedRoadType, x => x.NewRoadName).Subscribe(
-            Observer.Create<System.ValueTuple<Road?, int, RoadTypeHelper?, string>>(tuple =>
+            Observer.Create<ValueTuple<Road?, int, RoadTypeHelper?, string>>(_ =>
             {
                 var canCreate = true;
                 if (CurrentTabIndex == 0)

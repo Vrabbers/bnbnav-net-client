@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
 using BnbnavNetClient.I18Next.Services;
@@ -137,12 +136,12 @@ public sealed class Landmark : MapItem
 
     public LandmarkType LandmarkType => Enum.GetValues<LandmarkType>().FirstOrDefault(x => x.ServerName() == Type);
 
-    public void Deconstruct(out string Id, out Node Node, out string Name, out string Type)
+    public void Deconstruct(out string id, out Node node, out string name, out string type)
     {
-        Id = this.Id;
-        Node = this.Node;
-        Name = this.Name;
-        Type = this.Type;
+        id = Id;
+        node = Node;
+        name = Name;
+        type = Type;
     }
 
     public Rect BoundingRect(MapView mapView)

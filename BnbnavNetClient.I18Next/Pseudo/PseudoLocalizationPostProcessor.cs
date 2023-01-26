@@ -1,8 +1,7 @@
 using System.Text;
-using BnbnavNetClient.I18Next.Pseudo;
 using I18Next.Net.Plugins;
 
-namespace BnbnavNetClient.I18Next;
+namespace BnbnavNetClient.I18Next.Pseudo;
 
 public class PseudoLocalizationPostProcessor : IPostProcessor
 {

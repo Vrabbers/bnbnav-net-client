@@ -107,3 +107,9 @@ csharp_style_allow_embedded_statements_on_same_line_experimental = true:silent
 csharp_style_allow_blank_lines_between_consecutive_braces_experimental = true:silent
 csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = true:silent
 csharp_style_conditional_delegate_call = true:suggestion
+
+# ReSharper properties
+resharper_default_private_modifier = implicit
+
+# ReSharper inspection severities
+resharper_arrange_type_member_modifiers_highlighting = suggestion

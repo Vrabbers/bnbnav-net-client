@@ -11,6 +11,7 @@ using System.Reactive.Linq;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using BnbnavNetClient.Services.NetworkOperations;
+using JetBrains.Annotations;
 
 namespace BnbnavNetClient.ViewModels;
 
@@ -26,7 +27,8 @@ public class MapViewModel : ViewModel
 
     public MapService MapService { get; }
 
-    [ObservableAsProperty]
+    [ObservableAsProperty] 
+    [UsedImplicitly] 
     public bool IsInEditMode { get; }
 
     // In radians!

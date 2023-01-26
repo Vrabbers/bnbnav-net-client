@@ -5,9 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Animation;
 using Avalonia.Media;
-using BnbnavNetClient.Helpers;
 using BnbnavNetClient.Services;
 using Timer = System.Timers.Timer;
 
@@ -132,15 +130,21 @@ public sealed class Player : IDisposable
         {
             if (!_lastSnapMutex.WaitOne(0)) return;
 
-            var shouldChangeEdge = SnappedEdge is null;
-            //TODO: Also change edge if the current route contains the edge to change to or if the current route does not contain the currently snapped edge
-            if (shouldChangeEdge)
+            try
             {
-                //TODO: Prioritise edges that are part of the current route
-                SnappedEdge = _mapService.Edges.Values.FirstOrDefault(CanSnapToEdge);
+                var currentEdges = _mapService.Edges.Values.ToArray();
+                var shouldChangeEdge = SnappedEdge is null;
+                //TODO: Also change edge if the current route contains the edge to change to or if the current route does not contain the currently snapped edge
+                if (shouldChangeEdge)
+                {
+                    //TODO: Prioritise edges that are part of the current route
+                    SnappedEdge = currentEdges.FirstOrDefault(CanSnapToEdge);
+                }
             }
-
-            _lastSnapMutex.ReleaseMutex();
+            finally
+            {
+                _lastSnapMutex.ReleaseMutex();
+            }
         });
     }
 

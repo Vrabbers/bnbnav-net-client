@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -11,8 +10,8 @@ namespace BnbnavNetClient.Services.EditControllers;
 public class NodeMoveEditController : EditController
 {
     readonly MapEditorService _editorService;
-    Node? _movingNode = null;
-    Node? _movedNode = null;
+    Node? _movingNode;
+    Node? _movedNode;
 
     public NodeMoveEditController(MapEditorService editorService)
     {

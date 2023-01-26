@@ -25,17 +25,17 @@ public sealed class Edge : MapItem
     public Node From { get; init; }
     public Node To { get; init; }
 
-    public void Deconstruct(out string Id, out Road Road, out Node From, out Node To)
+    public void Deconstruct(out string id, out Road road, out Node from, out Node to)
     {
-        Id = this.Id;
-        Road = this.Road;
-        From = this.From;
-        To = this.To;
+        id = Id;
+        road = Road;
+        from = From;
+        to = To;
     }
 
     public bool CanSnapTo => Road.RoadType != RoadType.DuongWarp;
 
-    public ExtendedLine Line => new ExtendedLine()
+    public ExtendedLine Line => new()
     {
         Point1 = From.Point,
         Point2 = To.Point

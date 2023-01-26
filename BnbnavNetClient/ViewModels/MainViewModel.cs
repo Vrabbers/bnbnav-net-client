@@ -74,7 +74,7 @@ public sealed class MainViewModel : ViewModel
 
     public MainViewModel()
     {
-        MapEditorService = new();
+        MapEditorService = new MapEditorService();
         
         _settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
         _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
@@ -107,7 +107,7 @@ public sealed class MainViewModel : ViewModel
     {
         var mapService = await MapService.DownloadInitialMapAsync();
         MapEditorService.MapService = mapService;
-        MapViewModel = new(mapService, this);
+        MapViewModel = new MapViewModel(mapService, this);
         var panText = MapViewModel
             .WhenAnyValue(map => map.Pan)
             .Select(pt => $"x = {double.Round(pt.X)}; y = {double.Round(pt.Y)}");
@@ -132,6 +132,7 @@ public sealed class MainViewModel : ViewModel
     public void LanguageButtonPressed()
     {
         var languagePopup = new LanguageSelectViewModel();
+        // ReSharper disable once AsyncVoidLambda
         languagePopup.Ok.Subscribe(async lang =>
         {
             Popup = null;
@@ -220,6 +221,7 @@ public sealed class MainViewModel : ViewModel
                 followMePopup.Ok,
                 followMePopup.Cancel.Select(_ => (string?)null))
             .Take(1)
+            // ReSharper disable once AsyncVoidLambda
             .Subscribe(async str =>
             {
                 if (str is not null)

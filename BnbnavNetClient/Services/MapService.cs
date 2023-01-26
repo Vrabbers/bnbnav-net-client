@@ -40,7 +40,7 @@ public sealed class MapService : ReactiveObject
 
     static readonly HttpClient HttpClient = new()
     {
-        BaseAddress = new(BaseUrl),
+        BaseAddress = new Uri(BaseUrl),
         DefaultRequestHeaders =
         {
             UserAgent =
@@ -75,7 +75,7 @@ public sealed class MapService : ReactiveObject
         set
         {
             _authenticationToken = value;
-            HttpClient.DefaultRequestHeaders.Authorization = value is not null ? new("Bearer", value) : null;
+            HttpClient.DefaultRequestHeaders.Authorization = value is not null ? new AuthenticationHeaderValue("Bearer", value) : null;
         }
     }
 
@@ -91,7 +91,7 @@ public sealed class MapService : ReactiveObject
         _landmarks = new Dictionary<string, Landmark>(landmarks.ToDictionary(l => l.Id));
         Landmarks = _landmarks.AsReadOnly();
         _annotations = new Dictionary<string, Annotation>(annotations.ToDictionary(a => a.Id));
-        _players = new();
+        _players = new Dictionary<string, Player>();
         Players = _players.AsReadOnly();
         _websocketService = websocketService;
     }
@@ -103,7 +103,7 @@ public sealed class MapService : ReactiveObject
 
     public async Task<ServerResponse> Submit(string path, object json)
     {
-        var resp = await HttpClient.PostAsync($"/api/{path}", JsonContent.Create(json, MediaTypeHeaderValue.Parse("application/json"), new()
+        var resp = await HttpClient.PostAsync($"/api/{path}", JsonContent.Create(json, MediaTypeHeaderValue.Parse("application/json"), new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         }));
@@ -113,7 +113,7 @@ public sealed class MapService : ReactiveObject
             return await HandleUnauthorizedResponse(path, json);
         }
 
-        return new()
+        return new ServerResponse
         {
             StatusCode = resp.StatusCode,
             Stream = await resp.Content.ReadAsStreamAsync()
@@ -159,7 +159,7 @@ public sealed class MapService : ReactiveObject
             return await HandleUnauthorizedResponse(path, null);
         }
         
-        return new()
+        return new ServerResponse
         {
             StatusCode = resp.StatusCode,
             Stream = await resp.Content.ReadAsStreamAsync()
@@ -322,7 +322,7 @@ public sealed class MapService : ReactiveObject
             {
                 case NodeCreated node:
                     type = nameof(Nodes);
-                    _nodes.Add(id, new(id, node.X, node.Y, node.Z));
+                    _nodes.Add(id, new Node(id, node.X, node.Y, node.Z));
                     break;
 
                 case UpdatedNode node:
@@ -339,7 +339,7 @@ public sealed class MapService : ReactiveObject
 
                 case RoadCreated road:
                     type = nameof(Roads);
-                    _roads.Add(id, new(id, road.Name, road.RoadType));
+                    _roads.Add(id, new Road(id, road.Name, road.RoadType));
                     break;
 
                 case UpdatedRoad road:
@@ -355,7 +355,7 @@ public sealed class MapService : ReactiveObject
 
                 case EdgeCreated edge:
                     type = nameof(Edges);
-                    _edges.Add(id, new(id, _roads[edge.Road], _nodes[edge.Node1], _nodes[edge.Node2]));
+                    _edges.Add(id, new Edge(id, _roads[edge.Road], _nodes[edge.Node1], _nodes[edge.Node2]));
                     break;
 
                 case EdgeRemoved:
@@ -365,7 +365,7 @@ public sealed class MapService : ReactiveObject
 
                 case LandmarkCreated landmark:
                     type = nameof(Landmarks);
-                    _landmarks.Add(id, new(id, _nodes[landmark.Node], landmark.Name, landmark.LandmarkType));
+                    _landmarks.Add(id, new Landmark(id, _nodes[landmark.Node], landmark.Name, landmark.LandmarkType));
                     break;
 
                 case LandmarkRemoved:

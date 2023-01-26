@@ -83,16 +83,16 @@ public class LandmarkFlyoutViewModel : ViewModel, IOpenableAsFlyout
         }
         
         this.WhenAnyValue(x => x.CurrentTabIndex, x => x.LandmarkName, x => x.SelectedLandmarkType, x => x.LabelName, x => x.SelectedLabelType).Subscribe(
-            Observer.Create<ValueTuple<int, string, LandmarkTypeHelper?, string, LandmarkTypeHelper?>>(tuple =>
+            Observer.Create<ValueTuple<int, string, LandmarkTypeHelper?, string, LandmarkTypeHelper?>>(_ =>
             {
-                var canCreate = true;
+                bool canCreate;
                 if (CurrentTabIndex == 0)
                 {
                     canCreate = SelectedLandmarkType is not null && !string.IsNullOrWhiteSpace(LandmarkName);
                 }
                 else
                 { 
-                    canCreate = SelectedLabelType is not null && !string.IsNullOrWhiteSpace(LabelName);;
+                    canCreate = SelectedLabelType is not null && !string.IsNullOrWhiteSpace(LabelName);
                 }
                 SaveButtonEnabled = canCreate;
             }));

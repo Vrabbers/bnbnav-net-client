@@ -17,11 +17,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using BnbnavNetClient.Models;
-using DynamicData;
 using BnbnavNetClient.Helpers;
 using Avalonia.Controls.Primitives;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.EditControllers;
@@ -32,7 +29,7 @@ namespace BnbnavNetClient.Views;
 public partial class MapView : UserControl
 {
     bool _pointerPressing;
-    bool _disablePan = false;
+    bool _disablePan;
     Point _pointerPrevPosition;
     Vector _viewVelocity = Vector.Zero;
     readonly List<Point> _pointerVelocities = new();
@@ -209,7 +206,7 @@ public partial class MapView : UserControl
         // This is the physics part of inertial panning.
         Clock = new Clock();
         Clock.Subscribe(
-            ts =>
+            _ =>
             {
                 if (_pointerPressing)
                     return;
@@ -599,7 +596,7 @@ public partial class MapView : UserControl
     public FlyoutBase OpenFlyout(ViewModel viewModel)
     {
         MapViewModel.FlyoutViewModel = viewModel;
-        var flyout = Flyout.GetAttachedFlyout(this);
+        var flyout = FlyoutBase.GetAttachedFlyout(this);
         flyout!.ShowAt(this, showAtPointer: true);
         if (viewModel is IOpenableAsFlyout ioaf) ioaf.Flyout = flyout;
         return flyout;

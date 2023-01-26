@@ -1,3 +1,4 @@
+using BnbnavNetClient.I18Next.Pseudo;
 using I18Next.Net;
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;

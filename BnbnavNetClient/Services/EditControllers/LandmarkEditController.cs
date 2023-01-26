@@ -11,7 +11,6 @@ namespace BnbnavNetClient.Services.EditControllers;
 public class LandmarkEditController : EditController
 {
     private readonly MapEditorService _mapEditorService;
-    private Point _pointerPrevPosition;
     private Point _initialPointerPosition;
 
     public LandmarkEditController(MapEditorService mapEditorService)
@@ -22,7 +21,6 @@ public class LandmarkEditController : EditController
     public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
         var pointerPos = args.GetPosition(mapView);
-        _pointerPrevPosition = pointerPos;
         _initialPointerPosition = pointerPos;
 
         return PointerPressedFlags.None;
