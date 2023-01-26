@@ -1,6 +1,7 @@
 {
   "CANCEL": "ביטול",
   "CREATE": "",
+  "DROPPED_PIN": "",
   "EDGE_DELETE": "",
   "EDITNAV_PROMPT": "השתמש ב-/editnav כדי לקבל שובר. הזן אותו פה:",
   "EDITNAV_WATERMARK": "שובר",
@@ -27,6 +28,7 @@
   "LANDMARK_COFFEE_SHOP": "",
   "LANDMARK_COURTHOUSE": "",
   "LANDMARK_DELETE": "",
+  "LANDMARK_DROPPED_PIN": "",
   "LANDMARK_ELC": "",
   "LANDMARK_EMBASSY": "",
   "LANDMARK_FRIVOLOCO": "",

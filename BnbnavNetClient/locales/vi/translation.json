@@ -1,6 +1,7 @@
 {
   "CANCEL": "Hủy",
   "CREATE": "",
+  "DROPPED_PIN": "",
   "EDGE_DELETE": "",
   "EDITNAV_PROMPT": "Sử dụng lệnh /editnav để nhận mã và điền vào đây:",
   "EDITNAV_WATERMARK": "Mã",
@@ -27,6 +28,7 @@
   "LANDMARK_COFFEE_SHOP": "",
   "LANDMARK_COURTHOUSE": "",
   "LANDMARK_DELETE": "",
+  "LANDMARK_DROPPED_PIN": "",
   "LANDMARK_ELC": "",
   "LANDMARK_EMBASSY": "",
   "LANDMARK_FRIVOLOCO": "",

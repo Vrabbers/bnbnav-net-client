@@ -1,6 +1,7 @@
 {
   "CANCEL": "Cancelar",
   "CREATE": "",
+  "DROPPED_PIN": "",
   "EDGE_DELETE": "",
   "EDITNAV_PROMPT": "Use /editnav para obter uma chave e a insira aqui:",
   "EDITNAV_WATERMARK": "Chave",
@@ -27,6 +28,7 @@
   "LANDMARK_COFFEE_SHOP": "",
   "LANDMARK_COURTHOUSE": "",
   "LANDMARK_DELETE": "",
+  "LANDMARK_DROPPED_PIN": "",
   "LANDMARK_ELC": "",
   "LANDMARK_EMBASSY": "",
   "LANDMARK_FRIVOLOCO": "",

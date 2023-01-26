@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Avalonia;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Views;
@@ -9,6 +10,7 @@ namespace BnbnavNetClient.Models;
 public enum LandmarkType
 {
     Unknown = 0,
+    InternalTemporary,
     City,
     Country,
     AirCSStation,
@@ -72,6 +74,7 @@ public static class LandmarkTypeExtensions
         LandmarkType.Tesco => "tesco",
         LandmarkType.City => "label-city",
         LandmarkType.Country => "label-country",
+        LandmarkType.InternalTemporary => "internal-temporary",
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
     };
 
@@ -107,17 +110,18 @@ public static class LandmarkTypeExtensions
             LandmarkType.FrivoloCoChocolates => t["LANDMARK_FRIVOLOCO"],
             LandmarkType.Elc => t["LANDMARK_ELC"],
             LandmarkType.Tesco => t["LANDMARK_TESCO"],
+            LandmarkType.InternalTemporary => t["LANDMARK_DROPPED_PIN"],
             LandmarkType.City => t["LABEL_CITY"],
             LandmarkType.Country => t["LABEL_COUNTRY"],
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
 
-    public static bool IsLandmark(this LandmarkType type) => type != LandmarkType.Unknown && !type.IsLabel();
+    public static bool IsLandmark(this LandmarkType type) => type != LandmarkType.Unknown && type != LandmarkType.InternalTemporary && !type.IsLabel();
     public static bool IsLabel(this LandmarkType type) => type.ServerName().StartsWith("label-");
 }
 
-public sealed class Landmark : MapItem
+public class Landmark : MapItem
 {
     static readonly double LandmarkSize = 10;
     
@@ -154,5 +158,29 @@ public sealed class Landmark : MapItem
             pos.Y - LandmarkSize * mapView.MapViewModel.Scale / 2,
             LandmarkSize * mapView.MapViewModel.Scale, LandmarkSize * mapView.MapViewModel.Scale);
         return rect;
+    }
+}
+
+public partial class TemporaryLandmark : Landmark
+{
+    [GeneratedRegex(@"^\(?(?<x>-?\d+), ?(?<z>-?\d+)\)?$", RegexOptions.CultureInvariant)]
+    private static partial Regex CoordinateSearchRegex();
+
+    public TemporaryLandmark(string Id, Node Node, string Name) : base(Id, Node, Name, "internal-temporary")
+    {
+    }
+
+    public static TemporaryLandmark? ParseCoordinateString(string coordinateString)
+    {
+        var coordinateSearch = CoordinateSearchRegex().Match(coordinateString);
+        if (!coordinateSearch.Success)
+        {
+            return null;
+        }
+
+        var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        var x = Convert.ToInt32(coordinateSearch.Groups["x"].Value);
+        var z = Convert.ToInt32(coordinateSearch.Groups["z"].Value);
+        return new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode($"temp@{x},{z}", x, 0, z), t["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
     }
 }

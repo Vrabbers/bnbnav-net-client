@@ -3,7 +3,7 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Models;
 
-public sealed class Node : MapItem
+public class Node : MapItem
 {
     static readonly double NodeSize = 14;
 
@@ -39,4 +39,11 @@ public sealed class Node : MapItem
     }
 
     public Point Point => new(X, Z);
+}
+
+public class TemporaryNode : Node
+{
+    public TemporaryNode(string Id, int X, int Y, int Z) : base(Id, X, Y, Z)
+    {
+    }
 }

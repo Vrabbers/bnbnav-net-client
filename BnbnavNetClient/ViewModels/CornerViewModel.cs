@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reactive;
+using System.Text.RegularExpressions;
 using Avalonia.Collections;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Services;
@@ -12,7 +13,6 @@ namespace BnbnavNetClient.ViewModels;
 public class CornerViewModel : ViewModel
 {
     readonly MapService _mapService;
-
     [Reactive]
     public string SearchQuery { get; set; } = string.Empty;
 
@@ -36,9 +36,14 @@ public class CornerViewModel : ViewModel
                 SearchResults = new AvaloniaList<Landmark>();
                 return;
             }
+
+            var listItems = _mapService.Landmarks.Values.Where(x =>
+                x.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase));
+
+            var coordinate = TemporaryLandmark.ParseCoordinateString(SearchQuery);
+            if (coordinate is not null) listItems = listItems.Prepend(coordinate);
             
-            SearchResults = new AvaloniaList<Landmark>(_mapService.Landmarks.Values.Where(x =>
-                x.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase)).ToList());
+            SearchResults = new AvaloniaList<Landmark>(listItems);
         }));
         this.WhenAnyValue(x => x.SearchQuery).Subscribe(Observer.Create<string>(_ =>
         {

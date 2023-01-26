@@ -1,6 +1,7 @@
 {
   "CANCEL": "Abbrechen",
   "CREATE": "Erstellen",
+  "DROPPED_PIN": "",
   "EDGE_DELETE": "",
   "EDITNAV_PROMPT": "Verwenden Sie /editnav, um ein Token zu erhalten, und geben sie den hier ein:",
   "EDITNAV_WATERMARK": "Token",
@@ -27,6 +28,7 @@
   "LANDMARK_COFFEE_SHOP": "",
   "LANDMARK_COURTHOUSE": "",
   "LANDMARK_DELETE": "",
+  "LANDMARK_DROPPED_PIN": "",
   "LANDMARK_ELC": "",
   "LANDMARK_EMBASSY": "",
   "LANDMARK_FRIVOLOCO": "",

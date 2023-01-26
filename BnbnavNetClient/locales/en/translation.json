@@ -1,6 +1,7 @@
 {
   "CANCEL": "Cancel",
   "CREATE": "Create",
+  "DROPPED_PIN": "Coordinates ({{x}}, {{z}})",
   "EDGE_DELETE": "Delete Edge {{roadName}}",
   "EDITNAV_PROMPT": "Use /editnav to obtain a token and enter here:",
   "EDITNAV_WATERMARK": "Token",
@@ -27,6 +28,7 @@
   "LANDMARK_COFFEE_SHOP": "Coffee Shop",
   "LANDMARK_COURTHOUSE": "Courthouse",
   "LANDMARK_DELETE": "Delete Landmark/Label",
+  "LANDMARK_DROPPED_PIN": "Dropped Pin",
   "LANDMARK_ELC": "ELC",
   "LANDMARK_EMBASSY": "Embassy",
   "LANDMARK_FRIVOLOCO": "FrivoloCo Chocolates",
