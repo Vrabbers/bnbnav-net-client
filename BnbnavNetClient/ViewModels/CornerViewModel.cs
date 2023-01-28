@@ -12,7 +12,27 @@ namespace BnbnavNetClient.ViewModels;
 
 public class CornerViewModel : ViewModel
 {
-    readonly MapService _mapService;
+    public MapService MapService { get; }
+
+    public enum AvailableUi
+    {
+        Search,
+        Prepare,
+        Go
+    }
+    
+    [Reactive]
+    public AvailableUi CurrentUi { get; set; } = AvailableUi.Search;
+    
+    [Reactive]
+    public bool IsInSearchMode { get; set; }
+    
+    [Reactive]
+    public bool IsInPrepareMode { get; set; }
+    
+    [Reactive]
+    public bool IsInGoMode { get; set; }
+    
     [Reactive]
     public string SearchQuery { get; set; } = string.Empty;
 
@@ -27,7 +47,7 @@ public class CornerViewModel : ViewModel
 
     public CornerViewModel(MapService mapService)
     {
-        _mapService = mapService;
+        MapService = mapService;
 
         this.WhenAnyValue(x => x.SearchAreaFocused, x => x.SearchQuery).Subscribe(Observer.Create<ValueTuple<bool, string>>(_ =>
         {
@@ -37,7 +57,7 @@ public class CornerViewModel : ViewModel
                 return;
             }
 
-            var listItems = _mapService.Landmarks.Values.Where(x =>
+            var listItems = MapService.Landmarks.Values.Where(x =>
                 x.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase));
 
             var coordinate = TemporaryLandmark.ParseCoordinateString(SearchQuery);
@@ -49,5 +69,22 @@ public class CornerViewModel : ViewModel
         {
             SelectedLandmark = null;
         }));
+        this.WhenAnyValue(x => x.CurrentUi).Subscribe(Observer.Create<AvailableUi>(_ =>
+        {
+            IsInSearchMode = CurrentUi == AvailableUi.Search;
+            IsInPrepareMode = CurrentUi == AvailableUi.Prepare;
+            IsInGoMode = CurrentUi == AvailableUi.Go;
+        }));
     }
+
+    public void GetDirectionsToSelectedLandmark()
+    {
+        CurrentUi = AvailableUi.Prepare;
+    }
+
+    public void LeavePrepareMode()
+    {
+        CurrentUi = AvailableUi.Search;
+    }
+
 }

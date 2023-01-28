@@ -7,26 +7,36 @@
              x:DataType="viewModels:CornerViewModel"
              xmlns:str="using:BnbnavNetClient.I18Next"
              xmlns:viewModels="clr-namespace:BnbnavNetClient.ViewModels"
+             xmlns:controls="clr-namespace:BnbnavNetClient.Controls"
+             xmlns:views="clr-namespace:BnbnavNetClient.Views"
              x:CompileBindings="True">
     <StackPanel>
-        <StackPanel>
-            <TextBox Watermark="Search..." Text="{Binding SearchQuery}" VerticalAlignment="Top" />
-            <StackPanel IsVisible="{Binding SelectedLandmark, Converter={x:Static ObjectConverters.IsNull}}" VerticalAlignment="Stretch">
-                <ListBox Items="{Binding SearchResults}" SelectedItem="{Binding SelectedLandmark}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Text="{Binding Name}"></TextBlock>
-                                <TextBlock Text="{Binding HumanReadableType}"></TextBlock>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </StackPanel>
-            <StackPanel IsVisible="{Binding SelectedLandmark, Converter={x:Static ObjectConverters.IsNotNull}}" VerticalAlignment="Stretch">
+        <StackPanel IsVisible="{Binding IsInSearchMode}">
+            <!-- <AutoCompleteBox Watermark="{str:Tr Key=SEARCH}" Text="{Binding SearchQuery}" IsDropDownOpen="True" Items="{Binding SearchResults}" SelectedItem="{Binding SelectedLandmark}"> -->
+            <!--     <AutoCompleteBox.ItemTemplate> -->
+            <!--         <DataTemplate> -->
+            <!--             <StackPanel> -->
+            <!--                 <TextBlock Text="{ReflectionBinding Name}"></TextBlock> -->
+            <!--                 <TextBlock Text="{ReflectionBinding HumanReadableType}"></TextBlock> -->
+            <!--             </StackPanel> -->
+            <!--         </DataTemplate> -->
+            <!--     </AutoCompleteBox.ItemTemplate> -->
+            <!-- </AutoCompleteBox> -->
+            <controls:LandmarkSearchControl SelectedLandmark="{Binding SelectedLandmark}" MapService="{Binding MapService}" />
+            <!-- <StackPanel IsVisible="{Binding SelectedLandmark, Converter={x:Static ObjectConverters.IsNotNull}}" VerticalAlignment="Stretch"> -->
+            <StackPanel IsVisible="True" VerticalAlignment="Stretch">
                 <TextBlock Text="Selected Landmark:"></TextBlock>
                 <TextBlock Text="{Binding SelectedLandmark.Name, FallbackValue=.}"></TextBlock>
                 <TextBlock Text="{Binding SelectedLandmark.HumanReadableType, FallbackValue=.}"></TextBlock>
+                <Button Content="{str:Tr Key=LANDMARK_GET_DIRECTIONS}" Command="{Binding GetDirectionsToSelectedLandmark}" />
+            </StackPanel>
+        </StackPanel>
+        
+        <StackPanel IsVisible="{Binding IsInPrepareMode}" Orientation="Horizontal">
+            <Button Content="&lt;-" Command="{Binding LeavePrepareMode}" VerticalAlignment="Top" />
+            <StackPanel>
+                <TextBox Watermark="From" HorizontalAlignment="Stretch" />
+                <TextBox Watermark="To" HorizontalAlignment="Stretch" />
             </StackPanel>
         </StackPanel>
     </StackPanel>

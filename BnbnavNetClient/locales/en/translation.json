@@ -36,6 +36,7 @@
   "LANDMARK_GENERIC_GRAY": "Generic Gray",
   "LANDMARK_GENERIC_GREEN": "Generic Green",
   "LANDMARK_GENERIC_RED": "Generic Red",
+  "LANDMARK_GET_DIRECTIONS": "Directions to here",
   "LANDMARK_HOSPITAL": "Hospital",
   "LANDMARK_HOTEL": "Hotel",
   "LANDMARK_IMMI": "Immigration Checkpoint",
@@ -77,6 +78,7 @@
   "ROAD_TYPE_UNKNOWN": "Unknown Road Type",
   "ROAD_TYPE_WATERWAY": "Waterway",
   "SAVE": "Save",
+  "SEARCH": "Search",
   "SPLICE": "Splice",
   "SPY_OPTIONS": "Spy Options",
   "UPDATE": "Update"

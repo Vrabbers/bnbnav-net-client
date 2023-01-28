@@ -1,0 +1,38 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:BnbnavNetClient.Controls"
+        xmlns:str="using:BnbnavNetClient.I18Next"
+        xmlns:models="clr-namespace:BnbnavNetClient.Models"
+        x:CompileBindings="True">
+    <Design.PreviewWith>
+        <controls:LandmarkSearchControl />
+    </Design.PreviewWith>
+
+    <Style Selector="controls|LandmarkSearchControl">
+        <!-- Set Defaults -->
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel>
+                    <TextBox Watermark="{str:Tr Key=SEARCH}" Text="{TemplateBinding SearchQuery}" VerticalAlignment="Top">
+                        <!-- <TextBox.InnerRightContent> -->
+                        <!-- <Button Content="X" Command="{TemplateBinding ClearSearchQuery}"></Button> -->
+                        <!-- </TextBox.InnerRightContent> -->
+                    </TextBox>
+                    <StackPanel IsVisible="{TemplateBinding SelectedLandmark, Converter={x:Static ObjectConverters.IsNull}}" VerticalAlignment="Stretch">
+                        <ListBox Items="{TemplateBinding SearchResults}" SelectedItem="{TemplateBinding SelectedLandmark}" x:DataType="models:Landmark">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" x:DataType="models:Landmark"></TextBlock>
+                                        <TextBlock Text="{Binding HumanReadableType}" x:DataType="models:Landmark"></TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+</Styles>

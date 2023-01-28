@@ -36,6 +36,7 @@
   "LANDMARK_GENERIC_GRAY": "",
   "LANDMARK_GENERIC_GREEN": "",
   "LANDMARK_GENERIC_RED": "",
+  "LANDMARK_GET_DIRECTIONS": "",
   "LANDMARK_HOSPITAL": "",
   "LANDMARK_HOTEL": "",
   "LANDMARK_IMMI": "",
@@ -77,6 +78,7 @@
   "ROAD_TYPE_UNKNOWN": "",
   "ROAD_TYPE_WATERWAY": "",
   "SAVE": "",
+  "SEARCH": "",
   "SPLICE": "",
   "SPY_OPTIONS": "Tùy chọn tỏa sáng",
   "UPDATE": ""
