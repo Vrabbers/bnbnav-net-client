@@ -54,7 +54,7 @@ public class CalculatedRoute
             {
                 var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
                 var args = new Dictionary<string, object?>();
-                if (to is not null) args["road"] = roundaboutExit?.Road.Name ?? to.Road.Name;
+                if (to is not null) args["road"] = TargetRoadName;
                 if (roundaboutExitNumber is not null) args["exit"] = roundaboutExitNumber.ToString();
 
                 return instructionType switch
@@ -80,6 +80,8 @@ public class CalculatedRoute
                 };
             }
         }
+
+        public string TargetRoadName => roundaboutExit?.Road.Name ?? to?.Road.Name ?? InstructionString;
     };
 
     List<MapItem> Elements { get; } = new();
