@@ -71,6 +71,11 @@ public class CornerViewModel : ViewModel
                     {
                         var route = await MapService.ObtainCalculatedRoute(GoModeStartPoint, GoModeEndPoint);
                         MapService.CurrentRoute = route;
+
+                        foreach (var inst in route.Instructions)
+                        {
+                            Console.WriteLine(inst.HumanReadableString((int) inst.distance));
+                        }
                     }
                     catch (RoutingException ex)
                     {

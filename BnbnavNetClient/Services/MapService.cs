@@ -267,14 +267,13 @@ public sealed class MapService : ReactiveObject
             if (processingNode.node == endingNode)
             {
                 //We have reached the end! Start backtracking!
-                var route = new CalculatedRoute();
+                var route = new CalculatedRoute(this);
                 do
                 {
                     route.AddRouteSegment(processingNode.node, processingNode.via);
                     processingNode = backtrack.Single(x => x.node == processingNode.via!.From);
                 } while (processingNode.via is not null);
                 route.AddRouteSegment(processingNode.node, null);
-                route.FinaliseRoute();
                 return route;
             }
 
