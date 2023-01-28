@@ -121,7 +121,7 @@ public static class LandmarkTypeExtensions
     public static bool IsLabel(this LandmarkType type) => type.ServerName().StartsWith("label-");
 }
 
-public class Landmark : MapItem
+public class Landmark : MapItem, ISearchable
 {
     static readonly double LandmarkSize = 10;
     
@@ -141,6 +141,8 @@ public class Landmark : MapItem
     public LandmarkType LandmarkType => Enum.GetValues<LandmarkType>().FirstOrDefault(x => x.ServerName() == Type);
     
     public string HumanReadableType => LandmarkType.HumanReadableName();
+
+    public ILocatable Location => Node;
 
     public void Deconstruct(out string id, out Node node, out string name, out string type)
     {

@@ -13,8 +13,8 @@ namespace BnbnavNetClient.Controls;
 
 public class LandmarkSearchControl : TemplatedControl
 {
-    Landmark? _SelectedLandmark;
-    public static readonly DirectProperty<LandmarkSearchControl, Landmark?> SelectedLandmarkProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, Landmark?>("SelectedLandmark", o => o.SelectedLandmark, (o, v) => o.SelectedLandmark = v, defaultBindingMode: BindingMode.TwoWay);
+    ISearchable? _SelectedLandmark;
+    public static readonly DirectProperty<LandmarkSearchControl, ISearchable?> SelectedLandmarkProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, ISearchable?>("SelectedLandmark", o => o.SelectedLandmark, (o, v) => o.SelectedLandmark = v, defaultBindingMode: BindingMode.TwoWay);
     MapService _MapService = null!;
     public static readonly DirectProperty<LandmarkSearchControl, MapService> MapServiceProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, MapService>("MapService", o => o.MapService, (o, v) => o.MapService = v);
 
@@ -22,12 +22,12 @@ public class LandmarkSearchControl : TemplatedControl
     public static readonly DirectProperty<LandmarkSearchControl, string> SearchQueryProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, string>(
         "SearchQuery", o => o.SearchQuery, (o, v) => o.SearchQuery = v);
 
-    private AvaloniaList<Landmark> _searchResults = new();
+    private AvaloniaList<ISearchable> _searchResults = new();
 
-    public static readonly DirectProperty<LandmarkSearchControl, AvaloniaList<Landmark>> SearchResultsProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, AvaloniaList<Landmark>>(
+    public static readonly DirectProperty<LandmarkSearchControl, AvaloniaList<ISearchable>> SearchResultsProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, AvaloniaList<ISearchable>>(
         "SearchResults", o => o.SearchResults, (o, v) => o.SearchResults = v);
 
-    public AvaloniaList<Landmark> SearchResults
+    public AvaloniaList<ISearchable> SearchResults
     {
         get => _searchResults;
         set => SetAndRaise(SearchResultsProperty, ref _searchResults, value);
@@ -39,7 +39,7 @@ public class LandmarkSearchControl : TemplatedControl
         set => SetAndRaise(SearchQueryProperty, ref _searchQuery, value);
     }
 
-    public Landmark? SelectedLandmark
+    public ISearchable? SelectedLandmark
     {
         get { return _SelectedLandmark; }
         set { SetAndRaise(SelectedLandmarkProperty, ref _SelectedLandmark, value); }
@@ -55,26 +55,36 @@ public class LandmarkSearchControl : TemplatedControl
     {
         SearchQueryProperty.Changed.Subscribe(x =>
         {
-            SelectedLandmark = null;
-            
-            if (string.IsNullOrEmpty(SearchQuery))
+            if (SelectedLandmark?.Name == SearchQuery)
             {
-                SearchResults = new AvaloniaList<Landmark>();
                 return;
             }
 
-            var listItems = MapService.Landmarks.Values.Where(x =>
-                x.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase));
+            SelectedLandmark = null;
+
+            if (string.IsNullOrEmpty(SearchQuery))
+            {
+                SearchResults = new AvaloniaList<ISearchable>();
+                return;
+            }
+
+            var listItems = MapService.Players.Values.Where(x =>
+                    x.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase)).Cast<ISearchable>()
+                .Union(MapService.Landmarks.Values.Where(x =>
+                    x.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase)));
 
             var coordinate = TemporaryLandmark.ParseCoordinateString(SearchQuery);
             if (coordinate is not null) listItems = listItems.Prepend(coordinate);
             
-            SearchResults = new AvaloniaList<Landmark>(listItems);
+            SearchResults = new AvaloniaList<ISearchable>(listItems);
         });
 
         SelectedLandmarkProperty.Changed.Subscribe(_ =>
         {
-
+            if (SelectedLandmark is not null)
+            {
+                SearchQuery = SelectedLandmark.Name;
+            }
         });
     }
 }

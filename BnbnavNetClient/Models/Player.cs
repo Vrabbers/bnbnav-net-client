@@ -6,12 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media;
+using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services;
 using Timer = System.Timers.Timer;
 
 namespace BnbnavNetClient.Models;
 
-public sealed class Player : IDisposable
+public sealed class Player : IDisposable, ISearchable, ILocatable
 {
     readonly MapService _mapService;
     readonly Timer _timer;
@@ -19,9 +20,20 @@ public sealed class Player : IDisposable
     
     public string Name { get; }
 
-    public double X { get; private set; }
-    public double Y { get; private set; }
-    public double Z { get; private set; }
+    public string HumanReadableType
+    {
+        get
+        {
+            var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+            return t["PLAYER"];
+        }
+    }
+
+    public ILocatable Location => this;
+
+    public double Xd { get; private set; }
+    public double Yd { get; private set; }
+    public double Zd { get; private set; }
 
     public Edge? SnappedEdge { get; private set; }
 
@@ -33,13 +45,13 @@ public sealed class Player : IDisposable
     {
         get
         {
-            if (SnappedEdge is null) return new(X, Z);
+            if (SnappedEdge is null) return new(Xd, Zd);
             
             //Find the intersection point
             var playerLine = new ExtendedLine()
             {
-                Point1 = new(X, Z),
-                Point2 = new(X + 1, Z)
+                Point1 = new(Xd, Zd),
+                Point2 = new(Xd + 1, Zd)
             };
             playerLine = playerLine.SetAngle(SnappedEdge.Line.NormalLine().Angle);
             _ = playerLine.TryIntersect(SnappedEdge.Line, out var intersectionPoint);
@@ -107,14 +119,14 @@ public sealed class Player : IDisposable
         var newZ = evt.Z;
 
         // ReSharper disable CompareOfFloatsByEqualityOperator
-        if (X == newX && Y == newY && Z == newZ) return;
+        if (Xd == newX && Yd == newY && Zd == newZ) return;
         // ReSharper restore CompareOfFloatsByEqualityOperator
 
-        X = newX;
-        Y = newY;
-        Z = newZ;
+        Xd = newX;
+        Yd = newY;
+        Zd = newZ;
         
-        PosHistory.Insert(0, (DateTime.UtcNow, new(X, Z)));
+        PosHistory.Insert(0, (DateTime.UtcNow, new(Xd, Zd)));
         PosHistory = PosHistory.Where((x, i) => i <= 10 || DateTime.UtcNow - x.Item1 < TimeSpan.FromMilliseconds(500)).ToList();
 
         if (SnappedEdge is not null)
@@ -154,7 +166,7 @@ public sealed class Player : IDisposable
         
         // TODO: Get the road thickness from resources somehow
         // We are not using GeoHelper because that takes into account the extra space at the end of a road
-        if (edge.Line.SetLength(10).NormalLine().MoveCenter(new(X, Z)).TryIntersect(edge.Line, out _) !=
+        if (edge.Line.SetLength(10).NormalLine().MoveCenter(new(Xd, Zd)).TryIntersect(edge.Line, out _) !=
             ExtendedLine.IntersectionType.Intersects) return false;
         
         var angle = edge.Line.AngleTo(Velocity);
@@ -174,4 +186,9 @@ public sealed class Player : IDisposable
         _timer.Dispose();
         _lastSnapMutex.Dispose();
     }
+
+    public int X => (int)double.Round(Xd);
+    public int Y => (int)double.Round(Yd);
+    public int Z => (int)double.Round(Zd);
+    public Point Point => new(X, Z);
 }

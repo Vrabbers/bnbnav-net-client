@@ -3,7 +3,7 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Models;
 
-public class Node : MapItem
+public class Node : MapItem, ILocatable
 {
     static readonly double NodeSize = 14;
 

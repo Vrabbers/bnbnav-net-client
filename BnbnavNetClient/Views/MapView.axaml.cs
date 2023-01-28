@@ -275,9 +275,9 @@ public partial class MapView : UserControl
             InvalidateVisual();
         });
 
-        MapViewModel.WhenAnyValue(x => x.SelectedLandmark).Subscribe(Observer.Create<Landmark?>(_ =>
+        MapViewModel.WhenAnyValue(x => x.SelectedLandmark).Subscribe(Observer.Create<ISearchable?>(_ =>
         {
-            if (MapViewModel.SelectedLandmark is not null) PanTo(MapViewModel.SelectedLandmark.Node.Point);
+            if (MapViewModel.SelectedLandmark is not null) PanTo(MapViewModel.SelectedLandmark.Location.Point);
         }));
     }
 

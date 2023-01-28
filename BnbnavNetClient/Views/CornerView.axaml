@@ -12,16 +12,6 @@
              x:CompileBindings="True">
     <StackPanel>
         <StackPanel IsVisible="{Binding IsInSearchMode}">
-            <!-- <AutoCompleteBox Watermark="{str:Tr Key=SEARCH}" Text="{Binding SearchQuery}" IsDropDownOpen="True" Items="{Binding SearchResults}" SelectedItem="{Binding SelectedLandmark}"> -->
-            <!--     <AutoCompleteBox.ItemTemplate> -->
-            <!--         <DataTemplate> -->
-            <!--             <StackPanel> -->
-            <!--                 <TextBlock Text="{ReflectionBinding Name}"></TextBlock> -->
-            <!--                 <TextBlock Text="{ReflectionBinding HumanReadableType}"></TextBlock> -->
-            <!--             </StackPanel> -->
-            <!--         </DataTemplate> -->
-            <!--     </AutoCompleteBox.ItemTemplate> -->
-            <!-- </AutoCompleteBox> -->
             <controls:LandmarkSearchControl SelectedLandmark="{Binding SelectedLandmark}" MapService="{Binding MapService}" />
             <StackPanel IsVisible="{Binding SelectedLandmark, Converter={x:Static ObjectConverters.IsNotNull}}" VerticalAlignment="Stretch">
                 <TextBlock Text="Selected Landmark:"></TextBlock>
@@ -34,8 +24,8 @@
         <StackPanel IsVisible="{Binding IsInPrepareMode}" Orientation="Horizontal">
             <Button Content="&lt;-" Command="{Binding LeavePrepareMode}" VerticalAlignment="Top" />
             <StackPanel>
-                <TextBox Watermark="From" HorizontalAlignment="Stretch" />
-                <TextBox Watermark="To" HorizontalAlignment="Stretch" />
+                <controls:LandmarkSearchControl SelectedLandmark="{Binding GoModeStartPoint}" MapService="{Binding MapService}" />
+                <controls:LandmarkSearchControl SelectedLandmark="{Binding GoModeEndPoint}" MapService="{Binding MapService}" />
             </StackPanel>
         </StackPanel>
     </StackPanel>

@@ -34,7 +34,13 @@ public class CornerViewModel : ViewModel
     public bool IsInGoMode { get; set; }
     
     [Reactive]
-    public Landmark? SelectedLandmark { get; set; }
+    public ISearchable? SelectedLandmark { get; set; }
+    
+    [Reactive]
+    public ISearchable? GoModeStartPoint { get; set; }
+    
+    [Reactive]
+    public ISearchable? GoModeEndPoint { get; set; }
 
     public CornerViewModel(MapService mapService)
     {
@@ -50,6 +56,7 @@ public class CornerViewModel : ViewModel
 
     public void GetDirectionsToSelectedLandmark()
     {
+        GoModeEndPoint = SelectedLandmark;
         CurrentUi = AvailableUi.Prepare;
     }
 

@@ -60,7 +60,7 @@ public class MapViewModel : ViewModel
     [Reactive] public AvaloniaList<MenuItem> ContextMenuItems { get; set; } = new();
     
     [ObservableAsProperty]
-    public Landmark? SelectedLandmark { get; set; }
+    public ISearchable? SelectedLandmark { get; set; }
 
     public MapViewModel(MapService mapService, MainViewModel mainViewModel)
     {
