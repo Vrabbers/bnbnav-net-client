@@ -3,7 +3,7 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Models;
 
-public sealed class Edge : MapItem
+public class Edge : MapItem
 {
     public Edge(string Id, Road Road, Node From, Node To)
     {
@@ -40,4 +40,11 @@ public sealed class Edge : MapItem
         Point1 = From.Point,
         Point2 = To.Point
     };
+}
+
+public class TemporaryEdge : Edge
+{
+    public TemporaryEdge(Road Road, Node From, Node To) : base("somegeneratedid", Road, From, To)
+    {
+    }
 }

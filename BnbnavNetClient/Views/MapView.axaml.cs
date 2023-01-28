@@ -268,6 +268,8 @@ public partial class MapView : UserControl
             .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Edge>>>(_ => UpdateDrawnItems()));
         MapViewModel.MapService.WhenPropertyChanged(x => x.Landmarks)
             .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Landmark>>>(_ => UpdateDrawnItems()));
+        MapViewModel.MapService.WhenPropertyChanged(x => x.CurrentRoute)
+            .Subscribe(Observer.Create<PropertyValue<MapService, CalculatedRoute?>>(_ => UpdateDrawnItems()));
 
         MapViewModel.MapService.PlayerUpdateInteraction.RegisterHandler(interaction =>
         {
@@ -337,7 +339,7 @@ public partial class MapView : UserControl
 
         var bounds = boundsRect ?? Bounds;
 
-        DrawnEdges = mapService.Edges.Values.Select(edge =>
+        DrawnEdges = mapService.AllEdges.Select(edge =>
         {
             var (from, to) = edge.Extents(this);
             return (from, to, edge);
@@ -369,10 +371,9 @@ public partial class MapView : UserControl
 
     public double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? this.FindResource("MotorwayThickness")! : this.FindResource("RoadThickness")!);
 
-    public void DrawEdge(DrawingContext context, RoadType roadType, Point from, Point to, bool drawGhost = false)
+    public void DrawEdge(DrawingContext context, RoadType roadType, Point from, Point to, bool drawGhost = false, bool drawRoute = false)
     {
-            
-        var pen = PenForRoadType(roadType);
+        var pen = drawRoute ? new Pen(new SolidColorBrush(new Color(255, 0, 150, 255)), lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round) : PenForRoadType(roadType);
 
         var length = double.Sqrt(double.Pow(from.X - to.X, 2) + double.Pow(from.Y - to.Y, 2));
         var diffPoint = to - from;
@@ -388,6 +389,7 @@ public partial class MapView : UserControl
             gradBrush.StartPoint = new(0, -pen.Thickness / 2, RelativeUnit.Absolute);
             gradBrush.EndPoint = new(0, pen.Thickness / 2, RelativeUnit.Absolute);
         }
+        
         using (context.PushPreTransform(matrix))
             using (context.PushOpacity(drawGhost ? 0.5 : 1))
                 context.DrawLine(pen, new(0, 0), new(length, 0));
@@ -475,7 +477,7 @@ public partial class MapView : UserControl
         foreach (var (from, to, edge) in DrawnEdges)
         {
             if (noRender.Contains(edge)) continue;
-            DrawEdge(context, edge.Road.RoadType, from, to);
+            DrawEdge(context, edge.Road.RoadType, from, to, drawRoute: MapViewModel.MapService.CurrentRoute?.Edges.Contains(edge) ?? false);
         }
 
         foreach (var (rect, landmark) in DrawnLandmarks)

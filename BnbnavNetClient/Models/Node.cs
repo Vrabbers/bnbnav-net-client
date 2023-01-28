@@ -43,7 +43,16 @@ public class Node : MapItem, ILocatable
 
 public class TemporaryNode : Node
 {
-    public TemporaryNode(string Id, int X, int Y, int Z) : base(Id, X, Y, Z)
+    public TemporaryNode(int X, int Y, int Z) : base($"temp@{X},{Z}", X, Y, Z)
     {
     }
+
+    public TemporaryNode(ISearchable original) : base(
+        $"temp@{original.Location.X},{original.Location.Z}:{original.Name}", original.Location.X, original.Location.Y,
+        original.Location.Z)
+    {
+        OriginalSearchable = original;
+    }
+    
+    ISearchable? OriginalSearchable { get; }
 }

@@ -1,6 +1,8 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.Shapes;
 using BnbnavNetClient.Helpers;
+using Microsoft.CodeAnalysis;
 
 namespace BnbnavNetClient.Models;
 
@@ -93,6 +95,19 @@ public readonly struct ExtendedLine
         {
             Point2 = new(Point1.X + length * unit.Dx, Point1.Y + length * unit.Dy)
         };
+    }
+
+    public bool RightAngleIntersection(Point point, out ExtendedLine intersection)
+    {
+        var intersectionLine = new ExtendedLine(point, point + new Point(5, 0)).SetAngle(NormalLine().Angle);
+        _ = intersectionLine.TryIntersect(this, out var intersectionPoint);
+
+        var testLine = new ExtendedLine(point, intersectionPoint);
+        testLine = testLine.SetLength(testLine.Length + 20);
+        var intersectionResult = testLine.TryIntersect(this, out intersectionPoint);
+
+        intersection = new ExtendedLine(intersectionPoint, point);
+        return intersectionResult == IntersectionType.Intersects;
     }
 
     public ExtendedLine FlipDirection() => new(Point2, Point1);

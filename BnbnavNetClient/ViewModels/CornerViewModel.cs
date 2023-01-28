@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Text.RegularExpressions;
@@ -41,8 +42,11 @@ public class CornerViewModel : ViewModel
     
     [Reactive]
     public ISearchable? GoModeEndPoint { get; set; }
+    
+    [ObservableAsProperty]
+    public string? LoggedInUsername { get; set; }
 
-    public CornerViewModel(MapService mapService)
+    public CornerViewModel(MapService mapService, MainViewModel mainViewModel)
     {
         MapService = mapService;
 
@@ -52,11 +56,45 @@ public class CornerViewModel : ViewModel
             IsInPrepareMode = CurrentUi == AvailableUi.Prepare;
             IsInGoMode = CurrentUi == AvailableUi.Go;
         }));
+        this.WhenAnyValue(x => x.GoModeStartPoint, x => x.GoModeEndPoint).Subscribe(Observer.Create<
+            // ReSharper disable once AsyncVoidLambda
+            ValueTuple<ISearchable?, ISearchable?>>(async _ =>
+                {
+                    if (GoModeStartPoint is null || GoModeEndPoint is null)
+                    {
+                        //Clear the current route
+                        MapService.CurrentRoute = null;
+                        return;
+                    }
+
+                    try
+                    {
+                        var route = await MapService.ObtainCalculatedRoute(GoModeStartPoint, GoModeEndPoint);
+                        MapService.CurrentRoute = route;
+                    }
+                    catch (RoutingException ex)
+                    {
+                        
+                    }
+                }));
+        
+        mainViewModel.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(this, x => x.LoggedInUsername);
     }
 
     public void GetDirectionsToSelectedLandmark()
     {
         GoModeEndPoint = SelectedLandmark;
+
+        if (!string.IsNullOrEmpty(LoggedInUsername))
+        {
+            //Attempt to find the player
+            var playerExists = MapService.Players.TryGetValue(LoggedInUsername, out var player);
+            if (playerExists)
+            {
+                GoModeStartPoint = player;
+            }
+        }
+        
         CurrentUi = AvailableUi.Prepare;
     }
 

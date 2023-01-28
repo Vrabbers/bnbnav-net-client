@@ -111,7 +111,7 @@ public sealed class MainViewModel : ViewModel
         var mapService = await MapService.DownloadInitialMapAsync();
         MapEditorService.MapService = mapService;
         MapViewModel = new MapViewModel(mapService, this);
-        CornerViewModel = new CornerViewModel(mapService);
+        CornerViewModel = new CornerViewModel(mapService, this);
         
         var panText = MapViewModel
             .WhenAnyValue(map => map.Pan)

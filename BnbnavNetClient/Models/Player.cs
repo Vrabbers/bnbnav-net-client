@@ -144,7 +144,7 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
 
             try
             {
-                var currentEdges = _mapService.Edges.Values.ToArray();
+                var currentEdges = _mapService.AllEdges;
                 var shouldChangeEdge = SnappedEdge is null;
                 //TODO: Also change edge if the current route contains the edge to change to or if the current route does not contain the currently snapped edge
                 if (shouldChangeEdge)
