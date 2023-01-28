@@ -3,6 +3,7 @@
         xmlns:controls="using:BnbnavNetClient.Controls"
         xmlns:str="using:BnbnavNetClient.I18Next"
         xmlns:models="clr-namespace:BnbnavNetClient.Models"
+        x:DataType="controls:LandmarkSearchControl"
         x:CompileBindings="True">
     <Design.PreviewWith>
         <controls:LandmarkSearchControl />
@@ -14,18 +15,18 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <StackPanel>
-                    <TextBox Watermark="{str:Tr Key=SEARCH}" Text="{TemplateBinding SearchQuery}" VerticalAlignment="Top">
+                    <TextBox Watermark="{str:Tr Key=SEARCH}" Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, Path=SearchQuery}" VerticalAlignment="Top">
                         <!-- <TextBox.InnerRightContent> -->
                         <!-- <Button Content="X" Command="{TemplateBinding ClearSearchQuery}"></Button> -->
                         <!-- </TextBox.InnerRightContent> -->
                     </TextBox>
                     <StackPanel IsVisible="{TemplateBinding SelectedLandmark, Converter={x:Static ObjectConverters.IsNull}}" VerticalAlignment="Stretch">
-                        <ListBox Items="{TemplateBinding SearchResults}" SelectedItem="{TemplateBinding SelectedLandmark}" x:DataType="models:Landmark">
+                        <ListBox Items="{TemplateBinding SearchResults}" SelectedItem="{Binding RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, Path=SelectedLandmark}">
                             <ListBox.ItemTemplate>
-                                <DataTemplate>
+                                <DataTemplate x:DataType="models:Landmark">
                                     <StackPanel>
-                                        <TextBlock Text="{Binding Name}" x:DataType="models:Landmark"></TextBlock>
-                                        <TextBlock Text="{Binding HumanReadableType}" x:DataType="models:Landmark"></TextBlock>
+                                        <TextBlock Text="{Binding Name}"></TextBlock>
+                                        <TextBlock Text="{Binding HumanReadableType}"></TextBlock>
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>

@@ -34,41 +34,12 @@ public class CornerViewModel : ViewModel
     public bool IsInGoMode { get; set; }
     
     [Reactive]
-    public string SearchQuery { get; set; } = string.Empty;
-
-    [Reactive]
-    public AvaloniaList<Landmark> SearchResults { get; set; } = new();
-
-    [Reactive]
-    public bool SearchAreaFocused { get; set; } = true;
-    
-    [Reactive]
     public Landmark? SelectedLandmark { get; set; }
 
     public CornerViewModel(MapService mapService)
     {
         MapService = mapService;
 
-        this.WhenAnyValue(x => x.SearchAreaFocused, x => x.SearchQuery).Subscribe(Observer.Create<ValueTuple<bool, string>>(_ =>
-        {
-            if (string.IsNullOrEmpty(SearchQuery) || !SearchAreaFocused)
-            {
-                SearchResults = new AvaloniaList<Landmark>();
-                return;
-            }
-
-            var listItems = MapService.Landmarks.Values.Where(x =>
-                x.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase));
-
-            var coordinate = TemporaryLandmark.ParseCoordinateString(SearchQuery);
-            if (coordinate is not null) listItems = listItems.Prepend(coordinate);
-            
-            SearchResults = new AvaloniaList<Landmark>(listItems);
-        }));
-        this.WhenAnyValue(x => x.SearchQuery).Subscribe(Observer.Create<string>(_ =>
-        {
-            SelectedLandmark = null;
-        }));
         this.WhenAnyValue(x => x.CurrentUi).Subscribe(Observer.Create<AvailableUi>(_ =>
         {
             IsInSearchMode = CurrentUi == AvailableUi.Search;

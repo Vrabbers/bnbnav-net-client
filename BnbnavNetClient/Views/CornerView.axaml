@@ -23,8 +23,7 @@
             <!--     </AutoCompleteBox.ItemTemplate> -->
             <!-- </AutoCompleteBox> -->
             <controls:LandmarkSearchControl SelectedLandmark="{Binding SelectedLandmark}" MapService="{Binding MapService}" />
-            <!-- <StackPanel IsVisible="{Binding SelectedLandmark, Converter={x:Static ObjectConverters.IsNotNull}}" VerticalAlignment="Stretch"> -->
-            <StackPanel IsVisible="True" VerticalAlignment="Stretch">
+            <StackPanel IsVisible="{Binding SelectedLandmark, Converter={x:Static ObjectConverters.IsNotNull}}" VerticalAlignment="Stretch">
                 <TextBlock Text="Selected Landmark:"></TextBlock>
                 <TextBlock Text="{Binding SelectedLandmark.Name, FallbackValue=.}"></TextBlock>
                 <TextBlock Text="{Binding SelectedLandmark.HumanReadableType, FallbackValue=.}"></TextBlock>

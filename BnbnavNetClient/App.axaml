@@ -49,5 +49,6 @@
       <Setter Property="Background" Value="#00ff00" />
     </Style>
     <StyleInclude Source="/Controls/DayNightButton.axaml"/>
+    <StyleInclude Source="/Controls/LandmarkSearchControl.axaml" />
   </Application.Styles>
 </Application>

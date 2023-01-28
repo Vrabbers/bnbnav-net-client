@@ -1,7 +1,10 @@
+using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Services;
 using ReactiveUI;
@@ -11,11 +14,7 @@ namespace BnbnavNetClient.Controls;
 public class LandmarkSearchControl : TemplatedControl
 {
     Landmark? _SelectedLandmark;
-    public static readonly DirectProperty<LandmarkSearchControl, Landmark?> SelectedLandmarkProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, Landmark?>("SelectedLandmark", o => o.SelectedLandmark, (o, v) => o.SelectedLandmark = v);
-    // public static readonly DirectProperty<LandmarkSearchControl, object?> SelectedLandmarkProperty =
-    //     ListBox.SelectedItemProperty.AddOwner<LandmarkSearchControl>(x => x.SelectedLandmark,
-    //         (x, v) => x.SelectedLandmark = v);
-    
+    public static readonly DirectProperty<LandmarkSearchControl, Landmark?> SelectedLandmarkProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, Landmark?>("SelectedLandmark", o => o.SelectedLandmark, (o, v) => o.SelectedLandmark = v, defaultBindingMode: BindingMode.TwoWay);
     MapService _MapService = null!;
     public static readonly DirectProperty<LandmarkSearchControl, MapService> MapServiceProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, MapService>("MapService", o => o.MapService, (o, v) => o.MapService = v);
 
@@ -50,5 +49,32 @@ public class LandmarkSearchControl : TemplatedControl
     {
         get { return _MapService; }
         set { SetAndRaise(MapServiceProperty, ref _MapService, value); }
+    }
+
+    public LandmarkSearchControl()
+    {
+        SearchQueryProperty.Changed.Subscribe(x =>
+        {
+            SelectedLandmark = null;
+            
+            if (string.IsNullOrEmpty(SearchQuery))
+            {
+                SearchResults = new AvaloniaList<Landmark>();
+                return;
+            }
+
+            var listItems = MapService.Landmarks.Values.Where(x =>
+                x.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase));
+
+            var coordinate = TemporaryLandmark.ParseCoordinateString(SearchQuery);
+            if (coordinate is not null) listItems = listItems.Prepend(coordinate);
+            
+            SearchResults = new AvaloniaList<Landmark>(listItems);
+        });
+
+        SelectedLandmarkProperty.Changed.Subscribe(_ =>
+        {
+
+        });
     }
 }
