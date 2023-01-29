@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Avalonia;
 using Avalonia.Collections;
 using BnbnavNetClient.I18Next.Services;
@@ -23,6 +24,7 @@ public enum AvailableUi
 public class CornerViewModel : ViewModel
 {
     readonly MainViewModel _mainViewModel;
+    readonly IAvaloniaI18Next _i18n;
     public MapService MapService { get; }
 
     [Reactive]
@@ -49,10 +51,19 @@ public class CornerViewModel : ViewModel
     [ObservableAsProperty]
     public string? LoggedInUsername { get; set; }
 
+    CancellationTokenSource? RouteCalculationCancellationSource { get; set; }
+
+    [Reactive]
+    public bool CalculatingRoute { get; set; }
+
+    [Reactive]
+    public string? RouteCalculationError { get; set; }
+
     public CornerViewModel(MapService mapService, MainViewModel mainViewModel)
     {
         _mainViewModel = mainViewModel;
         MapService = mapService;
+        _i18n = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
 
         this.WhenAnyValue(x => x.CurrentUi).Subscribe(Observer.Create<AvailableUi>(_ =>
         {
@@ -78,26 +89,46 @@ public class CornerViewModel : ViewModel
             // ReSharper disable once AsyncVoidLambda
             ValueTuple<ISearchable?, ISearchable?>>(async _ =>
                 {
+                    RouteCalculationCancellationSource?.Cancel();
+                    RouteCalculationCancellationSource = new CancellationTokenSource();
+                    
+                    //Clear the current route
+                    MapService.CurrentRoute = null;
+                    RouteCalculationError = null;
+                    
                     if (GoModeStartPoint is null || GoModeEndPoint is null)
                     {
-                        //Clear the current route
-                        MapService.CurrentRoute = null;
                         return;
                     }
 
                     try
                     {
-                        var route = await MapService.ObtainCalculatedRoute(GoModeStartPoint, GoModeEndPoint);
+                        CalculatingRoute = true;
+                        var route = await MapService.ObtainCalculatedRoute(GoModeStartPoint, GoModeEndPoint,
+                            RouteCalculationCancellationSource.Token);
                         MapService.CurrentRoute = route;
+                        CalculatingRoute = false;
+                        
+                        RouteCalculationCancellationSource = null;
 
                         foreach (var inst in route.Instructions)
                         {
-                            Console.WriteLine(inst.HumanReadableString((int) inst.distance));
+                            Console.WriteLine(inst.HumanReadableString((int)inst.distance));
                         }
                     }
-                    catch (RoutingException ex)
+                    catch (NoSuitableEdgeException ex)
                     {
-                        
+                        CalculatingRoute = false;
+                        RouteCalculationError = _i18n["DIRECTIONS_CALCULATING_FAILURE_NO_ROAD"];
+                    }
+                    catch (DisjointNetworkException ex)
+                    {
+                        CalculatingRoute = false;
+                        RouteCalculationError = _i18n["DIRECTIONS_CALCULATING_FAILURE_NO_PATH"];
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Ignore
                     }
                 }));
         
@@ -118,11 +149,10 @@ public class CornerViewModel : ViewModel
 
     public void EnterGoMode()
     {
-        var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
         _mainViewModel.Popup = new AlertDialogViewModel()
         {
-            Title = t["GO_MODE_WARNING_TITLE"],
-            Message = t["GO_MODE_WARNING_MESSAGE"],
+            Title = _i18n["GO_MODE_WARNING_TITLE"],
+            Message = _i18n["GO_MODE_WARNING_MESSAGE"],
             Ok = ReactiveCommand.Create(() =>
             {
                 _mainViewModel.Popup = null;

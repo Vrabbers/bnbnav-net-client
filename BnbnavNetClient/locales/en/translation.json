@@ -1,6 +1,9 @@
 {
   "CANCEL": "Cancel",
   "CREATE": "Create",
+  "DIRECTIONS_CALCULATING": "Calculating route...",
+  "DIRECTIONS_CALCULATING_FAILURE_NO_PATH": "No route to destination",
+  "DIRECTIONS_CALCULATING_FAILURE_NO_ROAD": "Departure or destination is not on a digitised road",
   "DIRECTIONS_FROM_HERE": "Directions from here",
   "DIRECTIONS_TO_HERE": "Directions to here",
   "DROPPED_PIN": "Coordinates ({{x}}, {{z}})",

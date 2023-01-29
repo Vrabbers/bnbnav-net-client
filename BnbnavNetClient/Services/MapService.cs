@@ -207,92 +207,98 @@ public sealed class MapService : ReactiveObject
         }));
     }
 
-    public async Task<CalculatedRoute> ObtainCalculatedRoute(ISearchable from, ISearchable to)
+    public async Task<CalculatedRoute> ObtainCalculatedRoute(ISearchable from, ISearchable to, CancellationToken ct)
     {
-        //TODO: When filters are switched on, this is where to filter out ineligible edges
-        var edges = _edges.Values.ToList();
-
-        var point1Edge = edges.MinBy(x => x.Line.RightAngleIntersection(from.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
-        var point2Edge = edges.MinBy(x => x.Line.RightAngleIntersection(to.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
-
-        if (point1Edge is null || point2Edge is null) throw new NoSuitableEdgeException();
-
-        var startingNode = new TemporaryNode(from);
-        var endingNode = new TemporaryNode(to);
-
-        IEnumerable<Edge> GenerateTemporaryEdgesFromPointToEdge(Node point, Edge edge, bool pointToEdge)
+        return await Task.Run(() =>
         {
-            _ = edge.Line.RightAngleIntersection(point.Point, out var normalLine);
-            var tempNode = new TemporaryNode((int)normalLine.Point1.X, 0, (int)normalLine.Point1.Y);
+            //TODO: When filters are switched on, this is where to filter out ineligible edges
+            var edges = _edges.Values.ToList();
+            
+            var point1Edge = edges.MinBy(x => x.Line.RightAngleIntersection(from.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
+            var point2Edge = edges.MinBy(x => x.Line.RightAngleIntersection(to.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
 
-            var isTwoWay = OppositeEdge(edge, edges) is not null;
-            if (pointToEdge)
+            ct.ThrowIfCancellationRequested();
+            if (point1Edge is null || point2Edge is null) throw new NoSuitableEdgeException();
+
+            var startingNode = new TemporaryNode(from);
+            var endingNode = new TemporaryNode(to);
+
+            IEnumerable<Edge> GenerateTemporaryEdgesFromPointToEdge(Node point, Edge edge, bool pointToEdge)
             {
-                yield return new TemporaryEdge(edge.Road, point, tempNode);
-                yield return new TemporaryEdge(edge.Road, tempNode, edge.To);
-                if (isTwoWay) yield return new TemporaryEdge(edge.Road, tempNode, edge.From);
+                _ = edge.Line.RightAngleIntersection(point.Point, out var normalLine);
+                var tempNode = new TemporaryNode((int)normalLine.Point1.X, 0, (int)normalLine.Point1.Y);
+
+                var isTwoWay = OppositeEdge(edge, edges) is not null;
+                if (pointToEdge)
+                {
+                    yield return new TemporaryEdge(edge.Road, point, tempNode);
+                    yield return new TemporaryEdge(edge.Road, tempNode, edge.To);
+                    if (isTwoWay) yield return new TemporaryEdge(edge.Road, tempNode, edge.From);
+                }
+                else
+                {
+                    yield return new TemporaryEdge(edge.Road, tempNode, point);
+                    yield return new TemporaryEdge(edge.Road, edge.From, tempNode);
+                    if (isTwoWay) yield return new TemporaryEdge(edge.Road, edge.To, tempNode);
+                }
+            }
+
+            //Construct temporary edges from the starting node
+            if (from is Player { SnappedEdge: { } } player)
+            {
+                //Connect the starting node to the map using the existing road
+                edges.Add(new TemporaryEdge(player.SnappedEdge.Road, startingNode, player.SnappedEdge.To));
             }
             else
             {
-                yield return new TemporaryEdge(edge.Road, tempNode, point);
-                yield return new TemporaryEdge(edge.Road, edge.From, tempNode);
-                if (isTwoWay) yield return new TemporaryEdge(edge.Road, edge.To, tempNode);
+                //Connect the starting node to the map using two temporary edges (three for a bidirectional road)
+                edges.AddRange(GenerateTemporaryEdgesFromPointToEdge(startingNode, point1Edge, true));
             }
-        }
-
-        //Construct temporary edges from the starting node
-        if (from is Player { SnappedEdge: { } } player)
-        {
-            //Connect the starting node to the map using the existing road
-            edges.Add(new TemporaryEdge(player.SnappedEdge.Road, startingNode, player.SnappedEdge.To));
-        }
-        else
-        {
-            //Connect the starting node to the map using two temporary edges (three for a bidirectional road)
-            edges.AddRange(GenerateTemporaryEdgesFromPointToEdge(startingNode, point1Edge, true));
-        }
-        
-        //Construct temporary edges to the ending node
-        edges.AddRange(GenerateTemporaryEdgesFromPointToEdge(endingNode, point2Edge, false));
-        
-        //Execute the shortest path algorithm to locate the shortest path between the starting node and the ending node
-        var queue = new Dictionary<Node, (Node node, int distance, Edge? via)> { { startingNode, (startingNode, 0, null) } };
-        var backtrack = new List<(Node node, int distance, Edge? via)>();
-        while (queue.Any())
-        {
-            var processingNode = queue.MinBy(x => x.Value.distance).Value;
-            queue.Remove(processingNode.node);
-            backtrack.Add(processingNode);
-
-            if (processingNode.node == endingNode)
+            
+            //Construct temporary edges to the ending node
+            edges.AddRange(GenerateTemporaryEdgesFromPointToEdge(endingNode, point2Edge, false));
+            
+            //Execute the shortest path algorithm to locate the shortest path between the starting node and the ending node
+            var queue = new Dictionary<Node, (Node node, int distance, Edge? via)> { { startingNode, (startingNode, 0, null) } };
+            var backtrack = new List<(Node node, int distance, Edge? via)>();
+            while (queue.Any())
             {
-                //We have reached the end! Start backtracking!
-                var route = new CalculatedRoute(this);
-                do
-                {
-                    route.AddRouteSegment(processingNode.node, processingNode.via);
-                    processingNode = backtrack.Single(x => x.node == processingNode.via!.From);
-                } while (processingNode.via is not null);
-                route.AddRouteSegment(processingNode.node, null);
-                return route;
-            }
+                ct.ThrowIfCancellationRequested();
+                var processingNode = queue.MinBy(x => x.Value.distance).Value;
+                queue.Remove(processingNode.node);
+                backtrack.Add(processingNode);
 
-            //Find each edge that this node connects to
-            //TODO: Turn restrictions should be calculated here
-            var fromEdges = edges.Where(x => x.From == processingNode.node && backtrack.All(y => y.node != x.To));
-            foreach (var edge in fromEdges)
-            {
-                var oldDistance = queue.TryGetValue(edge.To, out var node) ? node.distance : int.MaxValue;
-                var newDistance = (int) (processingNode.distance + edge.Line.Length * edge.Road.RoadType.RoadPenalty());
-                if (newDistance < oldDistance)
+                if (processingNode.node == endingNode)
                 {
-                    queue[edge.To] = (edge.To, newDistance, edge);
+                    //We have reached the end! Start backtracking!
+                    var route = new CalculatedRoute(this);
+                    do
+                    {
+                        ct.ThrowIfCancellationRequested();
+                        route.AddRouteSegment(processingNode.node, processingNode.via);
+                        processingNode = backtrack.Single(x => x.node == processingNode.via!.From);
+                    } while (processingNode.via is not null);
+                    route.AddRouteSegment(processingNode.node, null);
+                    return route;
+                }
+
+                //Find each edge that this node connects to
+                //TODO: Turn restrictions should be calculated here
+                var fromEdges = edges.Where(x => x.From == processingNode.node && backtrack.All(y => y.node != x.To));
+                foreach (var edge in fromEdges)
+                {
+                    var oldDistance = queue.TryGetValue(edge.To, out var node) ? node.distance : int.MaxValue;
+                    var newDistance = (int) (processingNode.distance + edge.Line.Length * edge.Road.RoadType.RoadPenalty());
+                    if (newDistance < oldDistance)
+                    {
+                        queue[edge.To] = (edge.To, newDistance, edge);
+                    }
                 }
             }
-        }
 
-        //No route exists
-        throw new DisjointNetworkException();
+            //No route exists
+            throw new DisjointNetworkException();
+        }, ct);
     }
 
     public static async Task<MapService> DownloadInitialMapAsync()
