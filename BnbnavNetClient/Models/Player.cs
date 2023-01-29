@@ -77,16 +77,16 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         {
             var targetAngle = SnappedEdge is null ? Velocity.Angle : SnappedEdge.Line.Angle;
 
-            var line1 = new ExtendedLine()
+            var unitLine = new ExtendedLine()
             {
                 Point1 = new(0, 0),
                 Point2 = new(1, 0)
             };
-            var line2 = line1 with { };
-            line1.SetAngle(MarkerAngle);
-            line2.SetAngle(targetAngle);
+            var line1 = unitLine.SetAngle(MarkerAngle);
+            var line2 = unitLine.SetAngle(targetAngle);
 
             var angleDifference = line1.AngleTo(line2);
+            if (angleDifference < 0) angleDifference += 360;
             
             switch (angleDifference)
             {
@@ -144,12 +144,11 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
 
             try
             {
-                var currentEdges = _mapService.AllEdges.ToList();
-                var shouldChangeEdge = SnappedEdge is null;
+                var currentEdges = _mapService.AllEdges.Reverse().ToList();
+                var shouldChangeEdge = SnappedEdge is null || (!_mapService.CurrentRoute?.Edges.Contains(SnappedEdge) ?? false);
                 //TODO: Also change edge if the current route contains the edge to change to or if the current route does not contain the currently snapped edge
                 if (shouldChangeEdge)
                 {
-                    //TODO: Prioritise edges that are part of the current route
                     SnappedEdge = currentEdges.FirstOrDefault(CanSnapToEdge);
                 }
             }

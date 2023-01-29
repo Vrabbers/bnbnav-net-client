@@ -17,6 +17,8 @@
   "FOLLOW_ME_PROMPT": "Enter Minecraft username:",
   "FOLLOW_ME_TURN_RESTRICTIONS": "Highlight nodes with turn restrictions",
   "FOLLOW_ME_WATERMARK": "Username",
+  "GO_MODE_WARNING_MESSAGE": "These directions are a guide only. Always pay attention to your surroundings.\n\nFollow all applicable laws, posted signs and indications. They take precedence in the event of a conflict with route guidance.",
+  "GO_MODE_WARNING_TITLE": "Before we get started...",
   "INSTRUCTION_ARRIVAL": "Arrive at the destination",
   "INSTRUCTION_BEAR_LEFT": "Bear left onto {{road}}",
   "INSTRUCTION_BEAR_RIGHT": "Bear right onto {{road}}",

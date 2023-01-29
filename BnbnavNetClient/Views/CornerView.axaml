@@ -26,7 +26,7 @@
             <StackPanel>
                 <controls:LandmarkSearchControl SelectedLandmark="{Binding GoModeStartPoint}" MapService="{Binding MapService}" />
                 <controls:LandmarkSearchControl SelectedLandmark="{Binding GoModeEndPoint}" MapService="{Binding MapService}" />
-                <ListBox Items="{Binding MapService.CurrentRoute.Instructions}">
+                <ListBox Items="{Binding MapService.CurrentRoute.Instructions}" MaxHeight="300">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Grid ColumnDefinitions="Auto Auto">
@@ -36,7 +36,14 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <Button Content="{str:Tr Key=START}" IsVisible="{Binding MapService.CurrentRoute, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <Button Content="{str:Tr Key=START}" IsVisible="{Binding MapService.CurrentRoute, Converter={x:Static ObjectConverters.IsNotNull}}" Command="{Binding EnterGoMode}" />
+            </StackPanel>
+        </StackPanel>
+        
+        <StackPanel IsVisible="{Binding IsInGoMode}" Orientation="Horizontal">
+            <Button Content="&lt;-" Command="{Binding LeaveGoMode}" VerticalAlignment="Top" />
+            <StackPanel>
+                <TextBlock>Instructions go here</TextBlock>
             </StackPanel>
         </StackPanel>
     </StackPanel>

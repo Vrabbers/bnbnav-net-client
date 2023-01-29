@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.Contracts;
 using Avalonia;
 using Avalonia.Controls.Shapes;
 using BnbnavNetClient.Helpers;
@@ -43,6 +44,7 @@ public readonly struct ExtendedLine
 
     public static implicit operator ExtendedLine(Line line) => new(line.StartPoint, line.EndPoint);
 
+    [Pure]
     public ExtendedLine SetAngle(double angle)
     {
         var angleR = MathHelper.ToRad(angle);
@@ -54,19 +56,23 @@ public readonly struct ExtendedLine
         };
     }
 
+    [Pure]
     public Point Lerp(double t) => 
         new(Point1.X + (Point2.X - Point1.X) * t, Point1.Y + (Point2.Y - Point1.Y) * t);
 
+    [Pure]
     public ExtendedLine UnitLine() => this with
     {
         Point2 = new(Point1.X + Dx / Length, Point1.Y + Dy / Length)
     };
 
+    [Pure]
     public ExtendedLine NormalLine() => this with
     {
         Point2 = Point1 + new Point(Dy, -Dx)
     };
 
+    [Pure]
     public IntersectionType TryIntersect(ExtendedLine other, out Point intersectionPoint)
     {
         intersectionPoint = new();
@@ -87,6 +93,7 @@ public readonly struct ExtendedLine
         return nb is < 0 or > 1 ? IntersectionType.IntersectsInterpolated : IntersectionType.Intersects;
     }
 
+    [Pure]
     public ExtendedLine SetLength(double length)
     {
         var unit = UnitLine();
@@ -97,6 +104,7 @@ public readonly struct ExtendedLine
         };
     }
 
+    [Pure]
     public bool RightAngleIntersection(Point point, out ExtendedLine intersection)
     {
         var intersectionLine = new ExtendedLine(point, point + new Point(5, 0)).SetAngle(NormalLine().Angle);
@@ -112,11 +120,13 @@ public readonly struct ExtendedLine
 
     public ExtendedLine FlipDirection() => new(Point2, Point1);
 
+    [Pure]
     public double AngleTo(ExtendedLine other)
     {
         return double.Ieee754Remainder(other.Angle - Angle, 360);
     }
 
+    [Pure]
     public ExtendedLine MovePoint1(Point point)
     {
         return new()
@@ -126,6 +136,7 @@ public readonly struct ExtendedLine
         };
     }
 
+    [Pure]
     public ExtendedLine MoveCenter(Point point)
     {
         return new()

@@ -3,7 +3,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Text.RegularExpressions;
+using Avalonia;
 using Avalonia.Collections;
+using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Services;
 using ReactiveUI;
@@ -20,6 +22,7 @@ public enum AvailableUi
 
 public class CornerViewModel : ViewModel
 {
+    readonly MainViewModel _mainViewModel;
     public MapService MapService { get; }
 
     [Reactive]
@@ -48,6 +51,7 @@ public class CornerViewModel : ViewModel
 
     public CornerViewModel(MapService mapService, MainViewModel mainViewModel)
     {
+        _mainViewModel = mainViewModel;
         MapService = mapService;
 
         this.WhenAnyValue(x => x.CurrentUi).Subscribe(Observer.Create<AvailableUi>(_ =>
@@ -112,4 +116,24 @@ public class CornerViewModel : ViewModel
         CurrentUi = AvailableUi.Search;
     }
 
+    public void EnterGoMode()
+    {
+        var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        _mainViewModel.Popup = new AlertDialogViewModel()
+        {
+            Title = t["GO_MODE_WARNING_TITLE"],
+            Message = t["GO_MODE_WARNING_MESSAGE"],
+            Ok = ReactiveCommand.Create(() =>
+            {
+                _mainViewModel.Popup = null;
+
+                CurrentUi = AvailableUi.Go;
+            })
+        };
+    }
+
+    public void LeaveGoMode()
+    {
+        CurrentUi = AvailableUi.Prepare;
+    }
 }

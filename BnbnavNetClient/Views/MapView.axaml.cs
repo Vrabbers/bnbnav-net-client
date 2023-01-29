@@ -52,6 +52,12 @@ public partial class MapView : UserControl
         
         PointerPressed += (_, eventArgs) =>
         {
+            //Disable all click events in Go Mode
+            if (MapViewModel.CurrentUi == AvailableUi.Go)
+            {
+                return;
+            }
+            
             var pointerPos = eventArgs.GetPosition(this);
             var pointer = eventArgs.GetCurrentPoint(this);
 
@@ -81,6 +87,12 @@ public partial class MapView : UserControl
 
         PointerMoved += (_, eventArgs) =>
         {
+            //Disable all click events in Go Mode
+            if (MapViewModel.CurrentUi == AvailableUi.Go)
+            {
+                return;
+            }
+            
             var pointerPos = eventArgs.GetPosition(this);
             _currentPointerPosition = pointerPos;
             
@@ -126,6 +138,12 @@ public partial class MapView : UserControl
 
         PointerReleased += (_, eventArgs) =>
         {
+            //Disable all click events in Go Mode
+            if (MapViewModel.CurrentUi == AvailableUi.Go)
+            {
+                return;
+            }
+            
             _pointerPressing = false;
 
             if (MapViewModel.IsInEditMode) 
@@ -178,12 +196,13 @@ public partial class MapView : UserControl
 
         //why does this happen to me :sob:
         MapViewModel
-            .WhenAnyValue(x => x.Pan, x => x.Scale, x => x.Rotation)
-            .Subscribe(Observer.Create<ValueTuple<Point, double, double>>(tuple =>
+            .WhenAnyValue(x => x.Pan, x => x.Scale, x => x.Rotation, x => x.RotationOrigin)
+            .Subscribe(Observer.Create<ValueTuple<Point, double, double, Vector>>(tuple =>
             {
                 var pan = tuple.Item1;
                 var scale = tuple.Item2;
                 var rotate = tuple.Item3;
+                var rotateOrigin = tuple.Item4;
 
                 var matrix =
                     Matrix.CreateTranslation(-pan) *
@@ -191,11 +210,12 @@ public partial class MapView : UserControl
 
                 if (rotate != 0)
                 {
-                    var centerOfBounds = new Vector(Bounds.Width, Bounds.Height) / (scale * 2);
+                    // var centerOfBounds = new Vector(Bounds.Width, Bounds.Height) / (scale * 2);
+                    var centerOfBounds = new Vector(Bounds.Width * rotateOrigin.X, Bounds.Height * rotateOrigin.Y);
                     
                     matrix *=
                         Matrix.CreateTranslation(-centerOfBounds) *
-                        Matrix.CreateRotation(rotate) * 
+                        Matrix.CreateRotation(MathHelper.ToRad(rotate)) * 
                         Matrix.CreateTranslation(centerOfBounds);
                 }
 
@@ -225,6 +245,14 @@ public partial class MapView : UserControl
             .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Landmark>>>(_ => UpdateDrawnItems()));
         MapViewModel.MapService.WhenPropertyChanged(x => x.CurrentRoute)
             .Subscribe(Observer.Create<PropertyValue<MapService, CalculatedRoute?>>(_ => UpdateDrawnItems()));
+        MapViewModel.WhenAnyValue(x => x.CurrentUi).Subscribe(Observer.Create<AvailableUi>(_ =>
+        {
+            if (MapViewModel.CurrentUi == AvailableUi.Prepare)
+            {
+                MapViewModel.RotationOrigin = new Vector(0.5, 0.5);
+                MapViewModel.Rotation = 0;
+            }
+        }));
 
         MapViewModel.MapService.PlayerUpdateInteraction.RegisterHandler(interaction =>
         {
@@ -320,7 +348,16 @@ public partial class MapView : UserControl
 
     void UpdateFollowMeState()
     {
-        if (MapViewModel.FollowMeEnabled)
+        if (MapViewModel.CurrentUi == AvailableUi.Go)
+        {
+            var exists = MapViewModel.MapService.Players.TryGetValue(MapViewModel.LoggedInUsername!, out var player);
+            if (!exists) return;
+
+            MapViewModel.RotationOrigin = new Vector(0.6, 0.8);
+            PanTo(player!.MarkerCoordinates, 0.6, 0.8);
+            MapViewModel.Rotation = player.MarkerAngle - 90;
+        }
+        else if (MapViewModel.FollowMeEnabled)
         {
             var exists = MapViewModel.MapService.Players.TryGetValue(MapViewModel.LoggedInUsername!, out var player);
             if (!exists) return;
@@ -503,7 +540,7 @@ public partial class MapView : UserControl
             const int playerSize = 48;
             var rect = new Rect(ToScreen(player.MarkerCoordinates) - new Point(playerSize, playerSize) / 2, new Size(playerSize, playerSize));
             const string uriString = "avares://BnbnavNetClient/Assets/playermark.svg";
-            context.DrawSvgUrl(uriString, rect, -player.MarkerAngle);
+            context.DrawSvgUrl(uriString, rect, -player.MarkerAngle + MapViewModel.Rotation);
 
             //Draw the player name
             var textBrush = (Brush)this.FindResource("ForegroundBrush")!;

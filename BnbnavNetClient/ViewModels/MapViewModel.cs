@@ -31,10 +31,14 @@ public class MapViewModel : ViewModel
     [UsedImplicitly] 
     public bool IsInEditMode { get; }
 
-    // In radians!
+    // In degrees!
     [Reactive]
     public double Rotation { get; set; } = 0;
 
+    // As a % of the window bounds
+    [Reactive]
+    public Vector RotationOrigin { get; set; } = new(0.5, 0.5);
+    
     [Reactive]
     public string Test { get; set; } = string.Empty;
 
