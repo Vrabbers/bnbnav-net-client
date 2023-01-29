@@ -129,7 +129,9 @@ public class CalculatedRoute
             //Determine if we are turning onto the same road
             var isSameRoad = nextEdge.Road.Name == previousEdge.Road.Name;
 
-            var turnAngle = 360 - nextEdge.Line.AngleTo(previousEdge.Line);
+            var turnAngle = nextEdge.Line.AngleTo(previousEdge.Line);
+            if (turnAngle < 0) turnAngle += 360;
+            turnAngle = 360 - turnAngle;
             if (nextEdge.Road.RoadType == RoadType.Roundabout)
             {
                 //Check if we are driving through the roundabout
