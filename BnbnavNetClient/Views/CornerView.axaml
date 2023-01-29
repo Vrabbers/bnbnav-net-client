@@ -39,10 +39,7 @@
                 <ListBox Items="{Binding MapService.CurrentRoute.Instructions}" MaxHeight="300">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Grid ColumnDefinitions="Auto Auto">
-                                <TextBlock Text="{Binding distance}" />
-                                <TextBlock Grid.Column="1" Text="{Binding InstructionString}" />
-                            </Grid>
+                            <controls:InstructionDisplayControl Instruction="{Binding}" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
@@ -53,7 +50,8 @@
         <StackPanel IsVisible="{Binding IsInGoMode}" Orientation="Horizontal">
             <Button Content="&lt;-" Command="{Binding LeaveGoMode}" VerticalAlignment="Top" />
             <StackPanel>
-                <TextBlock>Instructions go here</TextBlock>
+                <controls:InstructionDisplayControl Instruction="{Binding CurrentInstruction}" ToNextInstruction="{Binding BlocksToNextInstruction}" />
+                <TextBlock Text="{Binding BlocksToRouteEnd}" />
             </StackPanel>
         </StackPanel>
     </StackPanel>

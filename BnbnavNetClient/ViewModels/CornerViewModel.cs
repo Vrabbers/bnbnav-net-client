@@ -59,6 +59,15 @@ public class CornerViewModel : ViewModel
     [Reactive]
     public string? RouteCalculationError { get; set; }
 
+    [ObservableAsProperty] 
+    public int BlocksToNextInstruction { get; }
+
+    [ObservableAsProperty]
+    public CalculatedRoute.Instruction? CurrentInstruction { get; }
+
+    [Reactive]
+    public string BlocksToRouteEnd { get; set; }
+
     public CornerViewModel(MapService mapService, MainViewModel mainViewModel)
     {
         _mainViewModel = mainViewModel;
@@ -70,6 +79,7 @@ public class CornerViewModel : ViewModel
             IsInSearchMode = CurrentUi == AvailableUi.Search;
             IsInPrepareMode = CurrentUi == AvailableUi.Prepare;
             IsInGoMode = CurrentUi == AvailableUi.Go;
+            SetupRouteForGoMode();
         }));
         this.WhenAnyValue(x => x.GoModeEndPoint).Subscribe(Observer.Create<ISearchable?>(_ =>
         {
@@ -165,5 +175,31 @@ public class CornerViewModel : ViewModel
     public void LeaveGoMode()
     {
         CurrentUi = AvailableUi.Prepare;
+    }
+
+    void SetupRouteForGoMode()
+    {
+        if (MapService.CurrentRoute is null)
+        {
+            return;
+        }
+
+        if (IsInGoMode)
+        {
+            MapService.CurrentRoute.WhenAnyValue(x => x.CurrentInstruction)
+                .ToPropertyEx(this, x => x.CurrentInstruction);
+            MapService.CurrentRoute.WhenAnyValue(x => x.BlocksToNextInstruction)
+                .ToPropertyEx(this, x => x.BlocksToNextInstruction);
+            MapService.CurrentRoute.WhenAnyValue(x => x.TotalBlocksRemaining)
+                .Subscribe(Observer.Create<int>(remain =>
+                {
+                    BlocksToRouteEnd = $"{remain} blk";
+                }));
+            MapService.CurrentRoute.StartTrackingPlayer(MapService.LoggedInPlayer!);
+        }
+        else
+        {
+            MapService.CurrentRoute.StopTrackingPlayer();
+        }
     }
 }

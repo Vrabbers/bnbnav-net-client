@@ -50,5 +50,6 @@
     </Style>
     <StyleInclude Source="/Controls/DayNightButton.axaml"/>
     <StyleInclude Source="/Controls/LandmarkSearchControl.axaml" />
+    <StyleInclude Source="/Controls/InstructionDisplayControl.axaml" />
   </Application.Styles>
 </Application>

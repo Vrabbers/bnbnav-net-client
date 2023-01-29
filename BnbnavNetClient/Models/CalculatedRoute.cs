@@ -1,21 +1,26 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using Avalonia;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services;
 using DynamicData;
+using DynamicData.Binding;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 namespace BnbnavNetClient.Models;
 
-public class CalculatedRoute
+public class CalculatedRoute : ReactiveObject
 {
     readonly MapService _mapService;
 
-    public CalculatedRoute(MapService _mapService)
+    public CalculatedRoute(MapService mapService)
     {
-        this._mapService = _mapService;
+        _mapService = mapService;
     }
     
     public record Instruction(Node node, Edge? from, Edge? to, double distance, Instruction.InstructionType instructionType, int? roundaboutExitNumber = null, Edge? roundaboutExit = null)
@@ -88,6 +93,15 @@ public class CalculatedRoute
     public IEnumerable<Node> Nodes => Elements.Where(x => x is Node).Cast<Node>();
     public IEnumerable<Edge> Edges => Elements.Where(x => x is Edge).Cast<Edge>();
     public List<Instruction> Instructions { get; } = new();
+    
+    [Reactive]
+    public Instruction? CurrentInstruction { get; set; }
+
+    [Reactive]
+    public int BlocksToNextInstruction { get; set; }
+    
+    [Reactive]
+    public int TotalBlocksRemaining { get; set; }
 
     public void AddRouteSegment(Node node, Edge? edge)
     {
@@ -238,6 +252,86 @@ public class CalculatedRoute
         
         //Always add an arrive instruction
         Instructions.Add(new Instruction(Nodes.Last(), Edges.Last(), null, currentLength, Instruction.InstructionType.Arrival));
+    }
+
+    void UpdateCurrentInstruction()
+    {
+        if (_mapService.LoggedInPlayer is null)
+        {
+            CurrentInstruction = null;
+            return;
+        }
+
+        if (!Edges.Contains(_mapService.LoggedInPlayer.SnappedEdge))
+        {
+            
+            return;
+        }
+
+        var instructionIndex = 0;
+        var instructionFound = false;
+        var blocksToNextInstruction = 0.0;
+        
+        foreach (var edge in Edges)
+        {
+            if (Instructions[instructionIndex].to == edge || (Instructions[instructionIndex].to is null && edge == Edges.Last()))
+            {
+                instructionIndex++;
+                if (instructionFound)
+                {
+                    BlocksToNextInstruction = (int)double.Round(blocksToNextInstruction);
+                    TotalBlocksRemaining = (int) double.Round(Edges.SkipWhile(x => x != edge).Sum(x => x.Line.Length) +
+                                           blocksToNextInstruction);
+                    return;
+                }
+            }
+
+            if (instructionFound)
+            {
+                blocksToNextInstruction += edge.Line.Length;
+            }
+            
+            if (_mapService.LoggedInPlayer.SnappedEdge == edge)
+            {
+                //We found the edge that the player is on
+                CurrentInstruction = Instructions[instructionIndex];
+                instructionFound = true;
+                blocksToNextInstruction += new ExtendedLine(edge.To.Point, _mapService.LoggedInPlayer.Point).Length;
+            }
+        }
+        
+        // We will arrive here if we are near the end of the route
+        if (instructionFound)
+        {
+            BlocksToNextInstruction = (int)double.Round(blocksToNextInstruction);
+            TotalBlocksRemaining = BlocksToNextInstruction;
+        }
+    }
+
+    Player? _trackedPlayer;
+
+    public void StartTrackingPlayer(Player player)
+    {
+        if (_trackedPlayer is not null) return;
+
+        _trackedPlayer = player;
+        _trackedPlayer.PlayerUpdateEvent += TrackedPlayerUpdate;
+    }
+
+    public void StopTrackingPlayer()
+    {
+        if (_trackedPlayer is null)
+        {
+            return;
+        }
+
+        _trackedPlayer.PlayerUpdateEvent -= TrackedPlayerUpdate;
+        _trackedPlayer = null;
+    }
+
+    void TrackedPlayerUpdate(object? sender, EventArgs eventArgs)
+    {
+        UpdateCurrentInstruction();
     }
 }
 

@@ -110,6 +110,9 @@ public sealed class MainViewModel : ViewModel
     {
         var mapService = await MapService.DownloadInitialMapAsync();
         MapEditorService.MapService = mapService;
+        
+        this.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(mapService, x => x.LoggedInUsername);
+
         MapViewModel = new MapViewModel(mapService, this);
         CornerViewModel = new CornerViewModel(mapService, this);
         

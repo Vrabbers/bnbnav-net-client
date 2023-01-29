@@ -348,21 +348,18 @@ public partial class MapView : UserControl
 
     void UpdateFollowMeState()
     {
+        var loggedInPlayer = MapViewModel.MapService.LoggedInPlayer;
+        if (loggedInPlayer is null) return;
+        
         if (MapViewModel.CurrentUi == AvailableUi.Go)
         {
-            var exists = MapViewModel.MapService.Players.TryGetValue(MapViewModel.LoggedInUsername!, out var player);
-            if (!exists) return;
-
             MapViewModel.RotationOrigin = new Vector(0.6, 0.8);
-            PanTo(player!.MarkerCoordinates, 0.6, 0.8);
-            MapViewModel.Rotation = player.MarkerAngle - 90;
+            PanTo(loggedInPlayer.MarkerCoordinates, 0.6, 0.8);
+            MapViewModel.Rotation = loggedInPlayer.MarkerAngle - 90;
         }
         else if (MapViewModel.FollowMeEnabled)
         {
-            var exists = MapViewModel.MapService.Players.TryGetValue(MapViewModel.LoggedInUsername!, out var player);
-            if (!exists) return;
-
-            PanTo(player!.MarkerCoordinates);
+            PanTo(loggedInPlayer.MarkerCoordinates);
         }
     }
 

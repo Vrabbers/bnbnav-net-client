@@ -73,6 +73,20 @@ public sealed class MapService : ReactiveObject
     
     [Reactive]
     public CalculatedRoute? CurrentRoute { get; set; }
+    
+    [ObservableAsProperty]
+    public string? LoggedInUsername { get; set; }
+
+    public Player? LoggedInPlayer
+    {
+        get
+        {
+            if (LoggedInUsername is null) return null;
+            
+            var exists = Players.TryGetValue(LoggedInUsername, out var player);
+            return !exists ? null : player;
+        }
+    }
 
     public IEnumerable<Edge> AllEdges =>
         (CurrentRoute?.Edges ?? Enumerable.Empty<Edge>()).Union(Edges.Values).Distinct().Reverse();
