@@ -1,6 +1,8 @@
 {
   "CANCEL": "Cancelar",
   "CREATE": "",
+  "DIRECTIONS_FROM_HERE": "",
+  "DIRECTIONS_TO_HERE": "",
   "DROPPED_PIN": "",
   "EDGE_DELETE": "",
   "EDITNAV_PROMPT": "Use /editnav para obter uma chave e a insira aqui:",
@@ -99,5 +101,6 @@
   "SEARCH": "",
   "SPLICE": "",
   "SPY_OPTIONS": "Espionar",
+  "START": "",
   "UPDATE": ""
 }

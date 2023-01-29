@@ -29,6 +29,7 @@ public partial class MapView : UserControl
     bool _pointerPressing;
     bool _disablePan;
     Point _pointerPrevPosition;
+    Point _currentPointerPosition;
     Vector _viewVelocity = Vector.Zero;
     readonly List<Point> _pointerVelocities = new();
     // This list is averaged to get smooth panning.
@@ -81,53 +82,12 @@ public partial class MapView : UserControl
         PointerMoved += (_, eventArgs) =>
         {
             var pointerPos = eventArgs.GetPosition(this);
+            _currentPointerPosition = pointerPos;
             
             if (MapViewModel.IsInEditMode) 
                 MapViewModel.MapEditorService.EditController.PointerMoved(this, eventArgs);
 
-            var seenEdges = new List<Edge>();
-            MapViewModel.ContextMenuItems.Clear();
-            MapViewModel.ContextMenuItems.AddRange(HitTest(pointerPos).SelectMany(x =>
-            {
-                switch (x)
-                {
-                    case Node node:
-                        return new MenuItem[]
-                        {
-                            new()
-                            {
-                                Header = _i18n["NODE_DELETE"],
-                                Command = ReactiveCommand.Create(() =>
-                                {
-                                    MapViewModel.QueueDelete(node);
-                                })
-                            }
-                        };
-                    case Edge edge when !seenEdges.Contains(edge):
-                    {
-                        seenEdges.Add(edge);
-                        if (MapViewModel.MapService.OppositeEdge(edge) is { } opposite)
-                        {
-                            seenEdges.Add(opposite);
-                        }
-
-                        return new MenuItem[]
-                        {
-                            new()
-                            {
-                                Header = _i18n["EDGE_DELETE", ("roadName", edge.Road.Name)],
-                                Command = ReactiveCommand.Create(() =>
-                                {
-                                    MapViewModel.QueueDelete(edge);
-                                })
-                            }
-                        };
-
-                    }
-                    default:
-                        return Enumerable.Empty<MenuItem>();
-                }
-            }));
+            UpdateContextMenuItems();
 
             if (_pointerPressing)
             {
@@ -276,6 +236,80 @@ public partial class MapView : UserControl
         {
             if (MapViewModel.SelectedLandmark is not null) PanTo(MapViewModel.SelectedLandmark.Location.Point);
         }));
+    }
+
+    void UpdateContextMenuItems()
+    {
+        var seenEdges = new List<Edge>();
+        MapViewModel.ContextMenuItems.Clear();
+
+        if (MapViewModel.IsInEditMode)
+        {
+            MapViewModel.ContextMenuItems.AddRange(HitTest(_currentPointerPosition).SelectMany(x =>
+            {
+                switch (x)
+                {
+                    case Node node:
+                        return new MenuItem[]
+                        {
+                            new()
+                            {
+                                Header = _i18n["NODE_DELETE"],
+                                Command = ReactiveCommand.Create(() => { MapViewModel.QueueDelete(node); })
+                            }
+                        };
+                    case Edge edge when !seenEdges.Contains(edge):
+                    {
+                        seenEdges.Add(edge);
+                        if (MapViewModel.MapService.OppositeEdge(edge) is { } opposite)
+                        {
+                            seenEdges.Add(opposite);
+                        }
+
+                        return new MenuItem[]
+                        {
+                            new()
+                            {
+                                Header = _i18n["EDGE_DELETE", ("roadName", edge.Road.Name)],
+                                Command = ReactiveCommand.Create(() => { MapViewModel.QueueDelete(edge); })
+                            }
+                        };
+                    }
+                    default:
+                        return Enumerable.Empty<MenuItem>();
+                }
+            }));
+        }
+        else
+        {
+            ToWorld(_currentPointerPosition).Deconstruct(out var xd, out var zd);
+            var x = (int)xd;
+            var z = (int)zd;
+            var landmark = new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z), _i18n["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
+
+            MapViewModel.ContextMenuItems.AddRange(new MenuItem[]
+            {
+                new()
+                {
+                    Header = _i18n["DIRECTIONS_TO_HERE"],
+                    Command = ReactiveCommand.Create(() =>
+                    {
+                        MapViewModel.GoModeEndPoint = landmark;
+                        MapViewModel.CurrentUi = AvailableUi.Prepare;
+                    })
+                },
+                new()
+                {
+                    Header = _i18n["DIRECTIONS_FROM_HERE"],
+                    Command = ReactiveCommand.Create(() =>
+                    {
+                        MapViewModel.GoModeStartPoint = landmark;
+                        MapViewModel.CurrentUi = AvailableUi.Prepare;
+                    })
+                }
+            });
+        }
+
     }
 
     readonly IAvaloniaI18Next _i18n;

@@ -36,9 +36,6 @@ public class MapViewModel : ViewModel
     public double Rotation { get; set; } = 0;
 
     [Reactive]
-    public bool NightMode { get; set; } = false;
-
-    [Reactive]
     public string Test { get; set; } = string.Empty;
 
     public MapEditorService MapEditorService { get; set; }
@@ -59,8 +56,17 @@ public class MapViewModel : ViewModel
 
     [Reactive] public AvaloniaList<MenuItem> ContextMenuItems { get; set; } = new();
     
-    [ObservableAsProperty]
+    [Reactive]
     public ISearchable? SelectedLandmark { get; set; }
+    
+    [Reactive]
+    public object GoModeStartPoint { get; set; }
+    
+    [Reactive]
+    public object GoModeEndPoint { get; set; }
+
+    [Reactive]
+    public AvailableUi CurrentUi { get; set; } = AvailableUi.Search;
 
     public MapViewModel(MapService mapService, MainViewModel mainViewModel)
     {

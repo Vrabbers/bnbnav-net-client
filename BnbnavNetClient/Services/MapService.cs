@@ -207,7 +207,7 @@ public sealed class MapService : ReactiveObject
         }));
     }
 
-    public async Task<CalculatedRoute?> ObtainCalculatedRoute(ISearchable from, ISearchable to)
+    public async Task<CalculatedRoute> ObtainCalculatedRoute(ISearchable from, ISearchable to)
     {
         //TODO: When filters are switched on, this is where to filter out ineligible edges
         var edges = _edges.Values.ToList();

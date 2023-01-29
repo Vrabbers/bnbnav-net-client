@@ -36,6 +36,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                <Button Content="{str:Tr Key=START}" IsVisible="{Binding MapService.CurrentRoute, Converter={x:Static ObjectConverters.IsNotNull}}" />
             </StackPanel>
         </StackPanel>
     </StackPanel>

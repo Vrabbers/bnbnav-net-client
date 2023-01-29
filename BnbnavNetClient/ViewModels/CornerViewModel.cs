@@ -11,17 +11,17 @@ using ReactiveUI.Fody.Helpers;
 
 namespace BnbnavNetClient.ViewModels;
 
+public enum AvailableUi
+{
+    Search,
+    Prepare,
+    Go
+}
+
 public class CornerViewModel : ViewModel
 {
     public MapService MapService { get; }
 
-    public enum AvailableUi
-    {
-        Search,
-        Prepare,
-        Go
-    }
-    
     [Reactive]
     public AvailableUi CurrentUi { get; set; } = AvailableUi.Search;
     
@@ -56,6 +56,20 @@ public class CornerViewModel : ViewModel
             IsInPrepareMode = CurrentUi == AvailableUi.Prepare;
             IsInGoMode = CurrentUi == AvailableUi.Go;
         }));
+        this.WhenAnyValue(x => x.GoModeEndPoint).Subscribe(Observer.Create<ISearchable?>(_ =>
+        {
+            if (GoModeStartPoint is not null) 
+                return;
+            if (string.IsNullOrEmpty(LoggedInUsername))
+                return;
+
+            //Attempt to find the player
+            var playerExists = MapService.Players.TryGetValue(LoggedInUsername, out var player);
+            if (playerExists)
+            {
+                GoModeStartPoint = player;
+            }
+        }));
         this.WhenAnyValue(x => x.GoModeStartPoint, x => x.GoModeEndPoint).Subscribe(Observer.Create<
             // ReSharper disable once AsyncVoidLambda
             ValueTuple<ISearchable?, ISearchable?>>(async _ =>
@@ -89,16 +103,6 @@ public class CornerViewModel : ViewModel
     public void GetDirectionsToSelectedLandmark()
     {
         GoModeEndPoint = SelectedLandmark;
-
-        if (!string.IsNullOrEmpty(LoggedInUsername))
-        {
-            //Attempt to find the player
-            var playerExists = MapService.Players.TryGetValue(LoggedInUsername, out var player);
-            if (playerExists)
-            {
-                GoModeStartPoint = player;
-            }
-        }
         
         CurrentUi = AvailableUi.Prepare;
     }

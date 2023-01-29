@@ -1,6 +1,8 @@
 {
   "CANCEL": "Hủy",
   "CREATE": "",
+  "DIRECTIONS_FROM_HERE": "",
+  "DIRECTIONS_TO_HERE": "",
   "DROPPED_PIN": "",
   "EDGE_DELETE": "",
   "EDITNAV_PROMPT": "Sử dụng lệnh /editnav để nhận mã và điền vào đây:",
@@ -99,5 +101,6 @@
   "SEARCH": "",
   "SPLICE": "",
   "SPY_OPTIONS": "Tùy chọn tỏa sáng",
+  "START": "",
   "UPDATE": ""
 }

@@ -8,7 +8,7 @@
              x:DataType="vm:MapViewModel"
              x:CompileBindings="True">
   <UserControl.ContextMenu> 
-    <ContextMenu IsVisible="{Binding IsInEditMode}" Items="{Binding ContextMenuItems}" />
+    <ContextMenu Items="{Binding ContextMenuItems}" />
   </UserControl.ContextMenu>
 
   <FlyoutBase.AttachedFlyout>    

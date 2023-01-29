@@ -1,6 +1,8 @@
 {
   "CANCEL": "Abbrechen",
   "CREATE": "Erstellen",
+  "DIRECTIONS_FROM_HERE": "",
+  "DIRECTIONS_TO_HERE": "",
   "DROPPED_PIN": "",
   "EDGE_DELETE": "",
   "EDITNAV_PROMPT": "Verwenden Sie /editnav, um ein Token zu erhalten, und geben sie den hier ein:",
@@ -97,5 +99,6 @@
   "SEARCH": "",
   "SPLICE": "",
   "SPY_OPTIONS": "",
+  "START": "",
   "UPDATE": ""
 }

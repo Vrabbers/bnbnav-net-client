@@ -1,6 +1,8 @@
 {
   "CANCEL": "Cancel",
   "CREATE": "Create",
+  "DIRECTIONS_FROM_HERE": "Directions from here",
+  "DIRECTIONS_TO_HERE": "Directions to here",
   "DROPPED_PIN": "Coordinates ({{x}}, {{z}})",
   "EDGE_DELETE": "Delete Edge {{roadName}}",
   "EDITNAV_PROMPT": "Use /editnav to obtain a token and enter here:",
@@ -100,5 +102,6 @@
   "SEARCH": "Search",
   "SPLICE": "Splice",
   "SPY_OPTIONS": "Spy Options",
+  "START": "Start",
   "UPDATE": "Update"
 }

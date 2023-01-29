@@ -47,7 +47,7 @@ public sealed class MainViewModel : ViewModel
     
     [ObservableAsProperty]
     public bool HaveLoggedInUser { get; set; }
-
+    
     readonly IAvaloniaI18Next _tr;
 
     readonly ISettingsManager _settings;
@@ -132,9 +132,16 @@ public sealed class MainViewModel : ViewModel
                 interaction.SetOutput(null);
             }
         });
-        CornerViewModel.WhenAnyValue(x => x.SelectedLandmark).ToPropertyEx(MapViewModel, x => x.SelectedLandmark);
+        CornerViewModel.WhenAnyValue(x => x.SelectedLandmark).BindTo(MapViewModel, x => x.SelectedLandmark);
+        CornerViewModel.WhenAnyValue(x => x.GoModeStartPoint).BindTo(MapViewModel, x => x.GoModeStartPoint);
+        CornerViewModel.WhenAnyValue(x => x.GoModeEndPoint).BindTo(MapViewModel, x => x.GoModeEndPoint);
+        CornerViewModel.WhenAnyValue(x => x.CurrentUi).BindTo(MapViewModel, x => x.CurrentUi);
+        MapViewModel.WhenAnyValue(x => x.SelectedLandmark).BindTo(CornerViewModel, x => x.SelectedLandmark);
+        MapViewModel.WhenAnyValue(x => x.GoModeStartPoint).BindTo(CornerViewModel, x => x.GoModeStartPoint);
+        MapViewModel.WhenAnyValue(x => x.GoModeEndPoint).BindTo(CornerViewModel, x => x.GoModeEndPoint);
+        MapViewModel.WhenAnyValue(x => x.CurrentUi).BindTo(CornerViewModel, x => x.CurrentUi);
     }
-    
+
     public void LanguageButtonPressed()
     {
         var languagePopup = new LanguageSelectViewModel();
