@@ -50,7 +50,7 @@
         <DockPanel IsVisible="{Binding IsInGoMode}">
             <Button Content="&lt;-" Command="{Binding LeaveGoMode}" VerticalAlignment="Top" DockPanel.Dock="Left"/>
             <StackPanel>
-                <controls:InstructionDisplayControl Instruction="{Binding CurrentInstruction}" ToNextInstruction="{Binding BlocksToNextInstruction}" />
+                <controls:InstructionDisplayControl Instruction="{Binding CurrentInstruction}" ToNextInstruction="{Binding BlocksToNextInstruction}" Classes="gomodeactiveinstruction" />
                 <TextBlock Text="{str:Tr Key=DIRECTIONS_CALCULATING}" HorizontalAlignment="Center" IsVisible="{Binding CalculatingRoute}" />
                 <TextBlock Text="{Binding RouteCalculationError}" HorizontalAlignment="Center" IsVisible="{Binding RouteCalculationError, Converter={x:Static ObjectConverters.IsNotNull}}" />
                 <TextBlock Text="{Binding BlocksToRouteEnd}" />

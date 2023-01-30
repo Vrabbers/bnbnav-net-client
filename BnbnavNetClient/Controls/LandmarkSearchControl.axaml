@@ -14,25 +14,27 @@
         <Setter Property="VerticalAlignment" Value="Stretch"/>
         <Setter Property="Template">
             <ControlTemplate>
-                <StackPanel>
-                    <TextBox Watermark="{str:Tr Key=SEARCH}" Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, Path=SearchQuery}" VerticalAlignment="Top">
-                        <!-- <TextBox.InnerRightContent> -->
-                        <!-- <Button Content="X" Command="{TemplateBinding ClearSearchQuery}"></Button> -->
-                        <!-- </TextBox.InnerRightContent> -->
-                    </TextBox>
-                    <StackPanel IsVisible="{TemplateBinding SelectedLandmark, Converter={x:Static ObjectConverters.IsNull}}" VerticalAlignment="Stretch">
-                        <ListBox Items="{TemplateBinding SearchResults}" SelectedItem="{Binding RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, Path=SelectedLandmark}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate x:DataType="models:ISearchable">
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Name}"></TextBlock>
-                                        <TextBlock Text="{Binding HumanReadableType}"></TextBlock>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                <Border>
+                    <StackPanel>
+                        <TextBox Watermark="{str:Tr Key=SEARCH}" Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, Path=SearchQuery}" VerticalAlignment="Top">
+                            <!-- <TextBox.InnerRightContent> -->
+                            <!-- <Button Content="X" Command="{TemplateBinding ClearSearchQuery}"></Button> -->
+                            <!-- </TextBox.InnerRightContent> -->
+                        </TextBox>
+                        <StackPanel IsVisible="{TemplateBinding SelectedLandmark, Converter={x:Static ObjectConverters.IsNull}}" VerticalAlignment="Stretch">
+                            <ListBox Items="{TemplateBinding SearchResults}" SelectedItem="{Binding RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, Path=SelectedLandmark}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:ISearchable">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}"></TextBlock>
+                                            <TextBlock Text="{Binding HumanReadableType}"></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Border>
             </ControlTemplate>
         </Setter>
     </Style>

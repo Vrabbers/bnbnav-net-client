@@ -12,8 +12,9 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid ColumnDefinitions="Auto *" RowDefinitions="Auto Auto">
-                    <TextBlock Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, Path=Instruction.TargetRoadName}" TextTrimming="CharacterEllipsis"/>
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{TemplateBinding CalculatedInstructionLength}" />
+                    <controls:InstructionImageControl Grid.Row="0" Grid.Column="0" Instruction="{TemplateBinding Instruction}" Width="48" Height="48" />
+                    <TextBlock Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, Path=Instruction.TargetRoadName}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{TemplateBinding CalculatedInstructionLength}" HorizontalAlignment="Center" />
                 </Grid>
             </ControlTemplate>
         </Setter>

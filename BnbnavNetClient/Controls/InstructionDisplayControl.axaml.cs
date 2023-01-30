@@ -4,6 +4,8 @@ using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Media;
+using BnbnavNetClient.Helpers;
 using BnbnavNetClient.Models;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -44,8 +46,9 @@ public class InstructionDisplayControl : TemplatedControl
         this.WhenAnyValue(x => x.Instruction, x => x.ToNextInstruction).Subscribe(Observer.Create<ValueTuple<CalculatedRoute.Instruction?, int?>>(
                 tuple =>
                 {
-                    var distance = tuple.Item2 ?? tuple.Item1?.distance ?? 0;
+                    var distance = (int) double.Round(tuple.Item2 ?? tuple.Item1?.distance ?? 0);
                     CalculatedInstructionLength = $"{distance} blk";
                 }));
     }
+
 }
