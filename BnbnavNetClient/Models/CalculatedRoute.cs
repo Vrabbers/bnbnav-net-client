@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services;
@@ -17,6 +19,8 @@ namespace BnbnavNetClient.Models;
 public class CalculatedRoute : ReactiveObject
 {
     readonly MapService _mapService;
+
+    public event EventHandler<EventArgs>? RerouteRequested;
 
     public CalculatedRoute(MapService mapService)
     {
@@ -258,15 +262,18 @@ public class CalculatedRoute : ReactiveObject
     {
         if (_mapService.LoggedInPlayer is null)
         {
+            _ = QueueReroute();
             CurrentInstruction = null;
             return;
         }
 
         if (!Edges.Contains(_mapService.LoggedInPlayer.SnappedEdge))
         {
-            
+            _ = QueueReroute();
             return;
         }
+        
+        CancelReroute();
 
         var instructionIndex = 0;
         var instructionFound = false;
@@ -332,6 +339,38 @@ public class CalculatedRoute : ReactiveObject
     void TrackedPlayerUpdate(object? sender, EventArgs eventArgs)
     {
         UpdateCurrentInstruction();
+    }
+
+    CancellationTokenSource? _cancellationSource = null;
+
+    async Task QueueReroute()
+    {
+        if (_cancellationSource is not null)
+        {
+            return;
+        }
+
+        _cancellationSource = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(3000, _cancellationSource.Token);
+            RerouteRequested?.Invoke(this, EventArgs.Empty);
+        }
+        catch (TaskCanceledException)
+        {
+        }
+    }
+
+    void CancelReroute()
+    {
+        if (_cancellationSource is null)
+        {
+            return;
+        }
+
+        _cancellationSource.Cancel();
+        _cancellationSource = null;
     }
 }
 

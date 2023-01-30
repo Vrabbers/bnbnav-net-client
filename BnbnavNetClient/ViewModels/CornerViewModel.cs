@@ -4,8 +4,10 @@ using System.Linq;
 using System.Reactive;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Collections;
+using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Services;
@@ -85,15 +87,10 @@ public class CornerViewModel : ViewModel
         {
             if (GoModeStartPoint is not null) 
                 return;
-            if (string.IsNullOrEmpty(LoggedInUsername))
-                return;
+            if (MapService.LoggedInPlayer is null) return;
 
             //Attempt to find the player
-            var playerExists = MapService.Players.TryGetValue(LoggedInUsername, out var player);
-            if (playerExists)
-            {
-                GoModeStartPoint = player;
-            }
+            GoModeStartPoint = MapService.LoggedInPlayer;
         }));
         this.WhenAnyValue(x => x.GoModeStartPoint, x => x.GoModeEndPoint).Subscribe(Observer.Create<
             // ReSharper disable once AsyncVoidLambda
@@ -111,38 +108,58 @@ public class CornerViewModel : ViewModel
                         return;
                     }
 
-                    try
-                    {
-                        CalculatingRoute = true;
-                        var route = await MapService.ObtainCalculatedRoute(GoModeStartPoint, GoModeEndPoint,
-                            RouteCalculationCancellationSource.Token);
-                        MapService.CurrentRoute = route;
-                        CalculatingRoute = false;
-                        
-                        RouteCalculationCancellationSource = null;
-
-                        foreach (var inst in route.Instructions)
-                        {
-                            Console.WriteLine(inst.HumanReadableString((int)inst.distance));
-                        }
-                    }
-                    catch (NoSuitableEdgeException ex)
-                    {
-                        CalculatingRoute = false;
-                        RouteCalculationError = _i18n["DIRECTIONS_CALCULATING_FAILURE_NO_ROAD"];
-                    }
-                    catch (DisjointNetworkException ex)
-                    {
-                        CalculatingRoute = false;
-                        RouteCalculationError = _i18n["DIRECTIONS_CALCULATING_FAILURE_NO_PATH"];
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        // Ignore
-                    }
+                    await CalculateAndSetRoute();
                 }));
         
         mainViewModel.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(this, x => x.LoggedInUsername);
+    }
+
+    public async Task CalculateAndSetRoute()
+    {
+        RouteCalculationCancellationSource?.Cancel();
+        RouteCalculationCancellationSource = new CancellationTokenSource();
+
+        if (GoModeStartPoint is null || GoModeEndPoint is null) return;
+        
+        try
+        {
+            CalculatingRoute = true;
+            var route = await MapService.ObtainCalculatedRoute(GoModeStartPoint, GoModeEndPoint,
+                RouteCalculationCancellationSource.Token);
+            MapService.CurrentRoute = route;
+            CalculatingRoute = false;
+            
+            RouteCalculationCancellationSource = null;
+
+            foreach (var inst in route.Instructions)
+            {
+                Console.WriteLine(inst.HumanReadableString((int)inst.distance));
+            }
+        }
+        catch (NoSuitableEdgeException ex)
+        {
+            CalculatingRoute = false;
+            RouteCalculationError = _i18n["DIRECTIONS_CALCULATING_FAILURE_NO_ROAD"];
+        }
+        catch (DisjointNetworkException ex)
+        {
+            CalculatingRoute = false;
+            RouteCalculationError = _i18n["DIRECTIONS_CALCULATING_FAILURE_NO_PATH"];
+        }
+        catch (OperationCanceledException)
+        {
+            // Ignore
+        }
+    }
+
+    void GoModeRerouteRequested(object? sender, EventArgs e)
+    {
+        // ReSharper disable once AsyncVoidLambda
+        Dispatcher.UIThread.Post(async () =>
+        {
+            await CalculateAndSetRoute();
+            SetupRouteForGoMode();
+        });
     }
 
     public void GetDirectionsToSelectedLandmark()
@@ -196,10 +213,12 @@ public class CornerViewModel : ViewModel
                     BlocksToRouteEnd = $"{remain} blk";
                 }));
             MapService.CurrentRoute.StartTrackingPlayer(MapService.LoggedInPlayer!);
+            MapService.CurrentRoute.RerouteRequested += GoModeRerouteRequested;
         }
         else
         {
             MapService.CurrentRoute.StopTrackingPlayer();
+            MapService.CurrentRoute.RerouteRequested -= GoModeRerouteRequested;
         }
     }
 }

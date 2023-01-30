@@ -51,6 +51,8 @@
             <Button Content="&lt;-" Command="{Binding LeaveGoMode}" VerticalAlignment="Top" />
             <StackPanel>
                 <controls:InstructionDisplayControl Instruction="{Binding CurrentInstruction}" ToNextInstruction="{Binding BlocksToNextInstruction}" />
+                <TextBlock Text="{str:Tr Key=DIRECTIONS_CALCULATING}" HorizontalAlignment="Center" IsVisible="{Binding CalculatingRoute}" />
+                <TextBlock Text="{Binding RouteCalculationError}" HorizontalAlignment="Center" IsVisible="{Binding RouteCalculationError, Converter={x:Static ObjectConverters.IsNotNull}}" />
                 <TextBlock Text="{Binding BlocksToRouteEnd}" />
             </StackPanel>
         </StackPanel>
