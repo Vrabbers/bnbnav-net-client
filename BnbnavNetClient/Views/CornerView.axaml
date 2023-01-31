@@ -114,7 +114,7 @@
                     </Grid>
                     <Border Grid.Row="1" Classes="gomodefooter">
                         <Grid ColumnDefinitions="Auto * Auto">
-                            <StackPanel Margin="3" Spacing="3">
+                            <StackPanel Orientation="Horizontal" Margin="3" Spacing="3">
                                 <TextBlock Text="{Binding BlocksToRouteEnd}" />
                                 <PathIcon Data="{StaticResource money_regular}" IsVisible="{Binding MapService.CurrentRoute.RouteContainsTolls, FallbackValue=False}" />
                                 <PathIcon Data="{StaticResource vehicle_ship_regular}" IsVisible="{Binding MapService.CurrentRoute.RouteContainsFerries, FallbackValue=False}" />
