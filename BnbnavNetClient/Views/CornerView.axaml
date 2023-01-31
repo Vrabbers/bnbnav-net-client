@@ -113,7 +113,12 @@
                         </Border>
                     </Grid>
                     <Border Grid.Row="1" Classes="gomodefooter">
-                        <TextBlock Text="{Binding BlocksToRouteEnd}" />
+                        <StackPanel Orientation="Horizontal" Margin="3" Spacing="3">
+                            <TextBlock Text="{Binding BlocksToRouteEnd}" />
+                            <PathIcon Data="{StaticResource money_regular}" IsVisible="{Binding MapService.CurrentRoute.RouteContainsTolls, FallbackValue=False}" />
+                            <PathIcon Data="{StaticResource vehicle_ship_regular}" IsVisible="{Binding MapService.CurrentRoute.RouteContainsFerries, FallbackValue=False}" />
+                            <PathIcon Data="{StaticResource balloon_regular}" IsVisible="{Binding MapService.CurrentRoute.RouteContainsDuongWarp, FallbackValue=False}" />
+                        </StackPanel>
                     </Border>
                 </Grid>
 
