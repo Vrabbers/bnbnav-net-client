@@ -16,6 +16,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using BnbnavNetClient.Services.NetworkOperations;
+using DynamicData.Binding;
 using ReactiveUI.Fody.Helpers;
 
 namespace BnbnavNetClient.Services;
@@ -77,16 +78,8 @@ public sealed class MapService : ReactiveObject
     [ObservableAsProperty]
     public string? LoggedInUsername { get; set; }
 
-    public Player? LoggedInPlayer
-    {
-        get
-        {
-            if (LoggedInUsername is null) return null;
-            
-            var exists = Players.TryGetValue(LoggedInUsername, out var player);
-            return !exists ? null : player;
-        }
-    }
+    [Reactive]
+    public Player? LoggedInPlayer { get; set; }
 
     public IEnumerable<Edge> AllEdges =>
         (CurrentRoute?.Edges ?? Enumerable.Empty<Edge>()).Union(Edges.Values).Distinct().Reverse();
@@ -116,6 +109,22 @@ public sealed class MapService : ReactiveObject
         _players = new Dictionary<string, Player>();
         Players = _players.AsReadOnly();
         _websocketService = websocketService;
+
+        this.WhenAnyValue(x => x.LoggedInUsername).Subscribe(Observer.Create<string?>(_ => UpdateLoggedInPlayer()));
+        this.WhenPropertyChanged(x => x.Players)
+            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Player>>>(_ =>
+                UpdateLoggedInPlayer()));
+    }
+
+    private void UpdateLoggedInPlayer()
+    {
+        if (LoggedInUsername is null)
+        {
+            LoggedInPlayer = null;
+            return;
+        }
+
+        LoggedInPlayer = Players.TryGetValue(LoggedInUsername, out var player) ? player : null;
     }
 
     public Edge? OppositeEdge(Edge edge, IEnumerable<Edge> list)

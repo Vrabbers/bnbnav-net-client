@@ -50,9 +50,6 @@ public class CornerViewModel : ViewModel
     
     [Reactive]
     public ISearchable? GoModeEndPoint { get; set; }
-    
-    [ObservableAsProperty]
-    public string? LoggedInUsername { get; set; }
 
     CancellationTokenSource? RouteCalculationCancellationSource { get; set; }
 
@@ -125,8 +122,25 @@ public class CornerViewModel : ViewModel
         this.WhenAnyValue(x => x.CalculatingRoute, x => x.RouteCalculationError)
             .Select(tuple => !tuple.Item1 && string.IsNullOrEmpty(tuple.Item2))
             .ToPropertyEx(this, x => x.CurrentInstructionValid);
-        
-        mainViewModel.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(this, x => x.LoggedInUsername);
+
+        MapService.WhenAnyValue(x => x.LoggedInPlayer).Subscribe(Observer.Create<Player?>(player =>
+        {
+            if (player is null && IsInGoMode)
+            {
+                //Immediately quit Go Mode as the player has disconnected
+                CurrentUi = AvailableUi.Prepare;
+                    
+                _mainViewModel.Popup = new AlertDialogViewModel()
+                {
+                    Title = _i18n["GO_MODE_PLAYER_DISCONNECTED_TITLE"],
+                    Message = _i18n["GO_MODE_PLAYER_DISCONNECTED_MESSAGE"],
+                    Ok = ReactiveCommand.Create(() =>
+                    {
+                        _mainViewModel.Popup = null;
+                    })
+                };
+            }
+        }));
     }
 
     public async Task CalculateAndSetRoute()
@@ -195,6 +209,43 @@ public class CornerViewModel : ViewModel
 
     public void EnterGoMode()
     {
+        if (MapService.LoggedInPlayer is null)
+        {
+            if (string.IsNullOrEmpty(MapService.LoggedInUsername))
+            {
+                //TODO: Ask the player to log in
+            }
+            else
+            {
+                _mainViewModel.Popup = new AlertDialogViewModel()
+                {
+                    Title = _i18n["GO_MODE_START_ERROR_TITLE"],
+                    Message = _i18n["GO_MODE_START_ERROR_LOGIN_REQUIRED"],
+                    Ok = ReactiveCommand.Create(() =>
+                    {
+                        _mainViewModel.Popup = null;
+                    })
+                };
+            }
+
+            return;
+        }
+
+        if (MapService.LoggedInPlayer != GoModeStartPoint)
+        {
+            _mainViewModel.Popup = new AlertDialogViewModel()
+            {
+                Title = _i18n["GO_MODE_START_ERROR_TITLE"],
+                Message = _i18n["GO_MODE_START_ERROR_INVALID_START_POINT"],
+                Ok = ReactiveCommand.Create(() =>
+                {
+                    _mainViewModel.Popup = null;
+                })
+            };
+
+            return;
+        }
+        
         _mainViewModel.Popup = new AlertDialogViewModel()
         {
             Title = _i18n["GO_MODE_WARNING_TITLE"],
@@ -220,18 +271,33 @@ public class CornerViewModel : ViewModel
             return;
         }
 
-        if (IsInGoMode)
+        if (IsInGoMode && MapService.LoggedInPlayer is not null)
         {
             MapService.CurrentRoute.WhenAnyValue(x => x.CurrentInstruction)
                 .ToPropertyEx(this, x => x.CurrentInstruction);
             MapService.CurrentRoute.WhenAnyValue(x => x.BlocksToNextInstruction)
                 .ToPropertyEx(this, x => x.BlocksToNextInstruction);
             MapService.CurrentRoute.WhenAnyValue(x => x.TotalBlocksRemaining)
+                // ReSharper disable once AsyncVoidLambda
                 .Subscribe(Observer.Create<int>(remain =>
                 {
                     BlocksToRouteEnd = $"{remain} blk";
+                    if (remain is < 20 and > 1)
+                    {
+                        // ReSharper disable once AsyncVoidLambda
+                        Dispatcher.UIThread.Post(async () =>
+                        {
+                            //End nav
+                            await Task.Delay(3000);
+                            var landmark = GoModeEndPoint;
+                            LeavePrepareMode();
+
+                            SelectedLandmark = null;
+                            SelectedLandmark = landmark;
+                        });
+                    }
                 }));
-            MapService.CurrentRoute.StartTrackingPlayer(MapService.LoggedInPlayer!);
+            MapService.CurrentRoute.StartTrackingPlayer(MapService.LoggedInPlayer);
             MapService.CurrentRoute.RerouteRequested += GoModeRerouteRequested;
         }
         else

@@ -149,7 +149,9 @@ public partial class MapView : UserControl
             if (MapViewModel.IsInEditMode) 
                 MapViewModel.MapEditorService.EditController.PointerReleased(this, eventArgs);
 
-            foreach (var item in HitTest(eventArgs.GetPosition(this)))
+            var hitTestResultsE = HitTest(eventArgs.GetPosition(this));
+            var hitTestResults = hitTestResultsE as MapItem[] ?? hitTestResultsE.ToArray();
+            foreach (var item in hitTestResults)
             {
                 switch (item)
                 {
@@ -165,6 +167,14 @@ public partial class MapView : UserControl
                 }
             }
             _pointerVelocities.Clear(); // Make sure we're not using velocities from previous pan.
+            
+            if (!MapViewModel.IsInEditMode)
+            {
+                if (hitTestResults.LastOrDefault() is Landmark landmark)
+                {
+                    MapViewModel.SelectedLandmark = landmark;
+                }
+            }
         };
 
         PointerWheelChanged += (_, eventArgs) =>

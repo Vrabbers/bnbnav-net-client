@@ -331,6 +331,9 @@ public class CalculatedRoute : ReactiveObject
         {
             return;
         }
+        
+        //Cancel any reroute in progress
+        CancelReroute();
 
         _trackedPlayer.PlayerUpdateEvent -= TrackedPlayerUpdate;
         _trackedPlayer = null;
