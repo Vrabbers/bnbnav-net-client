@@ -64,10 +64,10 @@ public class MapViewModel : ViewModel
     public ISearchable? SelectedLandmark { get; set; }
     
     [Reactive]
-    public object GoModeStartPoint { get; set; }
+    public ISearchable? GoModeStartPoint { get; set; }
     
     [Reactive]
-    public object GoModeEndPoint { get; set; }
+    public ISearchable? GoModeEndPoint { get; set; }
 
     [Reactive]
     public AvailableUi CurrentUi { get; set; } = AvailableUi.Search;

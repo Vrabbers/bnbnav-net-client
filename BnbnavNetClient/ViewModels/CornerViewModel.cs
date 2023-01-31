@@ -85,6 +85,13 @@ public class CornerViewModel : ViewModel
             IsInSearchMode = CurrentUi == AvailableUi.Search;
             IsInPrepareMode = CurrentUi == AvailableUi.Prepare;
             IsInGoMode = CurrentUi == AvailableUi.Go;
+
+            if (IsInSearchMode)
+            {
+                //There should never be a current route in search mode
+                MapService.CurrentRoute = null;
+            }
+            
             SetupRouteForGoMode();
         }));
         this.WhenAnyValue(x => x.GoModeEndPoint).Subscribe(Observer.Create<ISearchable?>(_ =>
@@ -144,12 +151,12 @@ public class CornerViewModel : ViewModel
                 Console.WriteLine(inst.HumanReadableString((int)inst.distance));
             }
         }
-        catch (NoSuitableEdgeException ex)
+        catch (NoSuitableEdgeException)
         {
             CalculatingRoute = false;
             RouteCalculationError = _i18n["DIRECTIONS_CALCULATING_FAILURE_NO_ROAD"];
         }
-        catch (DisjointNetworkException ex)
+        catch (DisjointNetworkException)
         {
             CalculatingRoute = false;
             RouteCalculationError = _i18n["DIRECTIONS_CALCULATING_FAILURE_NO_PATH"];

@@ -13,9 +13,9 @@ namespace BnbnavNetClient.Controls;
 public class InstructionImageControl : TemplatedControl
 {
     CalculatedRoute.Instruction? _Instruction;
-    public static readonly DirectProperty<InstructionImageControl, CalculatedRoute.Instruction> InstructionProperty = AvaloniaProperty.RegisterDirect<InstructionImageControl, CalculatedRoute.Instruction>("Instruction", o => o.Instruction, (o, v) => o.Instruction = v);
+    public static readonly DirectProperty<InstructionImageControl, CalculatedRoute.Instruction?> InstructionProperty = AvaloniaProperty.RegisterDirect<InstructionImageControl, CalculatedRoute.Instruction?>("Instruction", o => o.Instruction, (o, v) => o.Instruction = v);
 
-    public CalculatedRoute.Instruction Instruction
+    public CalculatedRoute.Instruction? Instruction
     {
         get { return _Instruction; }
         set { SetAndRaise(InstructionProperty, ref _Instruction, value); }
@@ -24,7 +24,7 @@ public class InstructionImageControl : TemplatedControl
     public InstructionImageControl()
     {
         this.WhenAnyValue(x => x.Instruction)
-            .Subscribe(Observer.Create<CalculatedRoute.Instruction>(_ => InvalidateVisual()));
+            .Subscribe(Observer.Create<CalculatedRoute.Instruction?>(_ => InvalidateVisual()));
     }
     
     public override void Render(DrawingContext context)
