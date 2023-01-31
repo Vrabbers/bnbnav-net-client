@@ -6,7 +6,8 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="BnbnavNetClient.Views.MapView"
              x:DataType="vm:MapViewModel"
-             x:CompileBindings="True">
+             x:CompileBindings="True"
+             FlowDirection="LeftToRight">
   <UserControl.ContextMenu> 
     <ContextMenu Items="{Binding ContextMenuItems}" />
   </UserControl.ContextMenu>

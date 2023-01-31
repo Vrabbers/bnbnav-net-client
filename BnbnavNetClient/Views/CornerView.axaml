@@ -125,7 +125,7 @@
                                 IsVisible="{Binding MapService.CurrentRoute.DisplayThenInstruction, FallbackValue=False}" Classes="gomodetheninstruction">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="3">
                                     <TextBlock Text="{str:Tr Key=ROUTE_THEN}" VerticalAlignment="Center" />
-                                    <controls:InstructionImageControl Instruction="{Binding ThenInstruction}" Height="24" Width="24" VerticalAlignment="Center" />
+                                    <controls:InstructionImageControl Instruction="{Binding ThenInstruction}" Height="24" Width="24" VerticalAlignment="Center" FlowDirection="LeftToRight" />
                                 </StackPanel>
                             </Border>
                         </Grid>
