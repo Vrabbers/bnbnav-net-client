@@ -100,6 +100,12 @@ public class CalculatedRoute : ReactiveObject
     
     [Reactive]
     public Instruction? CurrentInstruction { get; set; }
+    
+    [Reactive]
+    public Instruction? ThenInstruction { get; set; }
+    
+    [Reactive]
+    public bool DisplayThenInstruction { get; set; }
 
     [Reactive]
     public int BlocksToNextInstruction { get; set; }
@@ -275,6 +281,8 @@ public class CalculatedRoute : ReactiveObject
         {
             _ = QueueReroute();
             CurrentInstruction = null;
+            ThenInstruction = null;
+            DisplayThenInstruction = false;
             return;
         }
 
@@ -313,6 +321,16 @@ public class CalculatedRoute : ReactiveObject
             {
                 //We found the edge that the player is on
                 CurrentInstruction = Instructions[instructionIndex];
+                if (Instructions.Count > instructionIndex + 1)
+                {
+                    ThenInstruction = Instructions[instructionIndex + 1];
+                    DisplayThenInstruction = ThenInstruction.distance < 15;
+                }
+                else
+                {
+                    ThenInstruction = null;
+                    DisplayThenInstruction = false;
+                }
                 instructionFound = true;
                 blocksToNextInstruction += new ExtendedLine(edge.To.Point, _mapService.LoggedInPlayer.Point).Length;
             }

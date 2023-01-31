@@ -64,6 +64,9 @@ public class CornerViewModel : ViewModel
 
     [ObservableAsProperty]
     public CalculatedRoute.Instruction? CurrentInstruction { get; }
+    
+    [ObservableAsProperty]
+    public CalculatedRoute.Instruction? ThenInstruction { get; }
 
     [Reactive]
     public string BlocksToRouteEnd { get; set; } = "0 blk";
@@ -295,6 +298,8 @@ public class CornerViewModel : ViewModel
         {
             MapService.CurrentRoute.WhenAnyValue(x => x.CurrentInstruction)
                 .ToPropertyEx(this, x => x.CurrentInstruction);
+            MapService.CurrentRoute.WhenAnyValue(x => x.ThenInstruction)
+                .ToPropertyEx(this, x => x.ThenInstruction);
             MapService.CurrentRoute.WhenAnyValue(x => x.BlocksToNextInstruction)
                 .ToPropertyEx(this, x => x.BlocksToNextInstruction);
             MapService.CurrentRoute.WhenAnyValue(x => x.TotalBlocksRemaining)

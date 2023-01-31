@@ -70,6 +70,12 @@
     <Style Selector="Border.gomodefooter PathIcon">
       <Setter Property="Foreground" Value="#000000" />
     </Style>
+    <Style Selector="Border.gomodetheninstruction">
+      <Setter Property="Background" Value="#006400" />
+    </Style>
+    <Style Selector="Border.gomodetheninstruction TextBlock">
+      <Setter Property="Foreground" Value="#ffffff" />
+    </Style>
     <Style Selector="controls|InstructionDisplayControl">
       <Setter Property="FontFamily" Value="/Assets/Overpass-Regular.ttf#Overpass"/>
     </Style>

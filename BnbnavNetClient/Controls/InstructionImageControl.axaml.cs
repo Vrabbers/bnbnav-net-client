@@ -35,21 +35,20 @@ public class InstructionImageControl : TemplatedControl
 
         if (_Instruction is not null)
         {
-            var bounds = Bounds;
+            var bounds = new Rect(new Point(0, 0), Bounds.Size);
 
             if (_Instruction.roundaboutExit is not null && _Instruction.from is not null && _Instruction.to is not null)
             {
-                
-                var innerCircleBounds = bounds.Deflate(15);
+                var innerCircleBounds = bounds.Deflate(3 * bounds.Width / 10);
                 var angle = _Instruction.from.Line.FlipDirection().AngleTo(_Instruction.roundaboutExit.Line) - 90;
                 var complex = Complex.FromPolarCoordinates(innerCircleBounds.Width / 2, MathHelper.ToRad(angle + 180));
                 var arcEnd = new Point(-complex.Real, complex.Imaginary) + innerCircleBounds.Center;
-                var arrowEnd = new ExtendedLine(arcEnd, new Point(arcEnd.X + 10, arcEnd.Y)).SetAngle(angle).Point2;
+                var arrowEnd = new ExtendedLine(arcEnd, new Point(arcEnd.X + bounds.Width / 5, arcEnd.Y)).SetAngle(angle).Point2;
                 var sweepDirection = _Instruction.from.Line.FlipDirection().AngleTo(_Instruction.to.Line) < 0
                     ? SweepDirection.Clockwise
                     : SweepDirection.CounterClockwise;
                 
-                context.DrawEllipse(null, new Pen(new SolidColorBrush(new Color(100, 255, 255, 255)), 5), innerCircleBounds.Center, innerCircleBounds.Width / 2, innerCircleBounds.Height / 2);
+                context.DrawEllipse(null, new Pen(new SolidColorBrush(new Color(100, 255, 255, 255)), bounds.Width / 10), innerCircleBounds.Center, innerCircleBounds.Width / 2, innerCircleBounds.Height / 2);
 
                 var path = new PathGeometry
                 {
@@ -77,7 +76,7 @@ public class InstructionImageControl : TemplatedControl
                                 },
                                 new LineSegment
                                 {
-                                    Point = new ExtendedLine(arrowEnd, new Point(arrowEnd.X + 5, arrowEnd.Y)).SetAngle(angle - 135).Point2
+                                    Point = new ExtendedLine(arrowEnd, new Point(arrowEnd.X + bounds.Width / 10, arrowEnd.Y)).SetAngle(angle - 135).Point2
                                 },
                                 new LineSegment
                                 {
@@ -85,7 +84,7 @@ public class InstructionImageControl : TemplatedControl
                                 },
                                 new LineSegment
                                 {
-                                    Point = new ExtendedLine(arrowEnd, new Point(arrowEnd.X + 5, arrowEnd.Y)).SetAngle(angle + 135).Point2
+                                    Point = new ExtendedLine(arrowEnd, new Point(arrowEnd.X + bounds.Width / 10, arrowEnd.Y)).SetAngle(angle + 135).Point2
                                 }
                             },
                             IsClosed = false
@@ -93,7 +92,7 @@ public class InstructionImageControl : TemplatedControl
                     }
                 };
 
-                context.DrawGeometry(null, new Pen(new SolidColorBrush(new Color(255, 255, 255, 255)), 5, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round), path);
+                context.DrawGeometry(null, new Pen(new SolidColorBrush(new Color(255, 255, 255, 255)), bounds.Width / 10, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round), path);
             }
             else
             {
@@ -116,7 +115,7 @@ public class InstructionImageControl : TemplatedControl
                     CalculatedRoute.Instruction.InstructionType.LeaveRoundabout => "leave-roundabout",
                     _ => throw new ArgumentOutOfRangeException()
                 };
-            
+
                 context.DrawSvgUrl($"avares://BnbnavNetClient/Assets/Instructions/{instructionFile}.svg", bounds);
             }
         }

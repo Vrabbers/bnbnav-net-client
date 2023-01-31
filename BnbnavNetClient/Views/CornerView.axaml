@@ -113,12 +113,22 @@
                         </Border>
                     </Grid>
                     <Border Grid.Row="1" Classes="gomodefooter">
-                        <StackPanel Orientation="Horizontal" Margin="3" Spacing="3">
-                            <TextBlock Text="{Binding BlocksToRouteEnd}" />
-                            <PathIcon Data="{StaticResource money_regular}" IsVisible="{Binding MapService.CurrentRoute.RouteContainsTolls, FallbackValue=False}" />
-                            <PathIcon Data="{StaticResource vehicle_ship_regular}" IsVisible="{Binding MapService.CurrentRoute.RouteContainsFerries, FallbackValue=False}" />
-                            <PathIcon Data="{StaticResource balloon_regular}" IsVisible="{Binding MapService.CurrentRoute.RouteContainsDuongWarp, FallbackValue=False}" />
-                        </StackPanel>
+                        <Grid ColumnDefinitions="Auto * Auto">
+                            <StackPanel Margin="3" Spacing="3">
+                                <TextBlock Text="{Binding BlocksToRouteEnd}" />
+                                <PathIcon Data="{StaticResource money_regular}" IsVisible="{Binding MapService.CurrentRoute.RouteContainsTolls, FallbackValue=False}" />
+                                <PathIcon Data="{StaticResource vehicle_ship_regular}" IsVisible="{Binding MapService.CurrentRoute.RouteContainsFerries, FallbackValue=False}" />
+                                <PathIcon Data="{StaticResource balloon_regular}" IsVisible="{Binding MapService.CurrentRoute.RouteContainsDuongWarp, FallbackValue=False}" />
+                            </StackPanel>
+                            <Border
+                                Grid.Column="2"
+                                IsVisible="{Binding MapService.CurrentRoute.DisplayThenInstruction, FallbackValue=False}" Classes="gomodetheninstruction">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="3">
+                                    <TextBlock Text="{str:Tr Key=ROUTE_THEN}" VerticalAlignment="Center" />
+                                    <controls:InstructionImageControl Instruction="{Binding ThenInstruction}" Height="24" Width="24" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </Border>
                 </Grid>
 
