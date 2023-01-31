@@ -70,6 +70,18 @@ public class CornerViewModel : ViewModel
 
     [ObservableAsProperty]
     public bool CurrentInstructionValid { get; }
+    
+    [Reactive]
+    public bool AvoidTolls { get; set; }
+
+    [Reactive]
+    public bool AvoidMotorways { get; set; }
+    
+    [Reactive]
+    public bool AvoidFerries { get; set; }
+    
+    [Reactive]
+    public bool AvoidDuongWarp { get; set; }
 
     public CornerViewModel(MapService mapService, MainViewModel mainViewModel)
     {
@@ -100,9 +112,10 @@ public class CornerViewModel : ViewModel
             //Attempt to find the player
             GoModeStartPoint = MapService.LoggedInPlayer;
         }));
-        this.WhenAnyValue(x => x.GoModeStartPoint, x => x.GoModeEndPoint).Subscribe(Observer.Create<
+        this.WhenAnyValue(x => x.GoModeStartPoint, x => x.GoModeEndPoint, x => x.AvoidMotorways, x => x.AvoidDuongWarp,
+            x => x.AvoidTolls, x => x.AvoidFerries).Subscribe(Observer.Create<
             // ReSharper disable once AsyncVoidLambda
-            ValueTuple<ISearchable?, ISearchable?>>(async _ =>
+            ValueTuple<ISearchable?, ISearchable?, bool, bool, bool, bool>>(async _ =>
                 {
                     RouteCalculationCancellationSource?.Cancel();
                     RouteCalculationCancellationSource = new CancellationTokenSource();
@@ -153,7 +166,14 @@ public class CornerViewModel : ViewModel
         try
         {
             CalculatingRoute = true;
-            var route = await MapService.ObtainCalculatedRoute(GoModeStartPoint, GoModeEndPoint,
+
+            var routeOptions = MapService.RouteOptions.NoRouteOptions;
+            if (AvoidMotorways) routeOptions |= MapService.RouteOptions.AvoidMotorways;
+            if (AvoidDuongWarp) routeOptions |= MapService.RouteOptions.AvoidDuongWarp;
+            if (AvoidTolls) routeOptions |= MapService.RouteOptions.AvoidTolls;
+            if (AvoidFerries) routeOptions |= MapService.RouteOptions.AvoidFerries;
+            
+            var route = await MapService.ObtainCalculatedRoute(GoModeStartPoint, GoModeEndPoint, routeOptions,
                 RouteCalculationCancellationSource.Token);
             MapService.CurrentRoute = route;
             CalculatingRoute = false;

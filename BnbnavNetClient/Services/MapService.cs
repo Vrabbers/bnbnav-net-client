@@ -39,6 +39,16 @@ public sealed class MapService : ReactiveObject
         }
     }
 
+    [Flags]
+    public enum RouteOptions
+    {
+        NoRouteOptions = 0,
+        AvoidMotorways = 1,
+        AvoidDuongWarp = 2,
+        AvoidTolls = 4,
+        AvoidFerries = 8
+    }
+
     public static readonly string BaseUrl = Environment.GetEnvironmentVariable("BNBNAV_BASEURL") ?? "https://bnbnav.aircs.racing/";
 
     static readonly HttpClient HttpClient = new()
@@ -230,12 +240,14 @@ public sealed class MapService : ReactiveObject
         }));
     }
 
-    public async Task<CalculatedRoute> ObtainCalculatedRoute(ISearchable from, ISearchable to, CancellationToken ct)
+    public async Task<CalculatedRoute> ObtainCalculatedRoute(ISearchable from, ISearchable to, RouteOptions routeOptions, CancellationToken ct)
     {
         return await Task.Run(() =>
         {
-            //TODO: When filters are switched on, this is where to filter out ineligible edges
-            var edges = _edges.Values.ToList();
+            var edges = _edges.Values
+                .Where(x => !routeOptions.HasFlag(RouteOptions.AvoidMotorways) || x.Road.RoadType != RoadType.Motorway)
+                .Where(x => !routeOptions.HasFlag(RouteOptions.AvoidDuongWarp) || x.Road.RoadType != RoadType.DuongWarp)
+                .ToList();
             
             var point1Edge = edges.MinBy(x => x.Line.RightAngleIntersection(from.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
             var point2Edge = edges.MinBy(x => x.Line.RightAngleIntersection(to.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);

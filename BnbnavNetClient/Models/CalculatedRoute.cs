@@ -106,6 +106,15 @@ public class CalculatedRoute : ReactiveObject
     
     [Reactive]
     public int TotalBlocksRemaining { get; set; }
+    
+    [Reactive]
+    public bool RouteContainsDuongWarp { get; set; }
+    
+    [Reactive]
+    public bool RouteContainsTolls { get; set; }
+    
+    [Reactive]
+    public bool RouteContainsFerries { get; set; }
 
     public void AddRouteSegment(Node node, Edge? edge)
     {
@@ -121,8 +130,10 @@ public class CalculatedRoute : ReactiveObject
         }
     }
 
-    private void FinaliseRoute()
+    void FinaliseRoute()
     {
+        RouteContainsDuongWarp = Edges.Any(x => x.Road.RoadType == RoadType.DuongWarp);
+        
         //Always add a departure instruction
         Instructions.Add(new Instruction(Nodes.First(), null, Edges.First(), 0, Instruction.InstructionType.Departure));
 
