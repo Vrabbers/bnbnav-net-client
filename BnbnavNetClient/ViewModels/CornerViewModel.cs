@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,7 +69,10 @@ public class CornerViewModel : ViewModel
     public CalculatedRoute.Instruction? CurrentInstruction { get; }
 
     [Reactive]
-    public string BlocksToRouteEnd { get; set; }
+    public string BlocksToRouteEnd { get; set; } = "0 blk";
+
+    [ObservableAsProperty]
+    public bool CurrentInstructionValid { get; }
 
     public CornerViewModel(MapService mapService, MainViewModel mainViewModel)
     {
@@ -110,6 +114,10 @@ public class CornerViewModel : ViewModel
 
                     await CalculateAndSetRoute();
                 }));
+
+        this.WhenAnyValue(x => x.CalculatingRoute, x => x.RouteCalculationError)
+            .Select(tuple => !tuple.Item1 && string.IsNullOrEmpty(tuple.Item2))
+            .ToPropertyEx(this, x => x.CurrentInstructionValid);
         
         mainViewModel.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(this, x => x.LoggedInUsername);
     }
@@ -157,6 +165,10 @@ public class CornerViewModel : ViewModel
         // ReSharper disable once AsyncVoidLambda
         Dispatcher.UIThread.Post(async () =>
         {
+            //Clear the current route
+            MapService.CurrentRoute = null;
+            RouteCalculationError = null;
+            
             await CalculateAndSetRoute();
             SetupRouteForGoMode();
         });

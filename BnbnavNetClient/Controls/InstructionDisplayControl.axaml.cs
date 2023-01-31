@@ -22,6 +22,9 @@ public class InstructionDisplayControl : TemplatedControl
     
     string _CalculatedInstructionLength = "";
     public static readonly DirectProperty<InstructionDisplayControl, string> CalculatedInstructionLengthProperty = AvaloniaProperty.RegisterDirect<InstructionDisplayControl, string>("CalculatedInstructionLength", o => o.CalculatedInstructionLength, (o, v) => o.CalculatedInstructionLength = v);
+    
+    Thickness _InnerMargin;
+    public static readonly DirectProperty<InstructionDisplayControl, Thickness> InnerMarginProperty = AvaloniaProperty.RegisterDirect<InstructionDisplayControl, Thickness>("InnerMargin", o => o.InnerMargin, (o, v) => o.InnerMargin = v);
 
     public CalculatedRoute.Instruction? Instruction
     {
@@ -39,6 +42,12 @@ public class InstructionDisplayControl : TemplatedControl
     {
         get { return _CalculatedInstructionLength; }
         set { SetAndRaise(CalculatedInstructionLengthProperty, ref _CalculatedInstructionLength, value); }
+    }
+
+    public Thickness InnerMargin
+    {
+        get { return _InnerMargin; }
+        set { SetAndRaise(InnerMarginProperty, ref _InnerMargin, value); }
     }
 
     public InstructionDisplayControl()

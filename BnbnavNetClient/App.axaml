@@ -50,8 +50,28 @@
       <Setter Property="Background" Value="#00ff00" />
     </Style>
     <Style Selector="controls|InstructionDisplayControl.gomodeactiveinstruction">
-      <Setter Property="Background" Value="#00ff00" />
       <Setter Property="Foreground" Value="#ffffff" />
+    </Style>
+    <Style Selector="controls|InstructionDisplayControl.gomodeactiveinstruction Border">
+      <Setter Property="Background" Value="#009600" />
+    </Style>
+    <Style Selector="Border.gomodeactivesuspended">
+      <Setter Property="Background" Value="#646464" />
+    </Style>
+    <Style Selector="Border.gomodeactivesuspended TextBlock">
+      <Setter Property="Foreground" Value="#ffffff" />
+    </Style>
+    <Style Selector="Border.gomodefooter">
+      <Setter Property="Background" Value="#ffffff" />
+    </Style>
+    <Style Selector="Border.gomodefooter TextBlock">
+      <Setter Property="Foreground" Value="#000000" />
+    </Style>
+    <Style Selector="controls|InstructionDisplayControl">
+      <Setter Property="FontFamily" Value="/Assets/Overpass-Regular.ttf#Overpass"/>
+    </Style>
+    <Style Selector="TextBlock.roadname">
+      <Setter Property="FontSize" Value="25"/>
     </Style>
     <StyleInclude Source="/Controls/DayNightButton.axaml"/>
     <StyleInclude Source="/Controls/LandmarkSearchControl.axaml" />

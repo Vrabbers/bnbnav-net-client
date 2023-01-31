@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="BnbnavNetClient.Views.CornerView"
              x:DataType="viewModels:CornerViewModel"
              xmlns:str="using:BnbnavNetClient.I18Next"
@@ -49,12 +49,23 @@
         
         <DockPanel IsVisible="{Binding IsInGoMode}">
             <Button Content="&lt;-" Command="{Binding LeaveGoMode}" VerticalAlignment="Top" DockPanel.Dock="Left"/>
-            <StackPanel>
-                <controls:InstructionDisplayControl Instruction="{Binding CurrentInstruction}" ToNextInstruction="{Binding BlocksToNextInstruction}" Classes="gomodeactiveinstruction" />
-                <TextBlock Text="{str:Tr Key=DIRECTIONS_CALCULATING}" HorizontalAlignment="Center" IsVisible="{Binding CalculatingRoute}" />
-                <TextBlock Text="{Binding RouteCalculationError}" HorizontalAlignment="Center" IsVisible="{Binding RouteCalculationError, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                <TextBlock Text="{Binding BlocksToRouteEnd}" />
-            </StackPanel>
+            <Border CornerRadius="8">
+                <Grid RowDefinitions="Auto Auto">
+                    <Grid ColumnDefinitions="*" Margin="0">
+                        <controls:InstructionDisplayControl InnerMargin="6" Instruction="{Binding CurrentInstruction}" ToNextInstruction="{Binding BlocksToNextInstruction}" Classes="gomodeactiveinstruction" IsVisible="{Binding CurrentInstructionValid}" />
+                        <Border Grid.Column="0" IsVisible="{Binding CalculatingRoute}" Classes="gomodeactivesuspended" >
+                            <TextBlock Text="{str:Tr Key=DIRECTIONS_CALCULATING}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="0" IsVisible="{Binding RouteCalculationError, Converter={x:Static ObjectConverters.IsNotNull}}" Classes="gomodeactivesuspended">
+                            <TextBlock Text="{Binding RouteCalculationError}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </Grid>
+                    <Border Grid.Row="1" Classes="gomodefooter">
+                        <TextBlock Text="{Binding BlocksToRouteEnd}" />
+                    </Border>
+                </Grid>
+
+            </Border>
         </DockPanel>
     </StackPanel>
     <UserControl.Resources>
