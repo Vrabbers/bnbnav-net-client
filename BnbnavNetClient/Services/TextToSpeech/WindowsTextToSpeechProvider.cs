@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace BnbnavNetClient.Services.TextToSpeech;
 class WindowsTextToSpeechProvider : ITextToSpeechProvider
 {
-    private SpeechSynthesizer _speechSynthesizer;
+    SpeechSynthesizer _speechSynthesizer;
 
     public WindowsTextToSpeechProvider()
     {
@@ -18,7 +18,6 @@ class WindowsTextToSpeechProvider : ITextToSpeechProvider
 
         _speechSynthesizer = new SpeechSynthesizer();
         _speechSynthesizer.SetOutputToDefaultAudioDevice();
-
     }
 
     public Task SpeakAsync(string text, CultureInfo culture)
