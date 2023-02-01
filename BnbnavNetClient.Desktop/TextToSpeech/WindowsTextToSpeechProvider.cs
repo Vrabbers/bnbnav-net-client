@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Speech.Synthesis;
-using System.Text;
 using System.Threading.Tasks;
+using BnbnavNetClient.Services.TextToSpeech;
 
-namespace BnbnavNetClient.Services.TextToSpeech;
+namespace BnbnavNetClient.Desktop.TextToSpeech;
 class WindowsTextToSpeechProvider : ITextToSpeechProvider
 {
     SpeechSynthesizer _speechSynthesizer;

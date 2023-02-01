@@ -6,7 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace BnbnavNetClient.Services.TextToSpeech;
-interface ITextToSpeechProvider
+
+public interface ITextToSpeechProvider
 {
     Task SpeakAsync(string text, CultureInfo culture);
 }
