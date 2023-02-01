@@ -104,7 +104,7 @@
             <Border CornerRadius="8">
                 <Grid RowDefinitions="Auto Auto">
                     <Grid ColumnDefinitions="*" Margin="0">
-                        <controls:InstructionDisplayControl InnerMargin="6" Instruction="{Binding CurrentInstruction}" ToNextInstruction="{Binding BlocksToNextInstruction}" Classes="gomodeactiveinstruction" IsVisible="{Binding CurrentInstructionValid}" />
+                        <controls:InstructionDisplayControl InnerMargin="6" Instruction="{Binding MapService.CurrentRoute.CurrentInstruction}" ToNextInstruction="{Binding MapService.CurrentRoute.BlocksToNextInstruction}" Classes="gomodeactiveinstruction" IsVisible="{Binding CurrentInstructionValid}" />
                         <Border Grid.Column="0" IsVisible="{Binding CalculatingRoute}" Classes="gomodeactivesuspended" >
                             <TextBlock Text="{str:Tr Key=DIRECTIONS_CALCULATING}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
@@ -125,7 +125,7 @@
                                 IsVisible="{Binding MapService.CurrentRoute.DisplayThenInstruction, FallbackValue=False}" Classes="gomodetheninstruction">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="3">
                                     <TextBlock Text="{str:Tr Key=ROUTE_THEN}" VerticalAlignment="Center" />
-                                    <controls:InstructionImageControl Instruction="{Binding ThenInstruction}" Height="24" Width="24" VerticalAlignment="Center" FlowDirection="LeftToRight" />
+                                    <controls:InstructionImageControl Instruction="{Binding MapService.CurrentRoute.ThenInstruction}" Height="24" Width="24" VerticalAlignment="Center" FlowDirection="LeftToRight" />
                                 </StackPanel>
                             </Border>
                         </Grid>

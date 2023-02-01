@@ -59,15 +59,6 @@ public class CornerViewModel : ViewModel
     [Reactive]
     public string? RouteCalculationError { get; set; }
 
-    [ObservableAsProperty] 
-    public int BlocksToNextInstruction { get; }
-
-    [ObservableAsProperty]
-    public CalculatedRoute.Instruction? CurrentInstruction { get; }
-    
-    [ObservableAsProperty]
-    public CalculatedRoute.Instruction? ThenInstruction { get; }
-
     [Reactive]
     public string BlocksToRouteEnd { get; set; } = "0 blk";
 
@@ -190,11 +181,13 @@ public class CornerViewModel : ViewModel
         }
         catch (NoSuitableEdgeException)
         {
+            RouteCalculationCancellationSource = null;
             CalculatingRoute = false;
             RouteCalculationError = _i18n["DIRECTIONS_CALCULATING_FAILURE_NO_ROAD"];
         }
         catch (DisjointNetworkException)
         {
+            RouteCalculationCancellationSource = null;
             CalculatingRoute = false;
             RouteCalculationError = _i18n["DIRECTIONS_CALCULATING_FAILURE_NO_PATH"];
         }
@@ -296,12 +289,6 @@ public class CornerViewModel : ViewModel
 
         if (IsInGoMode && MapService.LoggedInPlayer is not null)
         {
-            MapService.CurrentRoute.WhenAnyValue(x => x.CurrentInstruction)
-                .ToPropertyEx(this, x => x.CurrentInstruction);
-            MapService.CurrentRoute.WhenAnyValue(x => x.ThenInstruction)
-                .ToPropertyEx(this, x => x.ThenInstruction);
-            MapService.CurrentRoute.WhenAnyValue(x => x.BlocksToNextInstruction)
-                .ToPropertyEx(this, x => x.BlocksToNextInstruction);
             MapService.CurrentRoute.WhenAnyValue(x => x.TotalBlocksRemaining)
                 // ReSharper disable once AsyncVoidLambda
                 .Subscribe(Observer.Create<int>(remain =>

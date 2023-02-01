@@ -257,7 +257,7 @@ public partial class MapView : UserControl
             .Subscribe(Observer.Create<PropertyValue<MapService, CalculatedRoute?>>(_ => UpdateDrawnItems()));
         MapViewModel.WhenAnyValue(x => x.CurrentUi).Subscribe(Observer.Create<AvailableUi>(_ =>
         {
-            if (MapViewModel.CurrentUi == AvailableUi.Prepare)
+            if (MapViewModel.CurrentUi != AvailableUi.Go)
             {
                 MapViewModel.RotationOrigin = new Vector(0.5, 0.5);
                 MapViewModel.Rotation = 0;
