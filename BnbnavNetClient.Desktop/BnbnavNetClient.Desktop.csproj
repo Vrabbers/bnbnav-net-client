@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net7.0;net7.0-windows;net7.0-macos</TargetFrameworks>
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationId>io.github.Vrabbers.bnbnav</ApplicationId>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -19,4 +20,9 @@
   <ItemGroup>
     <ProjectReference Include="..\BnbnavNetClient\BnbnavNetClient.csproj" />
   </ItemGroup>
+  
+  <Target Name="_CollectBundleResources" />
+  <Target Name="_PackLibraryResources" />
+  <Target Name="_UnpackLibraryResources" />
+  <Target Name="_CreateAppBundle" />
 </Project>
