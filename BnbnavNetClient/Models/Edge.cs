@@ -15,8 +15,8 @@ public class Edge : MapItem
 
     public (Point, Point) Extents(MapView mapView)
     {
-        var from = mapView.ToScreen(new(From.X, From.Z));
-        var to = mapView.ToScreen(new (To.X, To.Z));
+        var from = mapView.ToScreen(From.Point);
+        var to = mapView.ToScreen(To.Point);
         return (from, to);
     }
 

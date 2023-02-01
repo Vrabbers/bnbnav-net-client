@@ -57,6 +57,9 @@ public readonly struct ExtendedLine
     }
 
     [Pure]
+    public ExtendedLine NudgeAngle(double angle) => SetAngle(angle + Angle);
+
+    [Pure]
     public Point Lerp(double t) => 
         new(Point1.X + (Point2.X - Point1.X) * t, Point1.Y + (Point2.Y - Point1.Y) * t);
 

@@ -523,6 +523,27 @@ public partial class MapView : UserControl
             DrawLandmark(context, landmark, rect);
         }
 
+        if (MapViewModel.CurrentUi == AvailableUi.Go)
+        {
+            //Draw the arrow indicator
+            var instruction = MapViewModel.MapService.CurrentRoute?.CurrentInstruction;
+            if (instruction is { from: { }, to: { } })
+            {
+                var pen = new Pen(new SolidColorBrush(new Color(255, 100, 50, 150)),
+                    PenForRoadType(RoadType.Local).Thickness, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
+                var poly = new PolylineGeometry(new[]
+                {
+                    ToScreen(instruction.from.Line.FlipDirection().SetLength(10).Point2),
+                    ToScreen(instruction.node.Point),
+                    ToScreen(instruction.to.Line.SetLength(10).Point2),
+                    ToScreen(instruction.to.Line.SetLength(10).FlipDirection().NudgeAngle(-45).SetLength(5).Point2),
+                    ToScreen(instruction.to.Line.SetLength(10).Point2),
+                    ToScreen(instruction.to.Line.SetLength(10).FlipDirection().NudgeAngle(45).SetLength(5).Point2),
+                }, false);
+                context.DrawGeometry(null, pen, poly);
+            }
+        }
+
         if (MapViewModel.IsInEditMode)
         {
             var nodeBorder = (Pen)this.FindResource("NodeBorder")!;
