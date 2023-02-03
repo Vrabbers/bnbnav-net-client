@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using BnbnavNetClient.Services.TextToSpeech;
 
 #if MACOS
+using CoreFoundation;
 using AppKit;
 #endif
 
@@ -11,16 +12,13 @@ namespace BnbnavNetClient.Desktop.TextToSpeech;
 
 public class MacTextToSpeechProvider : ITextToSpeechProvider
 {
-#if MACOS
-    readonly NSSpeechSynthesizer _synth;
-#endif
-
     public MacTextToSpeechProvider()
     {
         if (!OperatingSystem.IsMacOS())
             throw new PlatformNotSupportedException();
+        
 #if MACOS
-        _synth = new NSSpeechSynthesizer(NSSpeechSynthesizer.AvailableVoices[0]);
+        NSApplication.CheckForIllegalCrossThreadCalls = false;
 #endif
     }
     
@@ -30,7 +28,14 @@ public class MacTextToSpeechProvider : ITextToSpeechProvider
             throw new PlatformNotSupportedException();
 
 #if MACOS
-        _synth.StartSpeakingString(text);
+        await Task.Run(() =>
+        {
+            DispatchQueue.MainQueue.DispatchSync(() =>
+            {
+                var synth = new NSSpeechSynthesizer(NSSpeechSynthesizer.AvailableVoices[0]);
+                synth.StartSpeakingString(text);
+            });
+        });
 #endif
     }
 }
