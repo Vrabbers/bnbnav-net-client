@@ -1,7 +1,7 @@
 namespace BnbnavNetClient.Mac;
 
 [Register("AppDelegate")]
-public class AppDelegate : NSApplicationDelegate
+public partial class AppDelegate : NSApplicationDelegate
 {
     public override void DidFinishLaunching(NSNotification notification)
     {
