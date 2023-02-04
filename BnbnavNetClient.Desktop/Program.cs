@@ -25,5 +25,5 @@ class Program
             .UseReactiveUI()
             .UseI18NextLocalization()
             .UseTextToSpeech()
-            .UseSettings(new SettingsManagerDesktop());
+            .UseSettings(new SettingsManagerJsonFile());
 }

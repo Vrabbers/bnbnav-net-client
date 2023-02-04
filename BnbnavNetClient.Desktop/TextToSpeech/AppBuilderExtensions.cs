@@ -11,7 +11,6 @@ public static class AppBuilderExtensions
         ITextToSpeechProvider textToSpeechProvider;
 
         if (OperatingSystem.IsWindows()) textToSpeechProvider = new WindowsTextToSpeechProvider();
-        else if (OperatingSystem.IsMacOS()) textToSpeechProvider = new MacTextToSpeechProvider();
         else if (OperatingSystem.IsLinux()) textToSpeechProvider = new DummyTextToSpeechProvider();
         // else if (OperatingSystem.IsBrowser()) textToSpeechProvider = new DummyTextToSpeechProvider();
         // else if (OperatingSystem.IsIOS()) textToSpeechProvider = new DummyTextToSpeechProvider();

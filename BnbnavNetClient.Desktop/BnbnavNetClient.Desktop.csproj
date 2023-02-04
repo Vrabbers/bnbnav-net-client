@@ -1,21 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFrameworks>net7.0;net7.0-windows;net7.0-macos</TargetFrameworks>
+    <OutputType>WinExe</OutputType>
+    <TargetFrameworks>net7.0;net7.0-windows</TargetFrameworks>
     <Nullable>enable</Nullable>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <ApplicationId>io.github.Vrabbers.bnbnav</ApplicationId>
     <Configurations>Debug;Release</Configurations>
-    <Platforms>AnyCPU;ARM64</Platforms>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="Info.plist"/>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
@@ -26,9 +21,4 @@
   <ItemGroup>
     <ProjectReference Include="..\BnbnavNetClient\BnbnavNetClient.csproj" />
   </ItemGroup>
-  
-  <Target Name="_CollectBundleResources" />
-  <Target Name="_PackLibraryResources" />
-  <Target Name="_UnpackLibraryResources" />
-  <Target Name="_CreateAppBundle" />
 </Project>
