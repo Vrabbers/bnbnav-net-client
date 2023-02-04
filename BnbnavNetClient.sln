@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32811.315
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BnbnavNetClient", "BnbnavNetClient\BnbnavNetClient.csproj", "{EBFA8512-1EA5-4D8C-B4AC-AB5B48A6D568}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BnbnavNetClient.Windows", "BnbnavNetClient.Desktop\BnbnavNetClient.Windows.csproj", "{ABC31E74-02FF-46EB-B3B2-4E6AE43B456C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BnbnavNetClient.Windows", "BnbnavNetClient.Windows\BnbnavNetClient.Windows.csproj", "{ABC31E74-02FF-46EB-B3B2-4E6AE43B456C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BnbnavNetClient.Web", "BnbnavNetClient.Web\BnbnavNetClient.Web.csproj", "{1C1A049E-235C-4CD0-B6FA-D53AC418F4DA}"
 EndProject
