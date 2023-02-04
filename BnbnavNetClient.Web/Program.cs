@@ -5,6 +5,8 @@ using Avalonia.ReactiveUI;
 using BnbnavNetClient;
 using BnbnavNetClient.I18Next;
 using BnbnavNetClient.Settings;
+using BnbnavNetClient.Services.TextToSpeech;
+using BnbnavNetClient.Web.TextToSpeech;
 
 [assembly: SupportedOSPlatform("browser")]
 
@@ -13,6 +15,7 @@ internal partial class Program
     private static void Main(string[] args) => BuildAvaloniaApp()
         .UseReactiveUI()
         .UseI18NextLocalization()
+        .With(new WebSpeechTextToSpeechProvider())
         .UseSettings(new DummySettingsManager())
         .SetupBrowserApp("out");
 

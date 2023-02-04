@@ -1,10 +1,12 @@
 ﻿using System;
 using Avalonia;
 using Avalonia.ReactiveUI;
+using BnbnavNetClient.Windows.TextToSpeech;
 using BnbnavNetClient.I18Next;
+using BnbnavNetClient.Services.TextToSpeech;
 using BnbnavNetClient.Settings;
 
-namespace BnbnavNetClient.Desktop;
+namespace BnbnavNetClient.Windows;
 
 class Program
 {
@@ -22,5 +24,6 @@ class Program
             .LogToTrace()
             .UseReactiveUI()
             .UseI18NextLocalization()
-            .UseSettings(new SettingsManagerDesktop());
+            .With(new WindowsTextToSpeechProvider())
+            .UseSettings(new SettingsManagerJsonFile());
 }
