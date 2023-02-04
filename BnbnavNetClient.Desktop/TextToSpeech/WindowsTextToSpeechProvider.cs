@@ -18,15 +18,17 @@ class WindowsTextToSpeechProvider : ITextToSpeechProvider
         _speechSynthesizer.SetOutputToDefaultAudioDevice();
     }
 
-    public Task SpeakAsync(string text, CultureInfo culture)
+    public Task SpeakAsync(string text)
     {
         if (!OperatingSystem.IsWindows())
             throw new PlatformNotSupportedException();
 
-        var prompt = new PromptBuilder(culture);
+        var prompt = new PromptBuilder(CurrentCulture);
         prompt.AppendText(text);
         _speechSynthesizer.SpeakAsync(prompt);
 
         return Task.CompletedTask;
     }
+
+    public CultureInfo CurrentCulture { get; set; } = CultureInfo.CurrentUICulture;
 }

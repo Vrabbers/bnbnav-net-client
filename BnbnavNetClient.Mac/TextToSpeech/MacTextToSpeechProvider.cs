@@ -14,7 +14,7 @@ public class MacTextToSpeechProvider : ITextToSpeechProvider
         NSApplication.CheckForIllegalCrossThreadCalls = false;
     }
     
-    public async Task SpeakAsync(string text, CultureInfo culture)
+    public async Task SpeakAsync(string text)
     {
         if (!OperatingSystem.IsMacOS())
             throw new PlatformNotSupportedException();
@@ -28,4 +28,6 @@ public class MacTextToSpeechProvider : ITextToSpeechProvider
             });
         });
     }
+
+    public CultureInfo CurrentCulture { get; set; } = CultureInfo.CurrentUICulture;
 }
