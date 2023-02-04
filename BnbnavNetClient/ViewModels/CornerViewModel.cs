@@ -92,6 +92,7 @@ public class CornerViewModel : ViewModel
             if (IsInSearchMode)
             {
                 //There should never be a current route in search mode
+                MapService.CurrentRoute?.Dispose();
                 MapService.CurrentRoute = null;
             }
             
@@ -115,6 +116,7 @@ public class CornerViewModel : ViewModel
                     RouteCalculationCancellationSource = new CancellationTokenSource();
                     
                     //Clear the current route
+                    MapService.CurrentRoute?.Dispose();
                     MapService.CurrentRoute = null;
                     RouteCalculationError = null;
                     
@@ -203,6 +205,7 @@ public class CornerViewModel : ViewModel
         Dispatcher.UIThread.Post(async () =>
         {
             //Clear the current route
+            MapService.CurrentRoute?.Dispose();
             MapService.CurrentRoute = null;
             RouteCalculationError = null;
             

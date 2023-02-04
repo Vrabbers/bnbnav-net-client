@@ -7,6 +7,7 @@ using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services;
 using DynamicData;
@@ -16,7 +17,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace BnbnavNetClient.Models;
 
-public class CalculatedRoute : ReactiveObject
+public class CalculatedRoute : ReactiveObject, IDisposable
 {
     readonly MapService _mapService;
 
@@ -82,8 +83,8 @@ public class CalculatedRoute : ReactiveObject
                     InstructionType.ExitRight => t["INSTRUCTION_EXIT_RIGHT", args],
                     InstructionType.Merge => t["INSTRUCTION_MERGE", args],
                     InstructionType.EnterRoundabout => roundaboutExit is not null
-                        ? t["INSTRUCTION_ENTER_ROUNDABOUT", args]
-                        : t["INSTRUCTION_ENTER_LEAVE_ROUNDABOUT", args],
+                        ? t["INSTRUCTION_ENTER_LEAVE_ROUNDABOUT", args]
+                        : t["INSTRUCTION_ENTER_ROUNDABOUT", args],
                     InstructionType.LeaveRoundabout => t["INSTRUCTION_LEAVE_ROUNDABOUT", args],
                     _ => throw new ArgumentOutOfRangeException()
                 };
@@ -91,12 +92,44 @@ public class CalculatedRoute : ReactiveObject
         }
 
         public string TargetRoadName => roundaboutExit?.Road.Name ?? to?.Road.Name ?? InstructionString;
-    };
+
+        public string Speech(double distance, Instruction? thenInstruction)
+        {
+            var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+            var log = double.Log10(distance);
+            var roundIncrements = (int) double.Pow(10, log) / 20;
+            if (roundIncrements == 0) roundIncrements = 5;
+            var blocks = (int) double.Round(distance / roundIncrements) * roundIncrements;
+
+            switch (blocks)
+            {
+                case < 15:
+                    var instructionString = InstructionString;
+                    if (thenInstruction is not null)
+                        instructionString = t["INSTRUCTION_THEN", ("first", instructionString),
+                            ("second", thenInstruction.InstructionString)];
+                    return instructionString;
+                case > 500:
+                    return t["INSTRUCTION_STAY", ("count", blocks), ("road", from?.Road.Name ?? t["ROAD_UNNAMED"])];
+                default:
+                    return HumanReadableString(blocks);
+            }
+        }
+    }
+
+    public class VoicePrompt
+    {
+        public required Instruction Instruction { get; init; }
+        public required double Distance { get; init; }
+    }
 
     List<MapItem> Elements { get; } = new();
     public IEnumerable<Node> Nodes => Elements.Where(x => x is Node).Cast<Node>();
     public IEnumerable<Edge> Edges => Elements.Where(x => x is Edge).Cast<Edge>();
+    public List<VoicePrompt> VoicePrompts { get; } = new();
     public List<Instruction> Instructions { get; } = new();
+    
+    public VoicePrompt? CurrentVoicePrompt { get; set; }
     
     [Reactive]
     public Instruction? CurrentInstruction { get; set; }
@@ -273,75 +306,122 @@ public class CalculatedRoute : ReactiveObject
         
         //Always add an arrive instruction
         Instructions.Add(new Instruction(Nodes.Last(), Edges.Last(), null, currentLength, Instruction.InstructionType.Arrival));
+
+        double totalBlocks = 0;
+        foreach (var instruction in Instructions.AsEnumerable().Reverse())
+        {
+            foreach (var targetDistance in new[]
+                     {
+                         10, 100, 500, instruction.distance - 10
+                     })
+            {
+                if (targetDistance > instruction.distance - 10 || targetDistance < 0) continue;
+                var testBlocks = totalBlocks + targetDistance;
+                
+                VoicePrompts.Add(new VoicePrompt
+                {
+                    Distance = testBlocks,
+                    Instruction = instruction
+                });
+            }
+
+            totalBlocks += instruction.distance;
+        }
+
+        VoicePrompts.Reverse();
     }
 
     void UpdateCurrentInstruction()
     {
-        if (_mapService.LoggedInPlayer is null)
+        lock (_currentInstructionMutex)
         {
-            _ = QueueReroute();
-            CurrentInstruction = null;
-            ThenInstruction = null;
-            DisplayThenInstruction = false;
-            return;
-        }
-
-        if (!Edges.Contains(_mapService.LoggedInPlayer.SnappedEdge))
-        {
-            _ = QueueReroute();
-            return;
-        }
-        
-        CancelReroute();
-
-        var instructionIndex = 0;
-        var instructionFound = false;
-        var blocksToNextInstruction = 0.0;
-        
-        foreach (var edge in Edges)
-        {
-            if (Instructions[instructionIndex].to == edge || (Instructions[instructionIndex].to is null && edge == Edges.Last()))
+            if (_mapService.LoggedInPlayer is null)
             {
-                instructionIndex++;
+                _ = QueueReroute();
+                CurrentInstruction = null;
+                ThenInstruction = null;
+                DisplayThenInstruction = false;
+                return;
+            }
+
+            if (!Edges.Contains(_mapService.LoggedInPlayer.SnappedEdge))
+            {
+                _ = QueueReroute();
+                return;
+            }
+
+            CancelReroute();
+
+            var instructionIndex = 0;
+            var instructionFound = false;
+            var blocksToNextInstruction = 0.0;
+
+            foreach (var edge in Edges)
+            {
+                if (Instructions[instructionIndex].to == edge ||
+                    (Instructions[instructionIndex].to is null && edge == Edges.Last()))
+                {
+                    instructionIndex++;
+                    if (instructionFound)
+                    {
+                        BlocksToNextInstruction = (int)double.Round(blocksToNextInstruction);
+                        TotalBlocksRemaining = (int)double.Round(
+                            Instructions.SkipWhile(x => x != Instructions[instructionIndex]).Sum(x => x.distance) +
+                            blocksToNextInstruction);
+                        UpdateCurrentVoicePrompt();
+                        return;
+                    }
+                }
+
                 if (instructionFound)
                 {
-                    BlocksToNextInstruction = (int)double.Round(blocksToNextInstruction);
-                    TotalBlocksRemaining = (int) double.Round(Edges.SkipWhile(x => x != edge).Sum(x => x.Line.Length) +
-                                           blocksToNextInstruction);
-                    return;
+                    blocksToNextInstruction += edge.Line.Length;
+                }
+
+                if (_mapService.LoggedInPlayer.SnappedEdge == edge)
+                {
+                    //We found the edge that the player is on
+                    CurrentInstruction = Instructions[instructionIndex];
+                    if (Instructions.Count > instructionIndex + 1)
+                    {
+                        ThenInstruction = Instructions[instructionIndex + 1];
+                        DisplayThenInstruction = ThenInstruction.distance < 15;
+                    }
+                    else
+                    {
+                        ThenInstruction = null;
+                        DisplayThenInstruction = false;
+                    }
+
+                    instructionFound = true;
+                    blocksToNextInstruction += new ExtendedLine(edge.To.Point, _mapService.LoggedInPlayer.Point).Length;
                 }
             }
 
             if (instructionFound)
             {
-                blocksToNextInstruction += edge.Line.Length;
+                BlocksToNextInstruction = (int)double.Round(blocksToNextInstruction);
+                TotalBlocksRemaining = BlocksToNextInstruction;
             }
-            
-            if (_mapService.LoggedInPlayer.SnappedEdge == edge)
-            {
-                //We found the edge that the player is on
-                CurrentInstruction = Instructions[instructionIndex];
-                if (Instructions.Count > instructionIndex + 1)
-                {
-                    ThenInstruction = Instructions[instructionIndex + 1];
-                    DisplayThenInstruction = ThenInstruction.distance < 15;
-                }
-                else
-                {
-                    ThenInstruction = null;
-                    DisplayThenInstruction = false;
-                }
-                instructionFound = true;
-                blocksToNextInstruction += new ExtendedLine(edge.To.Point, _mapService.LoggedInPlayer.Point).Length;
-            }
+
+            UpdateCurrentVoicePrompt();
         }
-        
-        // We will arrive here if we are near the end of the route
-        if (instructionFound)
-        {
-            BlocksToNextInstruction = (int)double.Round(blocksToNextInstruction);
-            TotalBlocksRemaining = BlocksToNextInstruction;
-        }
+    }
+
+    void UpdateCurrentVoicePrompt()
+    {
+        if (_trackedPlayer is null)
+            return;
+
+        //Update the current voice prompt if necessary
+        var newPrompt = VoicePrompts.LastOrDefault(x => x.Distance > TotalBlocksRemaining);
+        if (newPrompt is null || (CurrentVoicePrompt is not null &&
+                                  newPrompt.Instruction == CurrentVoicePrompt.Instruction &&
+                                  newPrompt.Distance >= CurrentVoicePrompt.Distance))
+            return;
+
+        CurrentVoicePrompt = newPrompt;
+        Console.WriteLine($"Voice prompt: {CurrentVoicePrompt.Instruction.Speech(BlocksToNextInstruction, DisplayThenInstruction ? ThenInstruction : null)}");
     }
 
     Player? _trackedPlayer;
@@ -352,6 +432,8 @@ public class CalculatedRoute : ReactiveObject
 
         _trackedPlayer = player;
         _trackedPlayer.PlayerUpdateEvent += TrackedPlayerUpdate;
+        
+        UpdateCurrentInstruction();
     }
 
     public void StopTrackingPlayer()
@@ -364,6 +446,8 @@ public class CalculatedRoute : ReactiveObject
         //Cancel any reroute in progress
         CancelReroute();
 
+        CurrentVoicePrompt = null;
+
         _trackedPlayer.PlayerUpdateEvent -= TrackedPlayerUpdate;
         _trackedPlayer = null;
     }
@@ -374,19 +458,28 @@ public class CalculatedRoute : ReactiveObject
     }
 
     CancellationTokenSource? _cancellationSource = null;
+    readonly object _rerouteMutex = new();
+    readonly object _currentInstructionMutex = new();
 
     async Task QueueReroute()
     {
-        if (_cancellationSource is not null)
+        if (_disposed) return;
+
+        CancellationToken cancellationToken;
+        lock (_rerouteMutex)
         {
-            return;
+            if (_cancellationSource is not null)
+            {
+                return;
+            }
+
+            _cancellationSource = new CancellationTokenSource();
+            cancellationToken = _cancellationSource.Token;
         }
-
-        _cancellationSource = new CancellationTokenSource();
-
+        
         try
         {
-            await Task.Delay(3000, _cancellationSource.Token);
+            await Task.Delay(3000, cancellationToken);
             RerouteRequested?.Invoke(this, EventArgs.Empty);
         }
         catch (TaskCanceledException)
@@ -396,14 +489,31 @@ public class CalculatedRoute : ReactiveObject
 
     void CancelReroute()
     {
-        if (_cancellationSource is null)
+        if (_disposed) return;
+        
+        lock (_rerouteMutex)
         {
-            return;
-        }
+            if (_cancellationSource is null)
+            {
+                return;
+            }
 
-        _cancellationSource.Cancel();
-        _cancellationSource = null;
+            _cancellationSource.Cancel();
+            _cancellationSource = null;
+        }
     }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        
+        StopTrackingPlayer();
+
+        _cancellationSource?.Cancel();
+        _cancellationSource?.Dispose();
+    }
+
+    bool _disposed;
 }
 
 public class RoutingException : Exception
