@@ -1,11 +1,10 @@
-﻿using BnbnavNetClient.Settings;
+﻿using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System;
 
-namespace BnbnavNetClient.Desktop;
-public sealed class SettingsManagerDesktop : ISettingsManager
+namespace BnbnavNetClient.Settings;
+public sealed class SettingsManagerJsonFile : ISettingsManager
 {
     static string SettingsFilePath =>
     Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
