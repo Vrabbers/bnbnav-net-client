@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BnbnavNetClient.I18Next", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BnbnavNetClient.Mac", "BnbnavNetClient.Mac\BnbnavNetClient.Mac.csproj", "{10F2F7A6-C407-4D8B-9691-2B4624324AFD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BnbnavNetClient.Linux", "BnbnavNetClient.Linux\BnbnavNetClient.Linux.csproj", "{541AA166-C484-4A9F-930A-432C1A60D5B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{10F2F7A6-C407-4D8B-9691-2B4624324AFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10F2F7A6-C407-4D8B-9691-2B4624324AFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10F2F7A6-C407-4D8B-9691-2B4624324AFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{541AA166-C484-4A9F-930A-432C1A60D5B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{541AA166-C484-4A9F-930A-432C1A60D5B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{541AA166-C484-4A9F-930A-432C1A60D5B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{541AA166-C484-4A9F-930A-432C1A60D5B2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
