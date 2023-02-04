@@ -1,8 +1,8 @@
 using Avalonia;
 using Avalonia.ReactiveUI;
 using BnbnavNetClient;
-using BnbnavNetClient.Desktop.TextToSpeech;
 using BnbnavNetClient.I18Next;
+using BnbnavNetClient.Mac.TextToSpeech;
 using BnbnavNetClient.Settings;
 
 AppBuilder BuildAvaloniaApp()
