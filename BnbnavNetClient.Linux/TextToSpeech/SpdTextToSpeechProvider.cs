@@ -6,11 +6,6 @@ namespace BnbnavNetClient.Linux.TextToSpeech;
 
 public class SpdTextToSpeechProvider : ITextToSpeechProvider
 {
-    public SpdTextToSpeechProvider()
-    {
-        this.SpeakAsync("This is a test!", CultureInfo.CurrentUICulture);
-    }
-    
     public async Task SpeakAsync(string text, CultureInfo culture)
     {
         using var process = new Process();
