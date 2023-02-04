@@ -17,7 +17,7 @@ public static class AppBuilderExtensions
         // else if (OperatingSystem.IsAndroid()) textToSpeechProvider = new DummyTextToSpeechProvider();
         else textToSpeechProvider = new DummyTextToSpeechProvider();
 
-        textToSpeechProvider.SpeakAsync("I am working!", CultureInfo.CurrentUICulture);
+        textToSpeechProvider.SpeakAsync("I am working!");
 
         appBuilder.With(textToSpeechProvider);
         return appBuilder;
