@@ -3,7 +3,7 @@ using System.Globalization;
 using Avalonia;
 using BnbnavNetClient.Services.TextToSpeech;
 
-namespace BnbnavNetClient.Desktop.TextToSpeech;
+namespace BnbnavNetClient.Windows.TextToSpeech;
 public static class AppBuilderExtensions
 {
     public static AppBuilder UseTextToSpeech(this AppBuilder appBuilder)

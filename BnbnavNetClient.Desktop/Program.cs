@@ -1,12 +1,12 @@
 ﻿using System;
 using Avalonia;
 using Avalonia.ReactiveUI;
-using BnbnavNetClient.Desktop.TextToSpeech;
+using BnbnavNetClient.Windows.TextToSpeech;
 using BnbnavNetClient.I18Next;
 using BnbnavNetClient.Services.TextToSpeech;
 using BnbnavNetClient.Settings;
 
-namespace BnbnavNetClient.Desktop;
+namespace BnbnavNetClient.Windows;
 
 class Program
 {

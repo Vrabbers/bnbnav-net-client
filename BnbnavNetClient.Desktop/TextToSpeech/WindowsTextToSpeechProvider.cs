@@ -4,7 +4,7 @@ using System.Speech.Synthesis;
 using System.Threading.Tasks;
 using BnbnavNetClient.Services.TextToSpeech;
 
-namespace BnbnavNetClient.Desktop.TextToSpeech;
+namespace BnbnavNetClient.Windows.TextToSpeech;
 class WindowsTextToSpeechProvider : ITextToSpeechProvider
 {
     SpeechSynthesizer _speechSynthesizer;
