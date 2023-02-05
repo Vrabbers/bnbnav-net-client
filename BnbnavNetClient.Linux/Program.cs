@@ -5,6 +5,7 @@ using Avalonia.ReactiveUI;
 using BnbnavNetClient;
 using BnbnavNetClient.I18Next;
 using BnbnavNetClient.Linux.TextToSpeech;
+using BnbnavNetClient.Services.TextToSpeech;
 using BnbnavNetClient.Settings;
 
 AppBuilder BuildAvaloniaApp()
@@ -13,7 +14,7 @@ AppBuilder BuildAvaloniaApp()
         .LogToTrace()
         .UseReactiveUI()
         .UseI18NextLocalization()
-        .With(new SpdTextToSpeechProvider())
+        .With<ITextToSpeechProvider>(new SpdTextToSpeechProvider())
         .UseSettings(new SettingsManagerJsonFile());
         
 BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);

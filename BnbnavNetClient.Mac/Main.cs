@@ -11,7 +11,7 @@ AppBuilder BuildAvaloniaApp()
         .LogToTrace()
         .UseReactiveUI()
         .UseI18NextLocalization()
-        .With(new MacTextToSpeechProvider())
+        .With<ITextToSpeechProvider>(new MacTextToSpeechProvider())
         .UseSettings(new SettingsManagerJsonFile());
         
 BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);

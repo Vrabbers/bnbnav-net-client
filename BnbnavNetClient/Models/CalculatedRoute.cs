@@ -10,6 +10,7 @@ using Avalonia;
 using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services;
+using BnbnavNetClient.Services.TextToSpeech;
 using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
@@ -421,7 +422,10 @@ public class CalculatedRoute : ReactiveObject, IDisposable
             return;
 
         CurrentVoicePrompt = newPrompt;
-        Console.WriteLine($"Voice prompt: {CurrentVoicePrompt.Instruction.Speech(BlocksToNextInstruction, DisplayThenInstruction ? ThenInstruction : null)}");
+
+        var tts = AvaloniaLocator.Current.GetRequiredService<ITextToSpeechProvider>();
+        tts.SpeakAsync(CurrentVoicePrompt.Instruction.Speech(BlocksToNextInstruction,
+            DisplayThenInstruction ? ThenInstruction : null));
     }
 
     Player? _trackedPlayer;

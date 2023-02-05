@@ -24,6 +24,6 @@ class Program
             .LogToTrace()
             .UseReactiveUI()
             .UseI18NextLocalization()
-            .With(new WindowsTextToSpeechProvider())
+            .With<ITextToSpeechProvider>(new WindowsTextToSpeechProvider())
             .UseSettings(new SettingsManagerJsonFile());
 }
