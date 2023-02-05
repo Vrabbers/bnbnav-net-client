@@ -30,6 +30,7 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
     }
 
     public ILocatable Location => this;
+    public string? IconUrl => null;
 
     public double Xd { get; private set; }
     public double Yd { get; private set; }

@@ -117,6 +117,8 @@ public static class LandmarkTypeExtensions
         };
     }
 
+    public static string IconUrl(this LandmarkType type) => $"avares://BnbnavNetClient/Assets/Landmarks/{type.ServerName()}.svg";
+
     public static bool IsLandmark(this LandmarkType type) => type != LandmarkType.Unknown && type != LandmarkType.InternalTemporary && !type.IsLabel();
     public static bool IsLabel(this LandmarkType type) => type.ServerName().StartsWith("label-");
 }
@@ -139,6 +141,7 @@ public class Landmark : MapItem, ISearchable
     public string Type { get; init; }
 
     public LandmarkType LandmarkType => Enum.GetValues<LandmarkType>().FirstOrDefault(x => x.ServerName() == Type);
+    public string? IconUrl => LandmarkType.IconUrl();
     
     public string HumanReadableType => LandmarkType.HumanReadableName();
 

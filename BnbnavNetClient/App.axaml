@@ -16,7 +16,7 @@
     </ResourceDictionary>
   </Application.Resources>
   <Application.Styles>
-    <FluentTheme Mode="Light"/>
+    <FluentTheme Mode="Light" />
     <Style Selector=":is(TemplatedControl)">
       <Setter Property="FontFamily" Value="/Assets/NotoSans-Regular.ttf#Noto"/>
       <Setter Property="FontSize" Value="16"/>

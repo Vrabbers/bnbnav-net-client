@@ -169,7 +169,7 @@ public partial class MapView : UserControl
             
             if (!MapViewModel.IsInEditMode)
             {
-                if (hitTestResults.LastOrDefault() is Landmark landmark)
+                if (hitTestResults.LastOrDefault(x => x is Landmark) is Landmark landmark)
                 {
                     MapViewModel.SelectedLandmark = landmark;
                 }
@@ -494,7 +494,7 @@ public partial class MapView : UserControl
             return;
         }
         
-        context.DrawSvgUrl($"avares://BnbnavNetClient/Assets/Landmarks/{landmark.Type}.svg", rect);
+        context.DrawSvgUrl(landmark.IconUrl, rect);
     }
 
     [SuppressMessage("ReSharper", "PossibleLossOfFraction")]
@@ -566,7 +566,7 @@ public partial class MapView : UserControl
 
             const int playerSize = 48;
             var rect = new Rect(ToScreen(player.MarkerCoordinates) - new Point(playerSize, playerSize) / 2, new Size(playerSize, playerSize));
-            const string uriString = "avares://BnbnavNetClient/Assets/playermark.svg";
+            const string? uriString = "avares://BnbnavNetClient/Assets/playermark.svg";
             context.DrawSvgUrl(uriString, rect, -player.MarkerAngle + MapViewModel.Rotation);
 
             //Draw the player name

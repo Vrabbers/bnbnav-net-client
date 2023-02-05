@@ -12,8 +12,10 @@ public static class DrawingContextExtensions
 {
     static readonly Dictionary<string, SKSvg> SvgCache = new();
     
-    public static void DrawSvgUrl(this DrawingContext context, string url, Rect rect, double angle = 0)
+    public static void DrawSvgUrl(this DrawingContext context, string? url, Rect rect, double angle = 0)
     {
+        if (string.IsNullOrEmpty(url)) return;
+        
         SKSvg? svg = null;
 
         if (SvgCache.TryGetValue(url, out var outSvg))

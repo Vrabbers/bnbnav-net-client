@@ -5,4 +5,5 @@ public interface ISearchable
     public string Name { get; }
     public string HumanReadableType { get; }
     public ILocatable Location { get; }
+    string? IconUrl { get; }
 }

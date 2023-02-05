@@ -13,12 +13,14 @@
     <StackPanel Width="400">
         <StackPanel IsVisible="{Binding IsInSearchMode}">
             <controls:LandmarkSearchControl SelectedLandmark="{Binding SelectedLandmark}" MapService="{Binding MapService}" />
-            <StackPanel IsVisible="{Binding SelectedLandmark, Converter={x:Static ObjectConverters.IsNotNull}}" VerticalAlignment="Stretch">
-                <TextBlock Text="Selected Landmark:"></TextBlock>
-                <TextBlock Text="{Binding SelectedLandmark.Name, FallbackValue=.}"></TextBlock>
-                <TextBlock Text="{Binding SelectedLandmark.HumanReadableType, FallbackValue=.}"></TextBlock>
-                <Button Content="{str:Tr Key=LANDMARK_GET_DIRECTIONS}" Command="{Binding GetDirectionsToSelectedLandmark}" />
-            </StackPanel>
+            <Border Classes="group" IsVisible="{Binding SelectedLandmark, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <Grid RowDefinitions="Auto Auto Auto" ColumnDefinitions="Auto Auto" VerticalAlignment="Stretch">
+                <Svg Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Path="{Binding SelectedLandmark.IconUrl}" />
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedLandmark.Name, FallbackValue=.}"></TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedLandmark.HumanReadableType, FallbackValue=.}"></TextBlock>
+                <Button Grid.Row="2" Grid.Column="1" Content="{str:Tr Key=LANDMARK_GET_DIRECTIONS}" Command="{Binding GetDirectionsToSelectedLandmark}" />
+            </Grid>
+            </Border>
         </StackPanel>
         
         <DockPanel IsVisible="{Binding IsInPrepareMode}">
