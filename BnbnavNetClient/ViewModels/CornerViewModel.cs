@@ -76,6 +76,9 @@ public class CornerViewModel : ViewModel
     
     [Reactive]
     public bool AvoidDuongWarp { get; set; }
+    
+    [Reactive]
+    public bool IsMuteEnabled { get; set; }
 
     public CornerViewModel(MapService mapService, MainViewModel mainViewModel)
     {
@@ -132,6 +135,14 @@ public class CornerViewModel : ViewModel
             .Select(tuple => !tuple.Item1 && string.IsNullOrEmpty(tuple.Item2))
             .ToPropertyEx(this, x => x.CurrentInstructionValid);
 
+        this.WhenAnyValue(x => x.IsMuteEnabled).Subscribe(Observer.Create<bool>(mute =>
+        {
+            if (MapService.CurrentRoute is not null)
+            {
+                MapService.CurrentRoute.Mute = mute;
+            }
+        }));
+
         MapService.WhenAnyValue(x => x.LoggedInPlayer).Subscribe(Observer.Create<Player?>(player =>
         {
             if (player is null && IsInGoMode)
@@ -172,6 +183,7 @@ public class CornerViewModel : ViewModel
             var route = await MapService.ObtainCalculatedRoute(GoModeStartPoint, GoModeEndPoint, routeOptions,
                 RouteCalculationCancellationSource.Token);
             MapService.CurrentRoute = route;
+            MapService.CurrentRoute.Mute = IsMuteEnabled;
             CalculatingRoute = false;
             
             RouteCalculationCancellationSource = null;

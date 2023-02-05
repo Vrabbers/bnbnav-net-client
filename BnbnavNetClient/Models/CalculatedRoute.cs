@@ -156,6 +156,8 @@ public class CalculatedRoute : ReactiveObject, IDisposable
     [Reactive]
     public bool RouteContainsFerries { get; set; }
 
+    public bool Mute { get; set; }
+
     public void AddRouteSegment(Node node, Edge? edge)
     {
         Elements.Add(node);
@@ -430,9 +432,12 @@ public class CalculatedRoute : ReactiveObject, IDisposable
 
         CurrentVoicePrompt = newPrompt;
 
-        var tts = AvaloniaLocator.Current.GetRequiredService<ITextToSpeechProvider>();
-        tts.SpeakAsync(CurrentVoicePrompt.Instruction.Speech(BlocksToNextInstruction,
-            DisplayThenInstruction ? ThenInstruction : null));
+        if (!Mute)
+        {
+            var tts = AvaloniaLocator.Current.GetRequiredService<ITextToSpeechProvider>();
+            tts.SpeakAsync(CurrentVoicePrompt.Instruction.Speech(BlocksToNextInstruction,
+                DisplayThenInstruction ? ThenInstruction : null));
+        }
     }
 
     Player? _trackedPlayer;
