@@ -106,7 +106,7 @@ public class CalculatedRoute : ReactiveObject, IDisposable
             {
                 case < 15:
                     var instructionString = InstructionString;
-                    if (thenInstruction is not null)
+                    if (thenInstruction is not null && thenInstruction.instructionType != InstructionType.LeaveRoundabout)
                         instructionString = t["INSTRUCTION_THEN", ("first", instructionString),
                             ("second", thenInstruction.InstructionString)];
                     return instructionString;
