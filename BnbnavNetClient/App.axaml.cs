@@ -7,6 +7,7 @@ using BnbnavNetClient.ViewModels;
 using BnbnavNetClient.Views;
 using System;
 using System.Globalization;
+using BnbnavNetClient.Services.TextToSpeech;
 
 namespace BnbnavNetClient;
 
@@ -22,6 +23,9 @@ public class App : Application
         var i18n = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
         i18n.Initialize("BnbnavNetClient.locales", pseudo);
         i18n.CurrentLanguage = new CultureInfo(settings.Settings.Language);
+
+        var tts = AvaloniaLocator.Current.GetRequiredService<ITextToSpeechProvider>();
+        tts.CurrentCulture = CultureInfo.CurrentUICulture;
     }
 
     public override void OnFrameworkInitializationCompleted()
