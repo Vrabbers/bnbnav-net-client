@@ -44,7 +44,9 @@ public class InstructionImageControl : TemplatedControl
                 var complex = Complex.FromPolarCoordinates(innerCircleBounds.Width / 2, MathHelper.ToRad(angle + 180));
                 var arcEnd = new Point(-complex.Real, complex.Imaginary) + innerCircleBounds.Center;
                 var arrowEnd = new ExtendedLine(arcEnd, new Point(arcEnd.X + bounds.Width / 5, arcEnd.Y)).SetAngle(angle).Point2;
-                var sweepDirection = _Instruction.from.Line.FlipDirection().AngleTo(_Instruction.to.Line) < 0
+
+                var roundaboutAngle = _Instruction.from.Line.FlipDirection().AngleTo(_Instruction.to.Line);
+                var sweepDirection = roundaboutAngle < 0
                     ? SweepDirection.Clockwise
                     : SweepDirection.CounterClockwise;
                 

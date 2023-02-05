@@ -70,6 +70,9 @@ public sealed class MainViewModel : ViewModel
     
     [ObservableAsProperty]
     public bool EditModeEnabled { get; } = false;
+
+    [Reactive]
+    public bool MainBarVisible { get; set; } = true;
     
     public Interaction<bool, Unit>? AuthTokeInteraction { get; set; }
 
@@ -143,6 +146,11 @@ public sealed class MainViewModel : ViewModel
         MapViewModel.WhenAnyValue(x => x.GoModeStartPoint).BindTo(CornerViewModel, x => x.GoModeStartPoint);
         MapViewModel.WhenAnyValue(x => x.GoModeEndPoint).BindTo(CornerViewModel, x => x.GoModeEndPoint);
         MapViewModel.WhenAnyValue(x => x.CurrentUi).BindTo(CornerViewModel, x => x.CurrentUi);
+
+        CornerViewModel.WhenAnyValue(x => x.CurrentUi).Subscribe(Observer.Create<AvailableUi>(currentUi =>
+        {
+            MainBarVisible = currentUi != AvailableUi.Go;
+        }));
     }
 
     public void LanguageButtonPressed()
