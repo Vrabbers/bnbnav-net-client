@@ -23,7 +23,14 @@ public class MacTextToSpeechProvider : ITextToSpeechProvider
         {
             DispatchQueue.MainQueue.DispatchSync(() =>
             {
-                var synth = new NSSpeechSynthesizer(NSSpeechSynthesizer.AvailableVoices[0]);
+                var availableVoices = NSSpeechSynthesizer.AvailableVoices.Where(x =>
+                {
+                    var parts = x.Split(".");
+                    return parts[^2].StartsWith(CurrentCulture.TwoLetterISOLanguageName);
+                }).ToList();
+                
+                var voice = availableVoices.Any() ? availableVoices.First() : NSSpeechSynthesizer.AvailableVoices[0];
+                var synth = new NSSpeechSynthesizer(voice);
                 synth.StartSpeakingString(text);
             });
         });
