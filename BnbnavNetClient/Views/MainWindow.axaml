@@ -11,6 +11,7 @@
         Width="960"
         MinWidth="400"
         Height="540"
-        MinHeight="225">
+        MinHeight="225"
+        ExtendClientAreaToDecorationsHint="True">
   <views:MainView/>
 </Window>

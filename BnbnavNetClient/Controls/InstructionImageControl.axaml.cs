@@ -47,8 +47,11 @@ public class InstructionImageControl : TemplatedControl
                 var sweepDirection = roundaboutAngle < 0
                     ? SweepDirection.Clockwise
                     : SweepDirection.CounterClockwise;
-                
-                context.DrawEllipse(null, new Pen(new SolidColorBrush(new Color(100, 255, 255, 255)), bounds.Width / 10), innerCircleBounds.Center, innerCircleBounds.Width / 2, innerCircleBounds.Height / 2);
+
+                var color = new Color(100, 255, 255, 255);
+                if (Foreground is SolidColorBrush solidColorBrush)
+                    color = new Color(100, solidColorBrush.Color.R, solidColorBrush.Color.G, solidColorBrush.Color.B);
+                context.DrawEllipse(null, new Pen(new SolidColorBrush(color), bounds.Width / 10), innerCircleBounds.Center, innerCircleBounds.Width / 2, innerCircleBounds.Height / 2);
 
                 var path = new PathGeometry
                 {
@@ -92,7 +95,7 @@ public class InstructionImageControl : TemplatedControl
                     }
                 };
 
-                context.DrawGeometry(null, new Pen(new SolidColorBrush(new Color(255, 255, 255, 255)), bounds.Width / 10, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round), path);
+                context.DrawGeometry(null, new Pen(Foreground, bounds.Width / 10, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round), path);
             }
             else
             {
