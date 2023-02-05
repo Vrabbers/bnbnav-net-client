@@ -1,18 +1,12 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services;
 using BnbnavNetClient.Services.TextToSpeech;
-using DynamicData;
-using DynamicData.Binding;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -473,7 +467,7 @@ public class CalculatedRoute : ReactiveObject, IDisposable
         UpdateCurrentInstruction();
     }
 
-    CancellationTokenSource? _cancellationSource = null;
+    CancellationTokenSource? _cancellationSource;
     readonly object _rerouteMutex = new();
     readonly object _currentInstructionMutex = new();
 

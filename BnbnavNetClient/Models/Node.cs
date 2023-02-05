@@ -22,7 +22,7 @@ public class Node : MapItem, ILocatable
 
     public Rect BoundingRect(MapView mapView)
     {
-        var pos = mapView.ToScreen(new(X, Z));
+        var pos = mapView.ToScreen(new Point(X, Z));
         var rect = new Rect(
             pos.X - NodeSize / 2, 
             pos.Y - NodeSize / 2,

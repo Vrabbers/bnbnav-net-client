@@ -45,13 +45,13 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
     {
         get
         {
-            if (SnappedEdge is null) return new(Xd, Zd);
+            if (SnappedEdge is null) return new Point(Xd, Zd);
             
             //Find the intersection point
             var playerLine = new ExtendedLine()
             {
-                Point1 = new(Xd, Zd),
-                Point2 = new(Xd + 1, Zd)
+                Point1 = new Point(Xd, Zd),
+                Point2 = new Point(Xd + 1, Zd)
             };
             playerLine = playerLine.SetAngle(SnappedEdge.Line.NormalLine().Angle);
             _ = playerLine.TryIntersect(SnappedEdge.Line, out var intersectionPoint);
@@ -72,15 +72,15 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         _mapService = mapService;
         Name = name;
 
-        _timer = new(50);
+        _timer = new Timer(50);
         _timer.Elapsed += (_, _) =>
         {
             var targetAngle = SnappedEdge is null ? Velocity.Angle : SnappedEdge.Line.Angle;
 
             var unitLine = new ExtendedLine()
             {
-                Point1 = new(0, 0),
-                Point2 = new(1, 0)
+                Point1 = new Point(0, 0),
+                Point2 = new Point(1, 0)
             };
             var line1 = unitLine.SetAngle(MarkerAngle);
             var line2 = unitLine.SetAngle(targetAngle);
@@ -108,8 +108,8 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
 
     public void GeneratePlayerText(FontFamily fontFamily)
     {
-        PlayerText = new(Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-            new(fontFamily), 20, null);
+        PlayerText = new FormattedText(Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+            new Typeface(fontFamily), 20, null);
     }
 
     public void HandlePlayerMovedEvent(PlayerMoved evt)
@@ -126,7 +126,7 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         Yd = newY;
         Zd = newZ;
         
-        PosHistory.Insert(0, (DateTime.UtcNow, new(Xd, Zd)));
+        PosHistory.Insert(0, (DateTime.UtcNow, new Point(Xd, Zd)));
         PosHistory = PosHistory.Where((x, i) => i <= 10 || DateTime.UtcNow - x.Item1 < TimeSpan.FromMilliseconds(500)).ToList();
 
         if (SnappedEdge is not null)
@@ -159,13 +159,13 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         });
     }
 
-    private bool CanSnapToEdge(Edge edge)
+    bool CanSnapToEdge(Edge edge)
     {
         if (!edge.CanSnapTo) return false;
         
         // TODO: Get the road thickness from resources somehow
         // We are not using GeoHelper because that takes into account the extra space at the end of a road
-        if (edge.Line.SetLength(10).NormalLine().MoveCenter(new(Xd, Zd)).TryIntersect(edge.Line, out _) !=
+        if (edge.Line.SetLength(10).NormalLine().MoveCenter(new Point(Xd, Zd)).TryIntersect(edge.Line, out _) !=
             ExtendedLine.IntersectionType.Intersects) return false;
         
         var angle = edge.Line.AngleTo(Velocity);

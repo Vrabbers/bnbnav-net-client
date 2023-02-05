@@ -154,7 +154,7 @@ public class Landmark : MapItem, ISearchable
 
     public Rect BoundingRect(MapView mapView)
     {
-        var pos = mapView.ToScreen(new(Node.X, Node.Z));
+        var pos = mapView.ToScreen(new Point(Node.X, Node.Z));
         var rect = new Rect(
             pos.X - LandmarkSize * mapView.MapViewModel.Scale / 2,
             pos.Y - LandmarkSize * mapView.MapViewModel.Scale / 2,

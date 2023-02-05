@@ -1,14 +1,9 @@
 using System;
 using System.Reactive;
-using System.Reactive.Linq;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using Avalonia.Media;
-using BnbnavNetClient.Helpers;
 using BnbnavNetClient.Models;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 
 namespace BnbnavNetClient.Controls;
 

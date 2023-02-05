@@ -1,13 +1,9 @@
 using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Collections;
 using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Models;

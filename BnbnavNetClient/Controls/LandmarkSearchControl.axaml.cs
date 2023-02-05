@@ -2,12 +2,10 @@ using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Collections;
-using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Services;
-using ReactiveUI;
 
 namespace BnbnavNetClient.Controls;
 
@@ -18,11 +16,11 @@ public class LandmarkSearchControl : TemplatedControl
     MapService _MapService = null!;
     public static readonly DirectProperty<LandmarkSearchControl, MapService> MapServiceProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, MapService>("MapService", o => o.MapService, (o, v) => o.MapService = v);
 
-    private string _searchQuery = null!;
+    string _searchQuery = null!;
     public static readonly DirectProperty<LandmarkSearchControl, string> SearchQueryProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, string>(
         "SearchQuery", o => o.SearchQuery, (o, v) => o.SearchQuery = v);
 
-    private AvaloniaList<ISearchable> _searchResults = new();
+    AvaloniaList<ISearchable> _searchResults = new();
 
     public static readonly DirectProperty<LandmarkSearchControl, AvaloniaList<ISearchable>> SearchResultsProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, AvaloniaList<ISearchable>>(
         "SearchResults", o => o.SearchResults, (o, v) => o.SearchResults = v);
@@ -53,7 +51,7 @@ public class LandmarkSearchControl : TemplatedControl
 
     public LandmarkSearchControl()
     {
-        SearchQueryProperty.Changed.Subscribe(x =>
+        SearchQueryProperty.Changed.Subscribe(_ =>
         {
             if (SelectedLandmark?.Name == SearchQuery)
             {

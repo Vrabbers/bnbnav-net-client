@@ -1,9 +1,7 @@
-using System;
 using System.Diagnostics.Contracts;
 using Avalonia;
 using Avalonia.Controls.Shapes;
 using BnbnavNetClient.Helpers;
-using Microsoft.CodeAnalysis;
 
 namespace BnbnavNetClient.Models;
 
@@ -52,7 +50,7 @@ public readonly struct ExtendedLine
         var dy = -double.Sin(angleR) * Length;
         
         return this with { 
-            Point2 = new(Point1.X + dx, Point1.Y + dy)
+            Point2 = new Point(Point1.X + dx, Point1.Y + dy)
         };
     }
 
@@ -66,7 +64,7 @@ public readonly struct ExtendedLine
     [Pure]
     public ExtendedLine UnitLine() => this with
     {
-        Point2 = new(Point1.X + Dx / Length, Point1.Y + Dy / Length)
+        Point2 = new Point(Point1.X + Dx / Length, Point1.Y + Dy / Length)
     };
 
     [Pure]
@@ -78,7 +76,7 @@ public readonly struct ExtendedLine
     [Pure]
     public IntersectionType TryIntersect(ExtendedLine other, out Point intersectionPoint)
     {
-        intersectionPoint = new();
+        intersectionPoint = new Point();
         
         var a = Point2 - Point1;
         var b = other.Point1 - other.Point2;
@@ -103,7 +101,7 @@ public readonly struct ExtendedLine
         length /= unit.Length;
         return this with
         {
-            Point2 = new(Point1.X + length * unit.Dx, Point1.Y + length * unit.Dy)
+            Point2 = new Point(Point1.X + length * unit.Dx, Point1.Y + length * unit.Dy)
         };
     }
 
@@ -132,7 +130,7 @@ public readonly struct ExtendedLine
     [Pure]
     public ExtendedLine MovePoint1(Point point)
     {
-        return new()
+        return new ExtendedLine
         {
             Point1 = point, 
             Point2 = point + new Point(Dx, Dy)
@@ -142,7 +140,7 @@ public readonly struct ExtendedLine
     [Pure]
     public ExtendedLine MoveCenter(Point point)
     {
-        return new()
+        return new ExtendedLine
         {
             Point1 = point - new Point(Dx, Dy) / 2,
             Point2 = point + new Point(Dx, Dy) / 2

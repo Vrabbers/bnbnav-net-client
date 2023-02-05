@@ -2,13 +2,14 @@ namespace BnbnavNetClient.I18Next.Pseudo;
 
 public class PseudoLocalizationOptions
 {
-    private int _letterMultiplier = 2;
-    private char[] _repeatedLetters =
+    int _letterMultiplier = 2;
+
+    char[] _repeatedLetters =
     {
         'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y'
     };
 
-    private IDictionary<char, char> _letters = new Dictionary<char, char>
+    IDictionary<char, char> _letters = new Dictionary<char, char>
     {
         { 'a', 'α' },
         { 'b', 'ḅ' },

@@ -32,7 +32,7 @@ public sealed class LanguageSelectViewModel : ViewModel
         var settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
         var presentLanguage = new CultureInfo(settings.Settings.Language);
         _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
-        ChosenLanguage = new(presentLanguage);
+        ChosenLanguage = new LanguageSelection(presentLanguage);
         Ok = ReactiveCommand.Create(() => ChosenLanguage.Info);
         this.WhenAnyValue(me => me.ChosenLanguage)
             .Select(chosen => chosen.Info.Name != presentLanguage.Name)

@@ -9,7 +9,6 @@ using System;
 using System.Linq;
 using System.Reactive;
 using BnbnavNetClient.Services;
-using Avalonia.Svg.Skia;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
@@ -123,7 +122,7 @@ public partial class MapView : UserControl
                     var xAverage = _pointerVelocities.Average(i => i.X);
                     var yAverage = _pointerVelocities.Average(i => i.Y);
 
-                    _viewVelocity = new(xAverage, yAverage);
+                    _viewVelocity = new Vector(xAverage, yAverage);
 
                     if (double.Abs(_viewVelocity.Y) < 7 && double.Abs(_viewVelocity.Y) < 7)
                         _viewVelocity = Vector.Zero;
@@ -458,13 +457,13 @@ public partial class MapView : UserControl
         pen.Thickness = ThicknessForRoadType(roadType) * MapViewModel.Scale;
         if (pen.Brush is LinearGradientBrush gradBrush)
         {
-            gradBrush.StartPoint = new(0, -pen.Thickness / 2, RelativeUnit.Absolute);
-            gradBrush.EndPoint = new(0, pen.Thickness / 2, RelativeUnit.Absolute);
+            gradBrush.StartPoint = new RelativePoint(0, -pen.Thickness / 2, RelativeUnit.Absolute);
+            gradBrush.EndPoint = new RelativePoint(0, pen.Thickness / 2, RelativeUnit.Absolute);
         }
         
         using (context.PushPreTransform(matrix))
             using (context.PushOpacity(drawGhost ? 0.5 : 1))
-                context.DrawLine(pen, new(0, 0), new(length, 0));
+                context.DrawLine(pen, new Point(0, 0), new Point(length, 0));
     }
 
     public void DrawLandmark(DrawingContext context, Landmark landmark, Rect rect)
@@ -483,7 +482,7 @@ public partial class MapView : UserControl
             if (scale < lowerScaleBound || scale > higherScaleBound) return;
 
             var text = new FormattedText(landmark.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                new(FontFamily), size * scale, (Brush)this.FindResource("ForegroundBrush")!);
+                new Typeface(FontFamily), size * scale, (Brush)this.FindResource("ForegroundBrush")!);
 
             context.DrawText(text, rect.Center - new Point(text.Width / 2, text.Height / 2));
             return;
@@ -585,7 +584,7 @@ public partial class MapView : UserControl
             if (player.SnappedEdge is not null)
             {
                 var roadText = new FormattedText(player.SnappedEdge.Road.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                    new(FontFamily), 20, new SolidColorBrush(new Color(255, 255, 255, 255)));
+                    new Typeface(FontFamily), 20, new SolidColorBrush(new Color(255, 255, 255, 255)));
 
                 var roadCenter = textCenter + new Point(0, player.PlayerText.Height / 2 + 10 + roadText.Height / 2);
                 var roadRect = new Rect(roadCenter - new Point(roadText.Width + 10, roadText.Height) / 2,

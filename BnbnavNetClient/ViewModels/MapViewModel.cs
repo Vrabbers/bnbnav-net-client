@@ -17,7 +17,7 @@ namespace BnbnavNetClient.ViewModels;
 
 public class MapViewModel : ViewModel
 {
-    private readonly MainViewModel _mainViewModel;
+    readonly MainViewModel _mainViewModel;
 
     [Reactive]
     public Point Pan { get; set; }

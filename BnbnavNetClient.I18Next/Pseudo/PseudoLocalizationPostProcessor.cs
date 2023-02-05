@@ -5,7 +5,7 @@ namespace BnbnavNetClient.I18Next.Pseudo;
 
 public class PseudoLocalizationPostProcessor : IPostProcessor
 {
-    private readonly PseudoLocalizationOptions _options;
+    readonly PseudoLocalizationOptions _options;
 
     public string Process(string key, string value, IDictionary<string, object> args)
     {

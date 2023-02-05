@@ -25,8 +25,8 @@ public class LandmarkTypeHelper
 
 public class LandmarkFlyoutViewModel : ViewModel, IOpenableAsFlyout
 {
-    private readonly MapEditorService _mapEditorService;
-    private readonly Node _node;
+    readonly MapEditorService _mapEditorService;
+    readonly Node _node;
     public FlyoutBase? Flyout { get; set; }
     
     [Reactive]
@@ -108,11 +108,11 @@ public class LandmarkFlyoutViewModel : ViewModel, IOpenableAsFlyout
     {
         if (CurrentTabIndex == 0) //Landmark
         {
-            _mapEditorService.TrackNetworkOperation(new LandmarkUpdateOperation(_mapEditorService, ExistingLandmark, new("temp", _node, LandmarkName, SelectedLandmarkType!.LandmarkType.ServerName())));
+            _mapEditorService.TrackNetworkOperation(new LandmarkUpdateOperation(_mapEditorService, ExistingLandmark, new Landmark("temp", _node, LandmarkName, SelectedLandmarkType!.LandmarkType.ServerName())));
         }
         else
         {
-            _mapEditorService.TrackNetworkOperation(new LandmarkUpdateOperation(_mapEditorService, ExistingLandmark, new("temp", _node, LabelName, SelectedLabelType!.LandmarkType.ServerName())));
+            _mapEditorService.TrackNetworkOperation(new LandmarkUpdateOperation(_mapEditorService, ExistingLandmark, new Landmark("temp", _node, LabelName, SelectedLabelType!.LandmarkType.ServerName())));
         }
         Flyout?.Hide();
     }

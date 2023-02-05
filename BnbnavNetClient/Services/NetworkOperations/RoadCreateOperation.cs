@@ -23,7 +23,7 @@ public class RoadCreateOperation : NetworkOperation
         _name = name;
         _type = type;
 
-        PendingRoad = new("", name, type.ServerName());
+        PendingRoad = new PendingRoad("", name, type.ServerName());
     }
     
     public override async Task PerformOperation()

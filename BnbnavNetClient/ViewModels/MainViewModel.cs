@@ -26,7 +26,7 @@ public sealed class MainViewModel : ViewModel
     public string LoginText { get; }
 
     [Reactive]
-    public string LoggedInUsername { get; set; } = string.Empty;
+    public string LoggedInUsername { get; set; }
 
     [Reactive]
     public string? EditModeToken { get; set; }
@@ -69,12 +69,10 @@ public sealed class MainViewModel : ViewModel
     public bool IsInLandmarkMode => MapEditorService.CurrentEditMode == EditModeControl.Landmark;
     
     [ObservableAsProperty]
-    public bool EditModeEnabled { get; } = false;
+    public bool EditModeEnabled { get; }
 
     [Reactive]
     public bool MainBarVisible { get; set; } = true;
-    
-    public Interaction<bool, Unit>? AuthTokeInteraction { get; set; }
 
     public MapEditorService MapEditorService { get; set; }
 
@@ -231,7 +229,7 @@ public sealed class MainViewModel : ViewModel
         MapEditorService.CurrentEditMode = EditModeControl.Landmark;
     }
 
-    private async Task SetLogin(string loggedInUsername)
+    async Task SetLogin(string loggedInUsername)
     {
         LoggedInUsername = loggedInUsername;
         _settings.Settings.LoggedInUser = loggedInUsername;
@@ -241,9 +239,7 @@ public sealed class MainViewModel : ViewModel
     public void LoginPressed()
     {
         var followMePopup = new EnterPopupViewModel(_tr["FOLLOW_ME_PROMPT"], _tr["FOLLOW_ME_WATERMARK"]);
-        Observable.Merge(
-                followMePopup.Ok,
-                followMePopup.Cancel.Select(_ => (string?)null))
+        followMePopup.Ok.Merge(followMePopup.Cancel.Select(_ => (string?)null))
             .Take(1)
             // ReSharper disable once AsyncVoidLambda
             .Subscribe(async str =>
