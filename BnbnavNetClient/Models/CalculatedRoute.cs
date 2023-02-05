@@ -366,9 +366,16 @@ public class CalculatedRoute : ReactiveObject, IDisposable
                     if (instructionFound)
                     {
                         BlocksToNextInstruction = (int)double.Round(blocksToNextInstruction);
-                        TotalBlocksRemaining = (int)double.Round(
+                        if (instructionIndex >= Instructions.Count)
+                        {
+                            TotalBlocksRemaining = (int)blocksToNextInstruction;
+                        }
+                        else
+                        {
+                            TotalBlocksRemaining = (int)double.Round(
                             Instructions.SkipWhile(x => x != Instructions[instructionIndex]).Sum(x => x.distance) +
                             blocksToNextInstruction);
+                        }
                         UpdateCurrentVoicePrompt();
                         return;
                     }
