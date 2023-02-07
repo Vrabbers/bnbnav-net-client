@@ -5,12 +5,12 @@ namespace BnbnavNetClient.Models;
 
 public class Edge : MapItem
 {
-    public Edge(string Id, Road Road, Node From, Node To)
+    public Edge(string id, Road road, Node from, Node to)
     {
-        this.Id = Id;
-        this.Road = Road;
-        this.From = From;
-        this.To = To;
+        this.Id = id;
+        this.Road = road;
+        this.From = from;
+        this.To = to;
     }
 
     public (Point, Point) Extents(MapView mapView)
@@ -44,7 +44,7 @@ public class Edge : MapItem
 
 public class TemporaryEdge : Edge
 {
-    public TemporaryEdge(Road Road, Node From, Node To) : base("somegeneratedid", Road, From, To)
+    public TemporaryEdge(Road road, Node from, Node to) : base("somegeneratedid", road, from, to)
     {
     }
 }

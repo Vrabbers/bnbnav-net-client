@@ -23,7 +23,7 @@ public enum AvailableUi
 public class CornerViewModel : ViewModel
 {
     readonly MainViewModel _mainViewModel;
-    readonly IAvaloniaI18Next _i18n;
+    readonly IAvaloniaI18Next _i18N;
     public MapService MapService { get; }
 
     [Reactive]
@@ -80,7 +80,7 @@ public class CornerViewModel : ViewModel
     {
         _mainViewModel = mainViewModel;
         MapService = mapService;
-        _i18n = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        _i18N = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
 
         this.WhenAnyValue(x => x.CurrentUi).Subscribe(Observer.Create<AvailableUi>(_ =>
         {
@@ -148,8 +148,8 @@ public class CornerViewModel : ViewModel
                     
                 _mainViewModel.Popup = new AlertDialogViewModel()
                 {
-                    Title = _i18n["GO_MODE_PLAYER_DISCONNECTED_TITLE"],
-                    Message = _i18n["GO_MODE_PLAYER_DISCONNECTED_MESSAGE"],
+                    Title = _i18N["GO_MODE_PLAYER_DISCONNECTED_TITLE"],
+                    Message = _i18N["GO_MODE_PLAYER_DISCONNECTED_MESSAGE"],
                     Ok = ReactiveCommand.Create(() =>
                     {
                         _mainViewModel.Popup = null;
@@ -186,20 +186,20 @@ public class CornerViewModel : ViewModel
 
             foreach (var inst in route.Instructions)
             {
-                Console.WriteLine(inst.HumanReadableString((int)inst.distance));
+                Console.WriteLine(inst.HumanReadableString((int)inst.Distance));
             }
         }
         catch (NoSuitableEdgeException)
         {
             RouteCalculationCancellationSource = null;
             CalculatingRoute = false;
-            RouteCalculationError = _i18n["DIRECTIONS_CALCULATING_FAILURE_NO_ROAD"];
+            RouteCalculationError = _i18N["DIRECTIONS_CALCULATING_FAILURE_NO_ROAD"];
         }
         catch (DisjointNetworkException)
         {
             RouteCalculationCancellationSource = null;
             CalculatingRoute = false;
-            RouteCalculationError = _i18n["DIRECTIONS_CALCULATING_FAILURE_NO_PATH"];
+            RouteCalculationError = _i18N["DIRECTIONS_CALCULATING_FAILURE_NO_PATH"];
         }
         catch (OperationCanceledException)
         {
@@ -246,8 +246,8 @@ public class CornerViewModel : ViewModel
             {
                 _mainViewModel.Popup = new AlertDialogViewModel()
                 {
-                    Title = _i18n["GO_MODE_START_ERROR_TITLE"],
-                    Message = _i18n["GO_MODE_START_ERROR_LOGIN_REQUIRED"],
+                    Title = _i18N["GO_MODE_START_ERROR_TITLE"],
+                    Message = _i18N["GO_MODE_START_ERROR_LOGIN_REQUIRED"],
                     Ok = ReactiveCommand.Create(() =>
                     {
                         _mainViewModel.Popup = null;
@@ -262,8 +262,8 @@ public class CornerViewModel : ViewModel
         {
             _mainViewModel.Popup = new AlertDialogViewModel()
             {
-                Title = _i18n["GO_MODE_START_ERROR_TITLE"],
-                Message = _i18n["GO_MODE_START_ERROR_INVALID_START_POINT"],
+                Title = _i18N["GO_MODE_START_ERROR_TITLE"],
+                Message = _i18N["GO_MODE_START_ERROR_INVALID_START_POINT"],
                 Ok = ReactiveCommand.Create(() =>
                 {
                     _mainViewModel.Popup = null;
@@ -275,8 +275,8 @@ public class CornerViewModel : ViewModel
         
         _mainViewModel.Popup = new AlertDialogViewModel()
         {
-            Title = _i18n["GO_MODE_WARNING_TITLE"],
-            Message = _i18n["GO_MODE_WARNING_MESSAGE"],
+            Title = _i18N["GO_MODE_WARNING_TITLE"],
+            Message = _i18N["GO_MODE_WARNING_MESSAGE"],
             Ok = ReactiveCommand.Create(() =>
             {
                 _mainViewModel.Popup = null;

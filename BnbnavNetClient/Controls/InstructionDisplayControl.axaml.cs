@@ -9,40 +9,40 @@ namespace BnbnavNetClient.Controls;
 
 public class InstructionDisplayControl : TemplatedControl
 {
-    CalculatedRoute.Instruction? _Instruction;
+    CalculatedRoute.Instruction? _instruction;
     public static readonly DirectProperty<InstructionDisplayControl, CalculatedRoute.Instruction?> InstructionProperty = AvaloniaProperty.RegisterDirect<InstructionDisplayControl, CalculatedRoute.Instruction?>("Instruction", o => o.Instruction, (o, v) => o.Instruction = v);
     
-    int? _ToNextInstruction;
+    int? _toNextInstruction;
     public static readonly DirectProperty<InstructionDisplayControl, int?> ToNextInstructionProperty = AvaloniaProperty.RegisterDirect<InstructionDisplayControl, int?>("ToNextInstruction", o => o.ToNextInstruction, (o, v) => o.ToNextInstruction = v);
     
-    string _CalculatedInstructionLength = "";
+    string _calculatedInstructionLength = "";
     public static readonly DirectProperty<InstructionDisplayControl, string> CalculatedInstructionLengthProperty = AvaloniaProperty.RegisterDirect<InstructionDisplayControl, string>("CalculatedInstructionLength", o => o.CalculatedInstructionLength, (o, v) => o.CalculatedInstructionLength = v);
     
-    Thickness _InnerMargin;
+    Thickness _innerMargin;
     public static readonly DirectProperty<InstructionDisplayControl, Thickness> InnerMarginProperty = AvaloniaProperty.RegisterDirect<InstructionDisplayControl, Thickness>("InnerMargin", o => o.InnerMargin, (o, v) => o.InnerMargin = v);
 
     public CalculatedRoute.Instruction? Instruction
     {
-        get { return _Instruction; }
-        set { SetAndRaise(InstructionProperty, ref _Instruction, value); }
+        get { return _instruction; }
+        set { SetAndRaise(InstructionProperty, ref _instruction, value); }
     }
 
     public int? ToNextInstruction
     {
-        get { return _ToNextInstruction; }
-        set { SetAndRaise(ToNextInstructionProperty, ref _ToNextInstruction, value); }
+        get { return _toNextInstruction; }
+        set { SetAndRaise(ToNextInstructionProperty, ref _toNextInstruction, value); }
     }
 
     public string CalculatedInstructionLength
     {
-        get { return _CalculatedInstructionLength; }
-        set { SetAndRaise(CalculatedInstructionLengthProperty, ref _CalculatedInstructionLength, value); }
+        get { return _calculatedInstructionLength; }
+        set { SetAndRaise(CalculatedInstructionLengthProperty, ref _calculatedInstructionLength, value); }
     }
 
     public Thickness InnerMargin
     {
-        get { return _InnerMargin; }
-        set { SetAndRaise(InnerMarginProperty, ref _InnerMargin, value); }
+        get { return _innerMargin; }
+        set { SetAndRaise(InnerMarginProperty, ref _innerMargin, value); }
     }
 
     public InstructionDisplayControl()
@@ -50,7 +50,7 @@ public class InstructionDisplayControl : TemplatedControl
         this.WhenAnyValue(x => x.Instruction, x => x.ToNextInstruction).Subscribe(Observer.Create<ValueTuple<CalculatedRoute.Instruction?, int?>>(
                 tuple =>
                 {
-                    var distance = (int) double.Round(tuple.Item2 ?? tuple.Item1?.distance ?? 0);
+                    var distance = (int) double.Round(tuple.Item2 ?? tuple.Item1?.Distance ?? 0);
                     CalculatedInstructionLength = $"{distance} blk";
                 }));
     }

@@ -23,9 +23,9 @@ public class CalculatedRoute : ReactiveObject, IDisposable
         _mapService = mapService;
     }
     
-    public record Instruction(Node node, Edge? from, Edge? to, double distance, Instruction.InstructionType instructionType, int? roundaboutExitNumber = null, Edge? roundaboutExit = null)
+    public record Instruction(Node Node, Edge? From, Edge? To, double Distance, Instruction.InstructionTypes InstructionType, int? RoundaboutExitNumber = null, Edge? RoundaboutExit = null)
     {
-        public enum InstructionType
+        public enum InstructionTypes
         {
             Departure,
             Arrival,
@@ -45,7 +45,7 @@ public class CalculatedRoute : ReactiveObject, IDisposable
         }
 
         public double TurnAngle => 0;
-        public double? RoundaboutExitAngle => roundaboutExit is not null ? from?.Line.AngleTo(roundaboutExit.Line) : null;
+        public double? RoundaboutExitAngle => RoundaboutExit is not null ? From?.Line.AngleTo(RoundaboutExit.Line) : null;
 
         public string HumanReadableString(int distance)
         {
@@ -59,34 +59,34 @@ public class CalculatedRoute : ReactiveObject, IDisposable
             {
                 var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
                 var args = new Dictionary<string, object?>();
-                if (to is not null) args["road"] = TargetRoadName;
-                if (roundaboutExitNumber is not null) args["exit"] = roundaboutExitNumber.ToString();
+                if (To is not null) args["road"] = TargetRoadName;
+                if (RoundaboutExitNumber is not null) args["exit"] = RoundaboutExitNumber.ToString();
 
-                return instructionType switch
+                return InstructionType switch
                 {
-                    InstructionType.Departure => t["INSTRUCTION_DEPARTURE", args],
-                    InstructionType.Arrival => t["INSTRUCTION_ARRIVAL", args],
-                    InstructionType.ContinueStraight => t["INSTRUCTION_CONTINUE_STRAIGHT", args],
-                    InstructionType.BearLeft => t["INSTRUCTION_BEAR_LEFT", args],
-                    InstructionType.TurnLeft => t["INSTRUCTION_TURN_LEFT", args],
-                    InstructionType.SharpLeft => t["INSTRUCTION_SHARP_LEFT", args],
-                    InstructionType.TurnAround => t["INSTRUCTION_TURN_AROUND", args],
-                    InstructionType.SharpRight => t["INSTRUCTION_SHARP_RIGHT", args],
-                    InstructionType.TurnRight => t["INSTRUCTION_TURN_RIGHT", args],
-                    InstructionType.BearRight => t["INSTRUCTION_BEAR_RIGHT", args],
-                    InstructionType.ExitLeft => t["INSTRUCTION_EXIT_LEFT", args],
-                    InstructionType.ExitRight => t["INSTRUCTION_EXIT_RIGHT", args],
-                    InstructionType.Merge => t["INSTRUCTION_MERGE", args],
-                    InstructionType.EnterRoundabout => roundaboutExit is not null
+                    InstructionTypes.Departure => t["INSTRUCTION_DEPARTURE", args],
+                    InstructionTypes.Arrival => t["INSTRUCTION_ARRIVAL", args],
+                    InstructionTypes.ContinueStraight => t["INSTRUCTION_CONTINUE_STRAIGHT", args],
+                    InstructionTypes.BearLeft => t["INSTRUCTION_BEAR_LEFT", args],
+                    InstructionTypes.TurnLeft => t["INSTRUCTION_TURN_LEFT", args],
+                    InstructionTypes.SharpLeft => t["INSTRUCTION_SHARP_LEFT", args],
+                    InstructionTypes.TurnAround => t["INSTRUCTION_TURN_AROUND", args],
+                    InstructionTypes.SharpRight => t["INSTRUCTION_SHARP_RIGHT", args],
+                    InstructionTypes.TurnRight => t["INSTRUCTION_TURN_RIGHT", args],
+                    InstructionTypes.BearRight => t["INSTRUCTION_BEAR_RIGHT", args],
+                    InstructionTypes.ExitLeft => t["INSTRUCTION_EXIT_LEFT", args],
+                    InstructionTypes.ExitRight => t["INSTRUCTION_EXIT_RIGHT", args],
+                    InstructionTypes.Merge => t["INSTRUCTION_MERGE", args],
+                    InstructionTypes.EnterRoundabout => RoundaboutExit is not null
                         ? t["INSTRUCTION_ENTER_LEAVE_ROUNDABOUT", args]
                         : t["INSTRUCTION_ENTER_ROUNDABOUT", args],
-                    InstructionType.LeaveRoundabout => t["INSTRUCTION_LEAVE_ROUNDABOUT", args],
+                    InstructionTypes.LeaveRoundabout => t["INSTRUCTION_LEAVE_ROUNDABOUT", args],
                     _ => throw new ArgumentOutOfRangeException()
                 };
             }
         }
 
-        public string TargetRoadName => roundaboutExit?.Road.Name ?? to?.Road.Name ?? InstructionString;
+        public string TargetRoadName => RoundaboutExit?.Road.Name ?? To?.Road.Name ?? InstructionString;
 
         public string Speech(double distance, Instruction? thenInstruction)
         {
@@ -100,12 +100,12 @@ public class CalculatedRoute : ReactiveObject, IDisposable
             {
                 case < 15:
                     var instructionString = InstructionString;
-                    if (thenInstruction is not null && thenInstruction.instructionType != InstructionType.LeaveRoundabout)
+                    if (thenInstruction is not null && thenInstruction.InstructionType != InstructionTypes.LeaveRoundabout)
                         instructionString = t["INSTRUCTION_THEN", ("first", instructionString),
                             ("second", thenInstruction.InstructionString)];
                     return instructionString;
                 case > 500:
-                    return t["INSTRUCTION_STAY", ("count", blocks), ("road", from?.Road.Name ?? t["ROAD_UNNAMED"])];
+                    return t["INSTRUCTION_STAY", ("count", blocks), ("road", From?.Road.Name ?? t["ROAD_UNNAMED"])];
                 default:
                     return HumanReadableString(blocks);
             }
@@ -171,7 +171,7 @@ public class CalculatedRoute : ReactiveObject, IDisposable
         RouteContainsDuongWarp = Edges.Any(x => x.Road.RoadType == RoadType.DuongWarp);
         
         //Always add a departure instruction
-        Instructions.Add(new Instruction(Nodes.First(), null, Edges.First(), 0, Instruction.InstructionType.Departure));
+        Instructions.Add(new Instruction(Nodes.First(), null, Edges.First(), 0, Instruction.InstructionTypes.Departure));
 
         double currentLength = 0;
         for (var i = 2; i < Elements.Count - 2; i += 2)
@@ -182,7 +182,7 @@ public class CalculatedRoute : ReactiveObject, IDisposable
             currentLength += previousEdge.Line.Length;
 
             var baseInstruction = new Instruction(node, previousEdge, nextEdge, currentLength,
-                Instruction.InstructionType.Arrival);
+                Instruction.InstructionTypes.Arrival);
                 
             if (nextEdge is TemporaryEdge) continue;
 
@@ -212,9 +212,9 @@ public class CalculatedRoute : ReactiveObject, IDisposable
                     {
                         Instructions.Add(baseInstruction with
                         {
-                            instructionType = Instruction.InstructionType.EnterRoundabout,
-                            roundaboutExitNumber = exitNumber,
-                            roundaboutExit = testEdge
+                            InstructionType = Instruction.InstructionTypes.EnterRoundabout,
+                            RoundaboutExitNumber = exitNumber,
+                            RoundaboutExit = testEdge
                         });
                         currentLength = 0;
                         break;
@@ -225,7 +225,7 @@ public class CalculatedRoute : ReactiveObject, IDisposable
                 {
                     Instructions.Add(baseInstruction with
                     {
-                        instructionType = Instruction.InstructionType.EnterRoundabout
+                        InstructionType = Instruction.InstructionTypes.EnterRoundabout
                     });
                 }
                 currentLength = 0;
@@ -234,7 +234,7 @@ public class CalculatedRoute : ReactiveObject, IDisposable
             {
                 Instructions.Add(baseInstruction with
                 {
-                    instructionType = Instruction.InstructionType.LeaveRoundabout
+                    InstructionType = Instruction.InstructionTypes.LeaveRoundabout
                 });
                 currentLength = 0;
             }
@@ -246,53 +246,53 @@ public class CalculatedRoute : ReactiveObject, IDisposable
                         if (isSameRoad) continue;
                         Instructions.Add(baseInstruction with
                         {
-                            instructionType = Instruction.InstructionType.ContinueStraight
+                            InstructionType = Instruction.InstructionTypes.ContinueStraight
                         });
                         break;
                     case < 80: //Bear Left
                         if (!isMultiRoad) continue;
                         Instructions.Add(baseInstruction with
                         {
-                            instructionType = nextEdge.Road.RoadType == RoadType.Motorway ? Instruction.InstructionType.Merge : (previousEdge.Road.RoadType == RoadType.Motorway ? Instruction.InstructionType.ExitLeft : Instruction.InstructionType.BearLeft)
+                            InstructionType = nextEdge.Road.RoadType == RoadType.Motorway ? Instruction.InstructionTypes.Merge : (previousEdge.Road.RoadType == RoadType.Motorway ? Instruction.InstructionTypes.ExitLeft : Instruction.InstructionTypes.BearLeft)
                         });
                         break;
                     case < 100: //Turn Left
                         if (!isMultiRoad) continue;
                         Instructions.Add(baseInstruction with
                         {
-                            instructionType = Instruction.InstructionType.TurnLeft
+                            InstructionType = Instruction.InstructionTypes.TurnLeft
                         });
                         break;
                     case < 160: //Sharp Left
                         Instructions.Add(baseInstruction with
                         {
-                            instructionType = Instruction.InstructionType.SharpLeft
+                            InstructionType = Instruction.InstructionTypes.SharpLeft
                         });
                         break;
                     case < 200: //Turn Around
                         Instructions.Add(baseInstruction with
                         {
-                            instructionType = Instruction.InstructionType.TurnAround
+                            InstructionType = Instruction.InstructionTypes.TurnAround
                         });
                         break;
                     case < 260: //Sharp Right
                         Instructions.Add(baseInstruction with
                         {
-                            instructionType = Instruction.InstructionType.SharpRight
+                            InstructionType = Instruction.InstructionTypes.SharpRight
                         });
                         break;
                     case < 280: //Turn Right
                         if (!isMultiRoad) continue;
                         Instructions.Add(baseInstruction with
                         {
-                            instructionType = Instruction.InstructionType.TurnRight
+                            InstructionType = Instruction.InstructionTypes.TurnRight
                         });
                         break;
                     default: //Bear Right
                         if (!isMultiRoad) continue;
                         Instructions.Add(baseInstruction with
                         {
-                            instructionType = nextEdge.Road.RoadType == RoadType.Motorway ? Instruction.InstructionType.Merge : (previousEdge.Road.RoadType == RoadType.Motorway ? Instruction.InstructionType.ExitRight : Instruction.InstructionType.BearRight)
+                            InstructionType = nextEdge.Road.RoadType == RoadType.Motorway ? Instruction.InstructionTypes.Merge : (previousEdge.Road.RoadType == RoadType.Motorway ? Instruction.InstructionTypes.ExitRight : Instruction.InstructionTypes.BearRight)
                         });
                         break;
                 }
@@ -302,17 +302,17 @@ public class CalculatedRoute : ReactiveObject, IDisposable
         }
         
         //Always add an arrive instruction
-        Instructions.Add(new Instruction(Nodes.Last(), Edges.Last(), null, currentLength, Instruction.InstructionType.Arrival));
+        Instructions.Add(new Instruction(Nodes.Last(), Edges.Last(), null, currentLength, Instruction.InstructionTypes.Arrival));
 
         double totalBlocks = 0;
         foreach (var instruction in Instructions.AsEnumerable().Reverse())
         {
             foreach (var targetDistance in new[]
                      {
-                         10, 100, 500, instruction.distance - 10
+                         10, 100, 500, instruction.Distance - 10
                      })
             {
-                if (targetDistance > instruction.distance - 10 || targetDistance < 0) continue;
+                if (targetDistance > instruction.Distance - 10 || targetDistance < 0) continue;
                 var testBlocks = totalBlocks + targetDistance;
                 
                 VoicePrompts.Add(new VoicePrompt
@@ -322,7 +322,7 @@ public class CalculatedRoute : ReactiveObject, IDisposable
                 });
             }
 
-            totalBlocks += instruction.distance;
+            totalBlocks += instruction.Distance;
         }
 
         VoicePrompts.Reverse();
@@ -355,8 +355,8 @@ public class CalculatedRoute : ReactiveObject, IDisposable
 
             foreach (var edge in Edges)
             {
-                if (Instructions[instructionIndex].to == edge ||
-                    (Instructions[instructionIndex].to is null && edge == Edges.Last()))
+                if (Instructions[instructionIndex].To == edge ||
+                    (Instructions[instructionIndex].To is null && edge == Edges.Last()))
                 {
                     instructionIndex++;
                     if (instructionFound)
@@ -369,7 +369,7 @@ public class CalculatedRoute : ReactiveObject, IDisposable
                         else
                         {
                             TotalBlocksRemaining = (int)double.Round(
-                            Instructions.SkipWhile(x => x != Instructions[instructionIndex]).Sum(x => x.distance) +
+                            Instructions.SkipWhile(x => x != Instructions[instructionIndex]).Sum(x => x.Distance) +
                             blocksToNextInstruction);
                         }
                         UpdateCurrentVoicePrompt();
@@ -389,7 +389,7 @@ public class CalculatedRoute : ReactiveObject, IDisposable
                     if (Instructions.Count > instructionIndex + 1)
                     {
                         ThenInstruction = Instructions[instructionIndex + 1];
-                        DisplayThenInstruction = ThenInstruction.distance < 15;
+                        DisplayThenInstruction = ThenInstruction.Distance < 15;
                     }
                     else
                     {

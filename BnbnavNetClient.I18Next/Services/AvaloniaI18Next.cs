@@ -17,7 +17,7 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
         }
     }
 
-    public Task<string> TAsync(string key, object? arguments)
+    public Task<string> Async(string key, object? arguments)
     {
         IsNotNull();
         return _i18Next!.Ta(key, arguments);

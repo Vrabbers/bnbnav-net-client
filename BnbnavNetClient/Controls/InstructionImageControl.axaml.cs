@@ -12,13 +12,13 @@ namespace BnbnavNetClient.Controls;
 
 public class InstructionImageControl : TemplatedControl
 {
-    CalculatedRoute.Instruction? _Instruction;
+    CalculatedRoute.Instruction? _instruction;
     public static readonly DirectProperty<InstructionImageControl, CalculatedRoute.Instruction?> InstructionProperty = AvaloniaProperty.RegisterDirect<InstructionImageControl, CalculatedRoute.Instruction?>("Instruction", o => o.Instruction, (o, v) => o.Instruction = v);
 
     public CalculatedRoute.Instruction? Instruction
     {
-        get { return _Instruction; }
-        set { SetAndRaise(InstructionProperty, ref _Instruction, value); }
+        get { return _instruction; }
+        set { SetAndRaise(InstructionProperty, ref _instruction, value); }
     }
 
     public InstructionImageControl()
@@ -31,19 +31,19 @@ public class InstructionImageControl : TemplatedControl
     {
         base.Render(context);
 
-        if (_Instruction is not null)
+        if (_instruction is not null)
         {
             var bounds = new Rect(new Point(0, 0), Bounds.Size);
 
-            if (_Instruction.roundaboutExit is not null && _Instruction.from is not null && _Instruction.to is not null)
+            if (_instruction.RoundaboutExit is not null && _instruction.From is not null && _instruction.To is not null)
             {
                 var innerCircleBounds = bounds.Deflate(3 * bounds.Width / 10);
-                var angle = _Instruction.from.Line.FlipDirection().AngleTo(_Instruction.roundaboutExit.Line) - 90;
+                var angle = _instruction.From.Line.FlipDirection().AngleTo(_instruction.RoundaboutExit.Line) - 90;
                 var complex = Complex.FromPolarCoordinates(innerCircleBounds.Width / 2, MathHelper.ToRad(angle + 180));
                 var arcEnd = new Point(-complex.Real, complex.Imaginary) + innerCircleBounds.Center;
                 var arrowEnd = new ExtendedLine(arcEnd, new Point(arcEnd.X + bounds.Width / 5, arcEnd.Y)).SetAngle(angle).Point2;
 
-                var roundaboutAngle = _Instruction.from.Line.FlipDirection().AngleTo(_Instruction.to.Line);
+                var roundaboutAngle = _instruction.From.Line.FlipDirection().AngleTo(_instruction.To.Line);
                 var sweepDirection = roundaboutAngle < 0
                     ? SweepDirection.Clockwise
                     : SweepDirection.CounterClockwise;
@@ -99,23 +99,23 @@ public class InstructionImageControl : TemplatedControl
             }
             else
             {
-                var instructionFile = _Instruction.instructionType switch
+                var instructionFile = _instruction.InstructionType switch
                 {
-                    CalculatedRoute.Instruction.InstructionType.Departure => "depart",
-                    CalculatedRoute.Instruction.InstructionType.Arrival => "arrive",
-                    CalculatedRoute.Instruction.InstructionType.ContinueStraight => "continue-straight",
-                    CalculatedRoute.Instruction.InstructionType.BearLeft => "bear-left",
-                    CalculatedRoute.Instruction.InstructionType.TurnLeft => "turn-left",
-                    CalculatedRoute.Instruction.InstructionType.SharpLeft => "sharp-left",
-                    CalculatedRoute.Instruction.InstructionType.TurnAround => "turn-around",
-                    CalculatedRoute.Instruction.InstructionType.SharpRight => "sharp-right",
-                    CalculatedRoute.Instruction.InstructionType.TurnRight => "turn-right",
-                    CalculatedRoute.Instruction.InstructionType.BearRight => "bear-right",
-                    CalculatedRoute.Instruction.InstructionType.ExitLeft => "exit-left",
-                    CalculatedRoute.Instruction.InstructionType.ExitRight => "exit-right",
-                    CalculatedRoute.Instruction.InstructionType.Merge => "merge",
-                    CalculatedRoute.Instruction.InstructionType.EnterRoundabout => "enter-roundabout",
-                    CalculatedRoute.Instruction.InstructionType.LeaveRoundabout => "leave-roundabout",
+                    CalculatedRoute.Instruction.InstructionTypes.Departure => "depart",
+                    CalculatedRoute.Instruction.InstructionTypes.Arrival => "arrive",
+                    CalculatedRoute.Instruction.InstructionTypes.ContinueStraight => "continue-straight",
+                    CalculatedRoute.Instruction.InstructionTypes.BearLeft => "bear-left",
+                    CalculatedRoute.Instruction.InstructionTypes.TurnLeft => "turn-left",
+                    CalculatedRoute.Instruction.InstructionTypes.SharpLeft => "sharp-left",
+                    CalculatedRoute.Instruction.InstructionTypes.TurnAround => "turn-around",
+                    CalculatedRoute.Instruction.InstructionTypes.SharpRight => "sharp-right",
+                    CalculatedRoute.Instruction.InstructionTypes.TurnRight => "turn-right",
+                    CalculatedRoute.Instruction.InstructionTypes.BearRight => "bear-right",
+                    CalculatedRoute.Instruction.InstructionTypes.ExitLeft => "exit-left",
+                    CalculatedRoute.Instruction.InstructionTypes.ExitRight => "exit-right",
+                    CalculatedRoute.Instruction.InstructionTypes.Merge => "merge",
+                    CalculatedRoute.Instruction.InstructionTypes.EnterRoundabout => "enter-roundabout",
+                    CalculatedRoute.Instruction.InstructionTypes.LeaveRoundabout => "leave-roundabout",
                     _ => throw new ArgumentOutOfRangeException()
                 };
 

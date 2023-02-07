@@ -11,9 +11,9 @@ namespace BnbnavNetClient.Controls;
 
 public class LandmarkSearchControl : TemplatedControl
 {
-    ISearchable? _SelectedLandmark;
+    ISearchable? _selectedLandmark;
     public static readonly DirectProperty<LandmarkSearchControl, ISearchable?> SelectedLandmarkProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, ISearchable?>("SelectedLandmark", o => o.SelectedLandmark, (o, v) => o.SelectedLandmark = v, defaultBindingMode: BindingMode.TwoWay);
-    MapService _MapService = null!;
+    MapService _mapService = null!;
     public static readonly DirectProperty<LandmarkSearchControl, MapService> MapServiceProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, MapService>("MapService", o => o.MapService, (o, v) => o.MapService = v);
 
     string _searchQuery = null!;
@@ -39,14 +39,14 @@ public class LandmarkSearchControl : TemplatedControl
 
     public ISearchable? SelectedLandmark
     {
-        get { return _SelectedLandmark; }
-        set { SetAndRaise(SelectedLandmarkProperty, ref _SelectedLandmark, value); }
+        get { return _selectedLandmark; }
+        set { SetAndRaise(SelectedLandmarkProperty, ref _selectedLandmark, value); }
     }
 
     public MapService MapService
     {
-        get { return _MapService; }
-        set { SetAndRaise(MapServiceProperty, ref _MapService, value); }
+        get { return _mapService; }
+        set { SetAndRaise(MapServiceProperty, ref _mapService, value); }
     }
 
     public LandmarkSearchControl()

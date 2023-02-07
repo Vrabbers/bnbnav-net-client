@@ -18,9 +18,9 @@ public class SpliceEditController : EditController
     bool _mouseDown;
 #pragma warning restore CS0414 // C# compiler seems to be having a little weird moment here?
 
-    public SpliceEditController(MapEditorService _editorService)
+    public SpliceEditController(MapEditorService editorService)
     {
-        this._editorService = _editorService;
+        this._editorService = editorService;
     }
 
     public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)

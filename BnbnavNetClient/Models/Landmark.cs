@@ -13,7 +13,7 @@ public enum LandmarkType
     InternalTemporary,
     City,
     Country,
-    AirCSStation,
+    AirCsStation,
     Airport,
     Hospital,
     SquidTransitStation,
@@ -46,7 +46,7 @@ public static class LandmarkTypeExtensions
     public static string ServerName(this LandmarkType type) => type switch
     {
         LandmarkType.Unknown => "",
-        LandmarkType.AirCSStation => "aircs",
+        LandmarkType.AirCsStation => "aircs",
         LandmarkType.Airport => "airport",
         LandmarkType.Hospital => "hospital",
         LandmarkType.SquidTransitStation => "squid-transit",
@@ -84,7 +84,7 @@ public static class LandmarkTypeExtensions
         return type switch
         {
             LandmarkType.Unknown => "",
-            LandmarkType.AirCSStation => t["LANDMARK_AIRCS"],
+            LandmarkType.AirCsStation => t["LANDMARK_AIRCS"],
             LandmarkType.Airport => t["LANDMARK_AIRPORT"],
             LandmarkType.Hospital => t["LANDMARK_HOSPITAL"],
             LandmarkType.SquidTransitStation => t["LANDMARK_SQTR"],
@@ -127,12 +127,12 @@ public class Landmark : MapItem, ISearchable
 {
     static readonly double LandmarkSize = 10;
     
-    public Landmark(string Id, Node Node, string Name, string Type)
+    public Landmark(string id, Node node, string name, string type)
     {
-        this.Id = Id;
-        this.Node = Node;
-        this.Name = Name;
-        this.Type = Type;
+        this.Id = id;
+        this.Node = node;
+        this.Name = name;
+        this.Type = type;
     }
 
     public string Id { get; init; }
@@ -171,7 +171,7 @@ public partial class TemporaryLandmark : Landmark
     [GeneratedRegex(@"^\(?(?<x>-?\d+), ?(?<z>-?\d+)\)?$", RegexOptions.CultureInvariant)]
     private static partial Regex CoordinateSearchRegex();
 
-    public TemporaryLandmark(string Id, Node Node, string Name) : base(Id, Node, Name, "internal-temporary")
+    public TemporaryLandmark(string id, Node node, string name) : base(id, node, name, "internal-temporary")
     {
     }
 

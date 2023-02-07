@@ -11,12 +11,12 @@ public interface IAvaloniaI18Next
     string this[string key, params (string Name, object? Value)[] arguments] => 
         this[key, TupleArrayToDict(arguments)];
 
-    Task<string> TAsync(string key, object? arguments);
+    Task<string> Async(string key, object? arguments);
 
-    Task<string> TAsync(string key) => TAsync(key, (object?) null);
+    Task<string> Async(string key) => Async(key, (object?) null);
 
-    Task<string> TAsync(string key, params (string Name, object? Value)[] arguments) =>
-        TAsync(key, TupleArrayToDict(arguments));
+    Task<string> Async(string key, params (string Name, object? Value)[] arguments) =>
+        Async(key, TupleArrayToDict(arguments));
 
     bool IsRightToLeft { get; }
 

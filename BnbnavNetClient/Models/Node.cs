@@ -7,12 +7,12 @@ public class Node : MapItem, ILocatable
 {
     static readonly double NodeSize = 14;
 
-    public Node(string Id, int X, int Y, int Z)
+    public Node(string id, int x, int y, int z)
     {
-        this.Id = Id;
-        this.X = X;
-        this.Y = Y;
-        this.Z = Z;
+        this.Id = id;
+        this.X = x;
+        this.Y = y;
+        this.Z = z;
     }
 
     public string Id { get; init; }
@@ -43,7 +43,7 @@ public class Node : MapItem, ILocatable
 
 public class TemporaryNode : Node
 {
-    public TemporaryNode(int X, int Y, int Z) : base($"temp@{X},{Z}", X, Y, Z)
+    public TemporaryNode(int x, int y, int z) : base($"temp@{x},{z}", x, y, z)
     {
     }
 

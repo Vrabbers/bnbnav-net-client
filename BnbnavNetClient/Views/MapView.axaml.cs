@@ -40,7 +40,7 @@ public partial class MapView : UserControl
 
     public MapView()
     {
-        _i18n = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        _i18N = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
 
         InitializeComponent();
     }
@@ -291,7 +291,7 @@ public partial class MapView : UserControl
                         {
                             new()
                             {
-                                Header = _i18n["NODE_DELETE"],
+                                Header = _i18N["NODE_DELETE"],
                                 Command = ReactiveCommand.Create(() => { MapViewModel.QueueDelete(node); })
                             }
                         };
@@ -307,7 +307,7 @@ public partial class MapView : UserControl
                         {
                             new()
                             {
-                                Header = _i18n["EDGE_DELETE", ("roadName", edge.Road.Name)],
+                                Header = _i18N["EDGE_DELETE", ("roadName", edge.Road.Name)],
                                 Command = ReactiveCommand.Create(() => { MapViewModel.QueueDelete(edge); })
                             }
                         };
@@ -322,13 +322,13 @@ public partial class MapView : UserControl
             ToWorld(_currentPointerPosition).Deconstruct(out var xd, out var zd);
             var x = (int)xd;
             var z = (int)zd;
-            var landmark = new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z), _i18n["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
+            var landmark = new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z), _i18N["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
 
             MapViewModel.ContextMenuItems.AddRange(new MenuItem[]
             {
                 new()
                 {
-                    Header = _i18n["DIRECTIONS_TO_HERE"],
+                    Header = _i18N["DIRECTIONS_TO_HERE"],
                     Command = ReactiveCommand.Create(() =>
                     {
                         MapViewModel.GoModeEndPoint = landmark;
@@ -337,7 +337,7 @@ public partial class MapView : UserControl
                 },
                 new()
                 {
-                    Header = _i18n["DIRECTIONS_FROM_HERE"],
+                    Header = _i18N["DIRECTIONS_FROM_HERE"],
                     Command = ReactiveCommand.Create(() =>
                     {
                         MapViewModel.GoModeStartPoint = landmark;
@@ -349,7 +349,7 @@ public partial class MapView : UserControl
 
     }
 
-    readonly IAvaloniaI18Next _i18n;
+    readonly IAvaloniaI18Next _i18N;
 
     List<(Point, Point, Edge)> DrawnEdges { get; set; } = new();
     List<(Rect, Landmark)> DrawnLandmarks { get; set; } = new();
@@ -526,18 +526,18 @@ public partial class MapView : UserControl
         {
             //Draw the arrow indicator
             var instruction = MapViewModel.MapService.CurrentRoute?.CurrentInstruction;
-            if (instruction is { from: { }, to: { } })
+            if (instruction is { From: { }, To: { } })
             {
                 var pen = new Pen(new SolidColorBrush(new Color(255, 100, 50, 150)),
                     PenForRoadType(RoadType.Local).Thickness, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
                 var poly = new PolylineGeometry(new[]
                 {
-                    ToScreen(instruction.from.Line.FlipDirection().SetLength(10).Point2),
-                    ToScreen(instruction.node.Point),
-                    ToScreen(instruction.to.Line.SetLength(10).Point2),
-                    ToScreen(instruction.to.Line.SetLength(10).FlipDirection().NudgeAngle(-45).SetLength(5).Point2),
-                    ToScreen(instruction.to.Line.SetLength(10).Point2),
-                    ToScreen(instruction.to.Line.SetLength(10).FlipDirection().NudgeAngle(45).SetLength(5).Point2),
+                    ToScreen(instruction.From.Line.FlipDirection().SetLength(10).Point2),
+                    ToScreen(instruction.Node.Point),
+                    ToScreen(instruction.To.Line.SetLength(10).Point2),
+                    ToScreen(instruction.To.Line.SetLength(10).FlipDirection().NudgeAngle(-45).SetLength(5).Point2),
+                    ToScreen(instruction.To.Line.SetLength(10).Point2),
+                    ToScreen(instruction.To.Line.SetLength(10).FlipDirection().NudgeAngle(45).SetLength(5).Point2),
                 }, false);
                 context.DrawGeometry(null, pen, poly);
             }
