@@ -10,7 +10,7 @@ public partial class LandmarkFlyoutView : UserControl
         InitializeComponent();
     }
 
-    private void InitializeComponent()
+    void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
     }

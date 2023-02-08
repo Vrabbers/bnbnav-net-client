@@ -12,5 +12,5 @@ public sealed class AlertDialogViewModel : ViewModel
 
     public string? Title { get; init; }
     public string? Message { get; init; }
-    public ReactiveCommand<Unit, Unit> Ok { get; }
+    public ReactiveCommand<Unit, Unit> Ok { get; init; }
 }

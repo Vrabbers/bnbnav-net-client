@@ -1,6 +1,7 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:BnbnavNetClient"
+             xmlns:controls="clr-namespace:BnbnavNetClient.Controls"
              x:Class="BnbnavNetClient.App"
              >
   <Application.DataTemplates>
@@ -15,7 +16,7 @@
     </ResourceDictionary>
   </Application.Resources>
   <Application.Styles>
-    <FluentTheme Mode="Light"/>
+    <FluentTheme Mode="Light" />
     <Style Selector=":is(TemplatedControl)">
       <Setter Property="FontFamily" Value="/Assets/NotoSans-Regular.ttf#Noto"/>
       <Setter Property="FontSize" Value="16"/>
@@ -48,6 +49,41 @@
     <Style Selector="Button.destructive:pressed">
       <Setter Property="Background" Value="#00ff00" />
     </Style>
+    <Style Selector="controls|InstructionDisplayControl.gomodeactiveinstruction">
+      <Setter Property="Foreground" Value="#ffffff" />
+    </Style>
+    <Style Selector="controls|InstructionDisplayControl.gomodeactiveinstruction Border">
+      <Setter Property="Background" Value="#009600" />
+    </Style>
+    <Style Selector="Border.gomodeactivesuspended">
+      <Setter Property="Background" Value="#646464" />
+    </Style>
+    <Style Selector="Border.gomodeactivesuspended TextBlock">
+      <Setter Property="Foreground" Value="#ffffff" />
+    </Style>
+    <Style Selector="Border.gomodefooter">
+      <Setter Property="Background" Value="#ffffff" />
+    </Style>
+    <Style Selector="Border.gomodefooter TextBlock">
+      <Setter Property="Foreground" Value="#000000" />
+    </Style>
+    <Style Selector="Border.gomodefooter PathIcon">
+      <Setter Property="Foreground" Value="#000000" />
+    </Style>
+    <Style Selector="Border.gomodetheninstruction">
+      <Setter Property="Background" Value="#006400" />
+    </Style>
+    <Style Selector="Border.gomodetheninstruction TextBlock">
+      <Setter Property="Foreground" Value="#ffffff" />
+    </Style>
+    <Style Selector="controls|InstructionDisplayControl">
+      <Setter Property="FontFamily" Value="/Assets/Overpass-Regular.ttf#Overpass"/>
+    </Style>
+    <Style Selector="TextBlock.roadname">
+      <Setter Property="FontSize" Value="25"/>
+    </Style>
     <StyleInclude Source="/Controls/DayNightButton.axaml"/>
+    <StyleInclude Source="/Controls/LandmarkSearchControl.axaml" />
+    <StyleInclude Source="/Controls/InstructionDisplayControl.axaml" />
   </Application.Styles>
 </Application>

@@ -26,7 +26,7 @@ public sealed class MainViewModel : ViewModel
     public string LoginText { get; }
 
     [Reactive]
-    public string LoggedInUsername { get; set; } = string.Empty;
+    public string LoggedInUsername { get; set; }
 
     [Reactive]
     public string? EditModeToken { get; set; }
@@ -37,6 +37,9 @@ public sealed class MainViewModel : ViewModel
     [Reactive]
     public MapViewModel? MapViewModel { get; private set; }
     
+    [Reactive]
+    public CornerViewModel? CornerViewModel { get; private set; }
+    
     public Button UserControlButton { get; set; } = null!;
 
     [ObservableAsProperty]
@@ -44,7 +47,7 @@ public sealed class MainViewModel : ViewModel
     
     [ObservableAsProperty]
     public bool HaveLoggedInUser { get; set; }
-
+    
     readonly IAvaloniaI18Next _tr;
 
     readonly ISettingsManager _settings;
@@ -66,9 +69,10 @@ public sealed class MainViewModel : ViewModel
     public bool IsInLandmarkMode => MapEditorService.CurrentEditMode == EditModeControl.Landmark;
     
     [ObservableAsProperty]
-    public bool EditModeEnabled { get; } = false;
-    
-    public Interaction<bool, Unit>? AuthTokeInteraction { get; set; }
+    public bool EditModeEnabled { get; }
+
+    [Reactive]
+    public bool MainBarVisible { get; set; } = true;
 
     public MapEditorService MapEditorService { get; set; }
 
@@ -107,7 +111,12 @@ public sealed class MainViewModel : ViewModel
     {
         var mapService = await MapService.DownloadInitialMapAsync();
         MapEditorService.MapService = mapService;
+        
+        this.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(mapService, x => x.LoggedInUsername);
+
         MapViewModel = new MapViewModel(mapService, this);
+        CornerViewModel = new CornerViewModel(mapService, this);
+        
         var panText = MapViewModel
             .WhenAnyValue(map => map.Pan)
             .Select(pt => $"x = {double.Round(pt.X)}; y = {double.Round(pt.Y)}");
@@ -127,8 +136,21 @@ public sealed class MainViewModel : ViewModel
                 interaction.SetOutput(null);
             }
         });
+        CornerViewModel.WhenAnyValue(x => x.SelectedLandmark).BindTo(MapViewModel, x => x.SelectedLandmark);
+        CornerViewModel.WhenAnyValue(x => x.GoModeStartPoint).BindTo(MapViewModel, x => x.GoModeStartPoint);
+        CornerViewModel.WhenAnyValue(x => x.GoModeEndPoint).BindTo(MapViewModel, x => x.GoModeEndPoint);
+        CornerViewModel.WhenAnyValue(x => x.CurrentUi).BindTo(MapViewModel, x => x.CurrentUi);
+        MapViewModel.WhenAnyValue(x => x.SelectedLandmark).BindTo(CornerViewModel, x => x.SelectedLandmark);
+        MapViewModel.WhenAnyValue(x => x.GoModeStartPoint).BindTo(CornerViewModel, x => x.GoModeStartPoint);
+        MapViewModel.WhenAnyValue(x => x.GoModeEndPoint).BindTo(CornerViewModel, x => x.GoModeEndPoint);
+        MapViewModel.WhenAnyValue(x => x.CurrentUi).BindTo(CornerViewModel, x => x.CurrentUi);
+
+        CornerViewModel.WhenAnyValue(x => x.CurrentUi).Subscribe(Observer.Create<AvailableUi>(currentUi =>
+        {
+            MainBarVisible = currentUi != AvailableUi.Go;
+        }));
     }
-    
+
     public void LanguageButtonPressed()
     {
         var languagePopup = new LanguageSelectViewModel();
@@ -207,7 +229,7 @@ public sealed class MainViewModel : ViewModel
         MapEditorService.CurrentEditMode = EditModeControl.Landmark;
     }
 
-    private async Task SetLogin(string loggedInUsername)
+    async Task SetLogin(string loggedInUsername)
     {
         LoggedInUsername = loggedInUsername;
         _settings.Settings.LoggedInUser = loggedInUsername;
@@ -217,9 +239,7 @@ public sealed class MainViewModel : ViewModel
     public void LoginPressed()
     {
         var followMePopup = new EnterPopupViewModel(_tr["FOLLOW_ME_PROMPT"], _tr["FOLLOW_ME_WATERMARK"]);
-        Observable.Merge(
-                followMePopup.Ok,
-                followMePopup.Cancel.Select(_ => (string?)null))
+        followMePopup.Ok.Merge(followMePopup.Cancel.Select(_ => (string?)null))
             .Take(1)
             // ReSharper disable once AsyncVoidLambda
             .Subscribe(async str =>

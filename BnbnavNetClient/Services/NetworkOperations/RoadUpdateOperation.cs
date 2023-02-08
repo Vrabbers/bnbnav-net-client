@@ -10,11 +10,11 @@ namespace BnbnavNetClient.Services.NetworkOperations;
 
 public class RoadUpdateOperation : NetworkOperation
 {
-    private readonly MapEditorService _editorService;
-    private readonly Road _road;
-    private readonly string _newName;
-    private readonly RoadType _newRoadType;
-    private readonly List<Edge> _affectedEdges = new();
+    readonly MapEditorService _editorService;
+    readonly Road _road;
+    readonly string _newName;
+    readonly RoadType _newRoadType;
+    readonly List<Edge> _affectedEdges = new();
 
     public RoadUpdateOperation(MapEditorService editorService, Road road, string newName, RoadType newRoadType)
     {

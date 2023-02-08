@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BnbnavNetClient.Services;
 
-sealed class BnbnavWebsocketService
+internal sealed class BnbnavWebsocketService
 {
     ClientWebSocket _ws = null!;
 
@@ -20,7 +20,7 @@ sealed class BnbnavWebsocketService
         {
             try
             {
-                _ws = new();
+                _ws = new ClientWebSocket();
 
                 var uri = new UriBuilder(MapService.BaseUrl)
                 {
@@ -96,7 +96,7 @@ public record BnbnavMessage
     public string? Id { get; init; }
 }
 
-abstract record NodeMessage : BnbnavMessage
+internal abstract record NodeMessage : BnbnavMessage
 {
     public required int X { get; init; }
     public required int Y { get; init; }
@@ -105,44 +105,50 @@ abstract record NodeMessage : BnbnavMessage
     public required string Player { get; init; }
 }
 
-sealed record NodeCreated : NodeMessage;
-sealed record UpdatedNode : NodeMessage;
+internal sealed record NodeCreated : NodeMessage;
 
-abstract record RoadMessage : BnbnavMessage
+internal sealed record UpdatedNode : NodeMessage;
+
+internal abstract record RoadMessage : BnbnavMessage
 {
     public required string Name { get; init; }
     public required string RoadType { get; init; }
 }
-sealed record RoadCreated : RoadMessage;
-sealed record UpdatedRoad : RoadMessage;
 
-sealed record EdgeCreated : BnbnavMessage
+internal sealed record RoadCreated : RoadMessage;
+
+internal sealed record UpdatedRoad : RoadMessage;
+
+internal sealed record EdgeCreated : BnbnavMessage
 {
     public required string Road { get; init; }
     public required string Node1 { get; init; }
     public required string Node2 { get; init; }
 }
 
-sealed record LandmarkCreated : BnbnavMessage
+internal sealed record LandmarkCreated : BnbnavMessage
 {
     public required string Node { get; init; }
     public required string Name { get; init; }
     public required string LandmarkType { get; init; }
 }
 
-sealed record EdgeRemoved : BnbnavMessage;
-sealed record RoadRemoved : BnbnavMessage;
-sealed record NodeRemoved : BnbnavMessage;
-sealed record LandmarkRemoved : BnbnavMessage;
+internal sealed record EdgeRemoved : BnbnavMessage;
 
-sealed record UpdatedAnnotation : BnbnavMessage
+internal sealed record RoadRemoved : BnbnavMessage;
+
+internal sealed record NodeRemoved : BnbnavMessage;
+
+internal sealed record LandmarkRemoved : BnbnavMessage;
+
+internal sealed record UpdatedAnnotation : BnbnavMessage
 {
     public required string Node { get; init; }
     public required string Name { get; init; }
     public required JsonElement Annotation { get; init; }
 }
 
-sealed record RemovedAnnotation : BnbnavMessage
+internal sealed record RemovedAnnotation : BnbnavMessage
 {
     public required string Node { get; init; }
     public required string Name { get; init; }
@@ -155,4 +161,4 @@ public sealed record PlayerMoved : BnbnavMessage
     public required double Z { get; init; }
 }
 
-sealed record PlayerLeft : BnbnavMessage;
+internal sealed record PlayerLeft : BnbnavMessage;

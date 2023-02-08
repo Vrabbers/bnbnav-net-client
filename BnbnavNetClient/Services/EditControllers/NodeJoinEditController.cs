@@ -104,7 +104,7 @@ public class NodeJoinEditController : EditController
         if (_roadGhosts.Count != 0)
         {
             PolylineGeometry geo = new();
-            geo.Points.AddRange(_roadGhosts.Select(x => mapView.ToScreen(new(x.X, x.Z))));
+            geo.Points.AddRange(_roadGhosts.Select(x => mapView.ToScreen(new Point(x.X, x.Z))));
             if (_mouseDown) geo.Points.Add(_pointerPrevPosition);
                 
             //Make the shape into a circle

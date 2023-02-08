@@ -17,7 +17,7 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
         }
     }
 
-    public Task<string> TAsync(string key, object? arguments)
+    public Task<string> Async(string key, object? arguments)
     {
         IsNotNull();
         return _i18Next!.Ta(key, arguments);
@@ -37,7 +37,7 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
     {
         get
         {
-            return new(_i18Next!.Language);
+            return new CultureInfo(_i18Next!.Language);
         }
 
         set
@@ -60,10 +60,10 @@ sealed class AvaloniaI18Next : IAvaloniaI18Next
             new DefaultInterpolator());
         if (pseudo)
         {
-            translator.PostProcessors.Add(new PseudoLocalizationPostProcessor(new()));
+            translator.PostProcessors.Add(new PseudoLocalizationPostProcessor(new PseudoLocalizationOptions()));
         }
 
-        _i18Next = new(backend, translator, new CultureInfoLanguageDetector());
+        _i18Next = new I18NextNet(backend, translator, new CultureInfoLanguageDetector());
         _i18Next.UseDetectedLanguage();
         _i18Next.SetFallbackLanguages("en");
 

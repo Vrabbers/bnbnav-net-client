@@ -26,6 +26,7 @@
       <ProgressBar IsIndeterminate="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0"/>
       <Panel Name="MapPanel"/>
       <TextBlock Text="{Binding MapViewModel.Test}"/>
+      <ContentControl Content="{Binding CornerViewModel}" Margin="12 12 12 12" Width="400" HorizontalAlignment="Left" />
 
       <!-- Edit Controls -->
       <Grid Grid.Row="2" IsVisible="{Binding EditModeEnabled}">
@@ -46,7 +47,7 @@
       </Grid>
       
       <!-- Main Bar -->
-      <Grid Grid.Row="3" ColumnDefinitions="Auto Auto * Auto Auto">
+      <Grid Grid.Row="3" ColumnDefinitions="Auto Auto * Auto Auto" IsVisible="{Binding MainBarVisible}">
         <Button Classes="icon" Command="{Binding LanguageButtonPressed}"><PathIcon Data="{StaticResource globe_regular}"/></Button>
         <ToggleButton Grid.Column="1" Command="{Binding EditModePressed}" Content="{str:Tr Key=EDIT_MODE}" IsChecked="{Binding EditModeEnabled}"/>
         <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>

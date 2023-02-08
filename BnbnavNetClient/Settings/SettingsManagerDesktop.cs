@@ -22,7 +22,6 @@ public sealed class SettingsManagerJsonFile : ISettingsManager
         if (!file.Exists)
         {
             Settings = SettingsObject.Defaults;
-            await SaveAsync();
             return;
         }
 

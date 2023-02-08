@@ -13,8 +13,8 @@ namespace BnbnavNetClient.ViewModels;
 
 public class RoadEditViewModel : ViewModel, IOpenableAsFlyout
 {
-    private readonly MapEditorService _editorService;
-    private readonly Road _road;
+    readonly MapEditorService _editorService;
+    readonly Road _road;
 
     [Reactive]
     public AvaloniaList<RoadTypeHelper> RoadTypes { get; set; } = new();

@@ -17,7 +17,7 @@ namespace BnbnavNetClient.ViewModels;
 
 public class MapViewModel : ViewModel
 {
-    private readonly MainViewModel _mainViewModel;
+    readonly MainViewModel _mainViewModel;
 
     [Reactive]
     public Point Pan { get; set; }
@@ -31,13 +31,14 @@ public class MapViewModel : ViewModel
     [UsedImplicitly] 
     public bool IsInEditMode { get; }
 
-    // In radians!
+    // In degrees!
     [Reactive]
     public double Rotation { get; set; } = 0;
 
+    // As a % of the window bounds
     [Reactive]
-    public bool NightMode { get; set; } = false;
-
+    public Vector RotationOrigin { get; set; } = new(0.5, 0.5);
+    
     [Reactive]
     public string Test { get; set; } = string.Empty;
 
@@ -58,6 +59,18 @@ public class MapViewModel : ViewModel
     public string? LoggedInUsername { get; set; }
 
     [Reactive] public AvaloniaList<MenuItem> ContextMenuItems { get; set; } = new();
+    
+    [Reactive]
+    public ISearchable? SelectedLandmark { get; set; }
+    
+    [Reactive]
+    public ISearchable? GoModeStartPoint { get; set; }
+    
+    [Reactive]
+    public ISearchable? GoModeEndPoint { get; set; }
+
+    [Reactive]
+    public AvailableUi CurrentUi { get; set; } = AvailableUi.Search;
 
     public MapViewModel(MapService mapService, MainViewModel mainViewModel)
     {

@@ -6,12 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media;
+using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services;
 using Timer = System.Timers.Timer;
 
 namespace BnbnavNetClient.Models;
 
-public sealed class Player : IDisposable
+public sealed class Player : IDisposable, ISearchable, ILocatable
 {
     readonly MapService _mapService;
     readonly Timer _timer;
@@ -19,9 +20,21 @@ public sealed class Player : IDisposable
     
     public string Name { get; }
 
-    public double X { get; private set; }
-    public double Y { get; private set; }
-    public double Z { get; private set; }
+    public string HumanReadableType
+    {
+        get
+        {
+            var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+            return t["PLAYER"];
+        }
+    }
+
+    public ILocatable Location => this;
+    public string? IconUrl => null;
+
+    public double Xd { get; private set; }
+    public double Yd { get; private set; }
+    public double Zd { get; private set; }
 
     public Edge? SnappedEdge { get; private set; }
 
@@ -33,13 +46,13 @@ public sealed class Player : IDisposable
     {
         get
         {
-            if (SnappedEdge is null) return new(X, Z);
+            if (SnappedEdge is null) return new Point(Xd, Zd);
             
             //Find the intersection point
             var playerLine = new ExtendedLine()
             {
-                Point1 = new(X, Z),
-                Point2 = new(X + 1, Z)
+                Point1 = new Point(Xd, Zd),
+                Point2 = new Point(Xd + 1, Zd)
             };
             playerLine = playerLine.SetAngle(SnappedEdge.Line.NormalLine().Angle);
             _ = playerLine.TryIntersect(SnappedEdge.Line, out var intersectionPoint);
@@ -60,21 +73,21 @@ public sealed class Player : IDisposable
         _mapService = mapService;
         Name = name;
 
-        _timer = new(50);
+        _timer = new Timer(50);
         _timer.Elapsed += (_, _) =>
         {
             var targetAngle = SnappedEdge is null ? Velocity.Angle : SnappedEdge.Line.Angle;
 
-            var line1 = new ExtendedLine()
+            var unitLine = new ExtendedLine()
             {
-                Point1 = new(0, 0),
-                Point2 = new(1, 0)
+                Point1 = new Point(0, 0),
+                Point2 = new Point(1, 0)
             };
-            var line2 = line1 with { };
-            line1.SetAngle(MarkerAngle);
-            line2.SetAngle(targetAngle);
+            var line1 = unitLine.SetAngle(MarkerAngle);
+            var line2 = unitLine.SetAngle(targetAngle);
 
             var angleDifference = line1.AngleTo(line2);
+            if (angleDifference < 0) angleDifference += 360;
             
             switch (angleDifference)
             {
@@ -96,8 +109,8 @@ public sealed class Player : IDisposable
 
     public void GeneratePlayerText(FontFamily fontFamily)
     {
-        PlayerText = new(Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-            new(fontFamily), 20, null);
+        PlayerText = new FormattedText(Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+            new Typeface(fontFamily), 20, null);
     }
 
     public void HandlePlayerMovedEvent(PlayerMoved evt)
@@ -107,14 +120,14 @@ public sealed class Player : IDisposable
         var newZ = evt.Z;
 
         // ReSharper disable CompareOfFloatsByEqualityOperator
-        if (X == newX && Y == newY && Z == newZ) return;
+        if (Xd == newX && Yd == newY && Zd == newZ) return;
         // ReSharper restore CompareOfFloatsByEqualityOperator
 
-        X = newX;
-        Y = newY;
-        Z = newZ;
+        Xd = newX;
+        Yd = newY;
+        Zd = newZ;
         
-        PosHistory.Insert(0, (DateTime.UtcNow, new(X, Z)));
+        PosHistory.Insert(0, (DateTime.UtcNow, new Point(Xd, Zd)));
         PosHistory = PosHistory.Where((x, i) => i <= 10 || DateTime.UtcNow - x.Item1 < TimeSpan.FromMilliseconds(500)).ToList();
 
         if (SnappedEdge is not null)
@@ -132,12 +145,11 @@ public sealed class Player : IDisposable
 
             try
             {
-                var currentEdges = _mapService.Edges.Values.ToArray();
-                var shouldChangeEdge = SnappedEdge is null;
+                var currentEdges = _mapService.AllEdges.Reverse().ToList();
+                var shouldChangeEdge = SnappedEdge is null || (!_mapService.CurrentRoute?.Edges.Contains(SnappedEdge) ?? false);
                 //TODO: Also change edge if the current route contains the edge to change to or if the current route does not contain the currently snapped edge
                 if (shouldChangeEdge)
                 {
-                    //TODO: Prioritise edges that are part of the current route
                     SnappedEdge = currentEdges.FirstOrDefault(CanSnapToEdge);
                 }
             }
@@ -148,13 +160,13 @@ public sealed class Player : IDisposable
         });
     }
 
-    private bool CanSnapToEdge(Edge edge)
+    bool CanSnapToEdge(Edge edge)
     {
         if (!edge.CanSnapTo) return false;
         
         // TODO: Get the road thickness from resources somehow
         // We are not using GeoHelper because that takes into account the extra space at the end of a road
-        if (edge.Line.SetLength(10).NormalLine().MoveCenter(new(X, Z)).TryIntersect(edge.Line, out _) !=
+        if (edge.Line.SetLength(10).NormalLine().MoveCenter(new Point(Xd, Zd)).TryIntersect(edge.Line, out _) !=
             ExtendedLine.IntersectionType.Intersects) return false;
         
         var angle = edge.Line.AngleTo(Velocity);
@@ -174,4 +186,9 @@ public sealed class Player : IDisposable
         _timer.Dispose();
         _lastSnapMutex.Dispose();
     }
+
+    public int X => (int)double.Round(Xd);
+    public int Y => (int)double.Round(Yd);
+    public int Z => (int)double.Round(Zd);
+    public Point Point => new(X, Z);
 }

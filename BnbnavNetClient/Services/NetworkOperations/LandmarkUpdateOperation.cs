@@ -8,9 +8,9 @@ namespace BnbnavNetClient.Services.NetworkOperations;
 
 public class LandmarkUpdateOperation : NetworkOperation
 {
-    private readonly MapEditorService _editorService;
-    private readonly Landmark? _toUpdate;
-    private readonly Landmark? _updateAs;
+    readonly MapEditorService _editorService;
+    readonly Landmark? _toUpdate;
+    readonly Landmark? _updateAs;
 
     public LandmarkUpdateOperation(MapEditorService editorService, Landmark? toUpdate, Landmark? updateAs)
     {

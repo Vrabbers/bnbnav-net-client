@@ -18,9 +18,9 @@ public class SpliceEditController : EditController
     bool _mouseDown;
 #pragma warning restore CS0414 // C# compiler seems to be having a little weird moment here?
 
-    public SpliceEditController(MapEditorService _editorService)
+    public SpliceEditController(MapEditorService editorService)
     {
-        this._editorService = _editorService;
+        this._editorService = editorService;
     }
 
     public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
@@ -94,7 +94,7 @@ public class SpliceEditController : EditController
             if (tempNode is null)
             {
                 var coords = mapView.ToWorld(_pointerPrevPosition);
-                tempNode = new("temp", (int)double.Round(coords.X), _splicingEdge.From.Y, (int)double.Round(coords.Y));
+                tempNode = new Node("temp", (int)double.Round(coords.X), _splicingEdge.From.Y, (int)double.Round(coords.Y));
             }
 
             var edge1 = new Edge("temp", _splicingEdge.Road, _splicingEdge.From, tempNode);

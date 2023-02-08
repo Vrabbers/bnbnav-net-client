@@ -3,16 +3,16 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Models;
 
-public sealed class Node : MapItem
+public class Node : MapItem, ILocatable
 {
     static readonly double NodeSize = 14;
 
-    public Node(string Id, int X, int Y, int Z)
+    public Node(string id, int x, int y, int z)
     {
-        this.Id = Id;
-        this.X = X;
-        this.Y = Y;
-        this.Z = Z;
+        this.Id = id;
+        this.X = x;
+        this.Y = y;
+        this.Z = z;
     }
 
     public string Id { get; init; }
@@ -22,7 +22,7 @@ public sealed class Node : MapItem
 
     public Rect BoundingRect(MapView mapView)
     {
-        var pos = mapView.ToScreen(new(X, Z));
+        var pos = mapView.ToScreen(new Point(X, Z));
         var rect = new Rect(
             pos.X - NodeSize / 2, 
             pos.Y - NodeSize / 2,
@@ -39,4 +39,20 @@ public sealed class Node : MapItem
     }
 
     public Point Point => new(X, Z);
+}
+
+public class TemporaryNode : Node
+{
+    public TemporaryNode(int x, int y, int z) : base($"temp@{x},{z}", x, y, z)
+    {
+    }
+
+    public TemporaryNode(ISearchable original) : base(
+        $"temp@{original.Location.X},{original.Location.Z}:{original.Name}", original.Location.X, original.Location.Y,
+        original.Location.Z)
+    {
+        OriginalSearchable = original;
+    }
+    
+    ISearchable? OriginalSearchable { get; }
 }

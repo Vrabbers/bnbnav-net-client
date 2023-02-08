@@ -10,8 +10,8 @@ namespace BnbnavNetClient.Services.EditControllers;
 
 public class LandmarkEditController : EditController
 {
-    private readonly MapEditorService _mapEditorService;
-    private Point _initialPointerPosition;
+    readonly MapEditorService _mapEditorService;
+    Point _initialPointerPosition;
 
     public LandmarkEditController(MapEditorService mapEditorService)
     {

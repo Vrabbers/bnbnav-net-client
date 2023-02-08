@@ -33,8 +33,8 @@ public sealed class MapThemeResources : AvaloniaObject, IResourceProvider
 
     public MapThemeResources()
     {
-        _day = new ResourceInclude() { Source = new("avares://BnbnavNetClient/Resources/DayTheme.axaml") };
-        _night = new ResourceInclude() { Source = new("avares://BnbnavNetClient/Resources/NightTheme.axaml") };
+        _day = new ResourceInclude() { Source = new Uri("avares://BnbnavNetClient/Resources/DayTheme.axaml") };
+        _night = new ResourceInclude() { Source = new Uri("avares://BnbnavNetClient/Resources/NightTheme.axaml") };
     }
 
     public event EventHandler? OwnerChanged

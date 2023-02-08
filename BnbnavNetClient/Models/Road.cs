@@ -77,11 +77,11 @@ public static class RoadTypeExtensions
 
 public class Road
 {
-    public Road(string Id, string Name, string Type)
+    public Road(string id, string name, string type)
     {
-        this.Id = Id;
-        this.Name = Name;
-        this.Type = Type;
+        this.Id = id;
+        this.Name = name;
+        this.Type = type;
     }
 
     public RoadType RoadType => Type switch

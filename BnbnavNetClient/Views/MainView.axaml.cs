@@ -18,7 +18,7 @@ public partial class MainView : UserControl
     public MainView()
     {
         FlowDirection = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>().IsRightToLeft ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
-        _whiteTextStyle = new(static x => x.OfType<TextBlock>());
+        _whiteTextStyle = new Style(static x => x.OfType<TextBlock>());
         _whiteTextStyle.Setters.Add(new Setter(TextBlock.ForegroundProperty, new SolidColorBrush(Colors.White)));
         _settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
         InitializeComponent();

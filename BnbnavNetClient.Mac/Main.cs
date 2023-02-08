@@ -3,6 +3,7 @@ using Avalonia.ReactiveUI;
 using BnbnavNetClient;
 using BnbnavNetClient.I18Next;
 using BnbnavNetClient.Mac.TextToSpeech;
+using BnbnavNetClient.Services.TextToSpeech;
 using BnbnavNetClient.Settings;
 
 AppBuilder BuildAvaloniaApp()
@@ -11,7 +12,7 @@ AppBuilder BuildAvaloniaApp()
         .LogToTrace()
         .UseReactiveUI()
         .UseI18NextLocalization()
-        .With(new MacTextToSpeechProvider())
+        .With<ITextToSpeechProvider>(new MacTextToSpeechProvider())
         .UseSettings(new SettingsManagerJsonFile());
         
 BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
