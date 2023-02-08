@@ -2,6 +2,8 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml.MarkupExtensions;
+using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Styling;
 
 namespace BnbnavNetClient;
 
@@ -33,8 +35,8 @@ public sealed class MapThemeResources : AvaloniaObject, IResourceProvider
 
     public MapThemeResources()
     {
-        _day = new ResourceInclude() { Source = new("avares://BnbnavNetClient/Resources/DayTheme.axaml") };
-        _night = new ResourceInclude() { Source = new("avares://BnbnavNetClient/Resources/NightTheme.axaml") };
+        _day = new ResourceInclude(new Uri("avares://BnbnavNetClient/Resources/DayTheme.axaml"));
+        _night = new ResourceInclude(new Uri("avares://BnbnavNetClient/Resources/NightTheme.axaml"));
     }
 
     public event EventHandler? OwnerChanged
@@ -64,5 +66,5 @@ public sealed class MapThemeResources : AvaloniaObject, IResourceProvider
         _night.RemoveOwner(owner);
     }
 
-    public bool TryGetResource(object key, out object? value) => CurrentProvider.TryGetResource(key, out value);
+    public bool TryGetResource(object key, ThemeVariant? theme, out object? value) => CurrentProvider.TryGetResource(key, theme, out value);
 }

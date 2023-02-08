@@ -7,7 +7,7 @@ namespace BnbnavNetClient;
 
 public class ViewLocator : IDataTemplate
 {
-    public IControl? Build(object? data)
+    Control? ITemplate<object?, Control?>.Build(object? data)
     {
         if (data is null)
             return null;
