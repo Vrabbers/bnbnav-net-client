@@ -126,5 +126,7 @@
   "SPLICE": "Splice",
   "SPY_OPTIONS": "Spy Options",
   "START": "Start",
-  "UPDATE": "Update"
+  "UPDATE": "Update",
+  "JOIN": "Join",
+  "SELECT": "Select"
 }
