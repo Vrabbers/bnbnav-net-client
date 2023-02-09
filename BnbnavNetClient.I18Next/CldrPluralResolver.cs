@@ -20,6 +20,8 @@ public sealed class CldrPluralResolver : IPluralResolver
 
     public string GetPluralSuffix(string language, int count)
     {
+        if (language == "pt") language = "en";
+        
         var pluralsFile = Assembly.GetAssembly(GetType())!.GetManifestResourceStream("BnbnavNetClient.I18Next.Resources.plurals.xml")!;
         var xp = new XPathDocument(pluralsFile);
         
