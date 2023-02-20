@@ -138,7 +138,22 @@ public sealed class MapService : ReactiveObject
 
     public Edge? OppositeEdge(Edge edge, IEnumerable<Edge> list)
     {
-        return list.SingleOrDefault(x => x.To == edge.From && x.From == edge.To);
+        var filter = list.Where(x => x.To == edge.From && x.From == edge.To).ToList();
+        try
+        {
+            return filter.SingleOrDefault();
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine("--- DATABASE CORRUPTION DETECTED ---");
+            Console.WriteLine("There is more than one edge connecting two nodes:");
+            foreach (var extra in filter)
+            {
+                Console.WriteLine($"  ID: {extra.Id}");
+            }
+            Console.WriteLine("Selecting the first edge. This may be inconsistent!");
+            return filter.First();
+        }
     }
 
     public Edge? OppositeEdge(Edge edge)
