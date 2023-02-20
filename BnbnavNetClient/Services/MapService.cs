@@ -143,7 +143,7 @@ public sealed class MapService : ReactiveObject
         {
             return filter.SingleOrDefault();
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException)
         {
             Console.WriteLine("--- DATABASE CORRUPTION DETECTED ---");
             Console.WriteLine("There is more than one edge connecting two nodes:");
