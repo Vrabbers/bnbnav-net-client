@@ -1,17 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
+    <InvariantGlobalization>false</InvariantGlobalization>
     <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
     <WasmMainJSPath>AppBundle\main.js</WasmMainJSPath>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="false" Trim="false" />
+  </ItemGroup>
+
+  <ItemGroup>
     <WasmExtraFilesToDeploy Include="AppBundle\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia.Web" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Avalonia.Browser" Version="$(AvaloniaVersion)" />
   </ItemGroup>
 
   <ItemGroup>

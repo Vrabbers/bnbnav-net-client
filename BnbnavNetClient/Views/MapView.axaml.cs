@@ -403,7 +403,7 @@ public partial class MapView : UserControl
     {
         var mapService = MapViewModel.MapService;
 
-        if (Bounds.Size.IsDefault && boundsRect is null)
+        if (Bounds.Size == default && boundsRect is null)
         {
             return;
         }
@@ -461,9 +461,9 @@ public partial class MapView : UserControl
             gradBrush.EndPoint = new RelativePoint(0, pen.Thickness / 2, RelativeUnit.Absolute);
         }
         
-        using (context.PushPreTransform(matrix))
-            using (context.PushOpacity(drawGhost ? 0.5 : 1))
-                context.DrawLine(pen, new Point(0, 0), new Point(length, 0));
+        using (context.PushTransform(matrix))
+        using (context.PushOpacity(drawGhost ? 0.5 : 1, new Rect(0, 0, length, 10)))
+            context.DrawLine(pen, new Point(0, 0), new Point(length, 0));
     }
 
     public void DrawLandmark(DrawingContext context, Landmark landmark, Rect rect)
@@ -616,11 +616,19 @@ public partial class MapView : UserControl
         MapViewModel.Pan -= correction;
     }
 
-    public FlyoutBase OpenFlyout(ViewModel viewModel)
+    public FlyoutBase? OpenFlyout(ViewModel viewModel)
     {
         MapViewModel.FlyoutViewModel = viewModel;
         var flyout = FlyoutBase.GetAttachedFlyout(this);
-        flyout!.ShowAt(this, showAtPointer: true);
+        if (flyout is PopupFlyoutBase popup)
+        {
+            popup.ShowAt(this, showAtPointer: true);
+        }
+        else
+        {
+            flyout?.ShowAt(this);
+        }
+
         if (viewModel is IOpenableAsFlyout ioaf) ioaf.Flyout = flyout;
         return flyout;
     }

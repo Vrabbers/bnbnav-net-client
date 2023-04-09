@@ -46,7 +46,7 @@ public partial class MainView : UserControl
     {
         var button = DayNightButton;
 
-        ((FluentTheme)Application.Current!.Styles[0]).Mode = button.IsNightMode ? FluentThemeMode.Dark : FluentThemeMode.Light;
+        Application.Current!.RequestedThemeVariant = button.IsNightMode ? ThemeVariant.Dark : ThemeVariant.Light;
     
         if (button.IsNightMode)
         {

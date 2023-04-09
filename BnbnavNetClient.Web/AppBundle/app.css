@@ -1,4 +1,21 @@
-﻿/* HTML styles for the splash screen */
+﻿:root {
+    --sat: env(safe-area-inset-top);
+    --sar: env(safe-area-inset-right);
+    --sab: env(safe-area-inset-bottom);
+    --sal: env(safe-area-inset-left);
+}
+
+/* HTML styles for the splash screen */
+
+.highlight {
+    color: white;
+    font-size: 2.5rem;
+    display: block;
+}
+
+.purple {
+    color: #8b44ac;
+}
 
 .icon {
     opacity: 0.05;
@@ -15,6 +32,11 @@
     pointer-events: none;
 }
 
+#avalonia-splash a {
+    color: whitesmoke;
+    text-decoration: none;
+}
+
 .center {
     display: flex;
     justify-content: center;
@@ -26,23 +48,14 @@
     position: relative;
     height: 100%;
     width: 100%;
-    font-family: Bahnschrift, sans-serif;
+    color: whitesmoke;
+    background: #1b2a4e;
+    font-family: 'Nunito', sans-serif;
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
     justify-content: center;
     align-items: center;
-}
-
-h1 {
-    font-weight: normal;
-    margin: 0;
-    font-size: 36pt;
-}
-
-a {
-    color: black;
-    font-size: 14pt;
 }
 
 .splash-close {

@@ -89,13 +89,16 @@ public class NodeJoinEditController : EditController
         {
             _lockRoadGhosts = true;
             var flyout = mapView.OpenFlyout(new NewEdgeFlyoutViewModel(_editorService, _roadGhosts));
-            
-            flyout.Closed += (_, _) =>
+
+            if (flyout is not null)
             {
-                _lockRoadGhosts = false;
-                _roadGhosts.Clear();
-                mapView.InvalidateVisual();
-            };
+                flyout.Closed += (_, _) =>
+                {
+                    _lockRoadGhosts = false;
+                    _roadGhosts.Clear();
+                    mapView.InvalidateVisual();
+                };
+            }
         }
     }
 

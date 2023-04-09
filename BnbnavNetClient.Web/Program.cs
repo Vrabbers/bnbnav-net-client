@@ -1,9 +1,10 @@
 ﻿using System.Runtime.Versioning;
 using Avalonia;
-using Avalonia.Web;
+using Avalonia.Browser;
 using Avalonia.ReactiveUI;
 using BnbnavNetClient;
 using BnbnavNetClient.I18Next;
+using BnbnavNetClient.Services.TextToSpeech;
 using BnbnavNetClient.Settings;
 using BnbnavNetClient.Web.TextToSpeech;
 
@@ -11,12 +12,15 @@ using BnbnavNetClient.Web.TextToSpeech;
 
 internal partial class Program
 {
-    static void Main(string[] args) => BuildAvaloniaApp()
+    static async Task Main()
+    {
+        await BuildAvaloniaApp()
+        .With<ITextToSpeechProvider>(new WebSpeechTextToSpeechProvider())
         .UseReactiveUI()
         .UseI18NextLocalization()
-        .With(new WebSpeechTextToSpeechProvider())
         .UseSettings(new DummySettingsManager())
-        .SetupBrowserApp("out");
+        .StartBrowserAppAsync("out");
+    }
 
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>();

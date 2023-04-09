@@ -66,13 +66,15 @@ public class LandmarkUpdateOperation : NetworkOperation
     {
         if (_updateAs is not null)
         {
-            using (context.PushOpacity(0.5))
-                mapView.DrawLandmark(context, _updateAs, _updateAs.BoundingRect(mapView));
+            var rect = _updateAs.BoundingRect(mapView);
+            using (context.PushOpacity(0.5, rect))
+                mapView.DrawLandmark(context, _updateAs, rect);
         }
         else if (_toUpdate is not null)
         {
-            using (context.PushOpacity(0.5))
-                mapView.DrawLandmark(context, _toUpdate, _toUpdate.BoundingRect(mapView));
+            var rect = _toUpdate.BoundingRect(mapView);
+            using (context.PushOpacity(0.5, rect))
+                mapView.DrawLandmark(context, _toUpdate, rect);
         }
     }
 }

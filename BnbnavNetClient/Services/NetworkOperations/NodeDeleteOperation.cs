@@ -28,11 +28,9 @@ public class NodeDeleteOperation : NetworkOperation
         }
         catch (HttpRequestException)
         {
-
         }
         catch (NetworkOperationException)
         {
-            
         }
     }
 
@@ -40,7 +38,8 @@ public class NodeDeleteOperation : NetworkOperation
     {
         var nodeBorder = (Pen)mapView.FindResource("NodeBorder")!;
         var nodeBrush = (Brush)mapView.FindResource("NodeFill")!;
-        using (context.PushOpacity(0.5))
-            context.DrawRectangle(nodeBrush, nodeBorder, _node.BoundingRect(mapView));
+        var rect = _node.BoundingRect(mapView);
+        using (context.PushOpacity(0.5, rect))
+            context.DrawRectangle(nodeBrush, nodeBorder, rect);
     }
 }

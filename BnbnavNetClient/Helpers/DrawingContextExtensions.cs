@@ -52,9 +52,9 @@ public static class DrawingContextExtensions
         var preRotateMatrix = Matrix.CreateTranslation(-sourceSize.Width / 2, -sourceSize.Width / 2);
 
         using (context.PushClip(rect))
-        using (context.PushPreTransform(translateMatrix * scaleMatrix))
-        using (context.PushTransformContainer())
-        using (context.PushPostTransform(preRotateMatrix * rotateMatrix * preRotateMatrix.Invert()))
+        using (context.PushTransform(translateMatrix * scaleMatrix))
+        using (context.PushTransform(Matrix.Identity))
+        using (context.PushTransform(preRotateMatrix * rotateMatrix * preRotateMatrix.Invert()))
         // using (context.PushPostTransform(rotateMatrix))
         // using (context.PushPostTransform(preRotateMatrix.Invert()))
             context.Custom(new SvgCustomDrawOperation(rect, svg));
