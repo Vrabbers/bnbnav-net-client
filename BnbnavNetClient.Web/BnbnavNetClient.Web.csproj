@@ -9,10 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="false" Trim="false" />
-  </ItemGroup>
-
-  <ItemGroup>
     <WasmExtraFilesToDeploy Include="AppBundle\**" />
   </ItemGroup>
 

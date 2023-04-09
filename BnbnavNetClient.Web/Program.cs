@@ -12,15 +12,12 @@ using BnbnavNetClient.Web.TextToSpeech;
 
 internal partial class Program
 {
-    static async Task Main()
-    {
-        await BuildAvaloniaApp()
+    static async Task Main() => await BuildAvaloniaApp()
         .With<ITextToSpeechProvider>(new WebSpeechTextToSpeechProvider())
         .UseReactiveUI()
         .UseI18NextLocalization()
         .UseSettings(new DummySettingsManager())
         .StartBrowserAppAsync("out");
-    }
 
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>();
