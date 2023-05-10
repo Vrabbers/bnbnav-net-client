@@ -9,7 +9,7 @@
              x:CompileBindings="True"
              FlowDirection="LeftToRight">
   <UserControl.ContextMenu> 
-    <ContextMenu Items="{Binding ContextMenuItems}" />
+    <ContextMenu ItemsSource="{Binding ContextMenuItems}" />
   </UserControl.ContextMenu>
 
   <FlyoutBase.AttachedFlyout>    

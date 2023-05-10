@@ -17,7 +17,7 @@
           <TextBlock Text="{str:Tr Key=LANDMARK_NAME}" />
           <TextBox Watermark="{str:Tr Key=LANDMARK_NAME}" Text="{Binding LandmarkName}"/>
           <TextBlock Text="{str:Tr Key=LANDMARK_TYPE}" />
-          <ComboBox HorizontalAlignment="Stretch" Items="{Binding LandmarkTypes}" SelectedItem="{Binding SelectedLandmarkType}">
+          <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding LandmarkTypes}" SelectedItem="{Binding SelectedLandmarkType}">
             <ComboBox.ItemTemplate>
               <DataTemplate>
                 <TextBlock Text="{Binding HumanReadableName}" />
@@ -31,7 +31,7 @@
           <TextBlock Text="{str:Tr Key=LABEL_NAME}" />
           <TextBox Watermark="{str:Tr Key=LABEL_NAME}" Text="{Binding LabelName}"/>
           <TextBlock Text="{str:Tr Key=LABEL_TYPE}" />
-          <ComboBox HorizontalAlignment="Stretch" Items="{Binding LabelTypes}" SelectedItem="{Binding SelectedLabelType}">
+          <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding LabelTypes}" SelectedItem="{Binding SelectedLabelType}">
             <ComboBox.ItemTemplate>
               <DataTemplate>
                 <TextBlock Text="{Binding HumanReadableName}" />

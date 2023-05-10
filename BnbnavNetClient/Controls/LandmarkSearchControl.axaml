@@ -22,7 +22,7 @@
                             <!-- </TextBox.InnerRightContent> -->
                         </TextBox>
                         <StackPanel IsVisible="{TemplateBinding SelectedLandmark, Converter={x:Static ObjectConverters.IsNull}}" VerticalAlignment="Stretch">
-                            <ListBox Items="{TemplateBinding SearchResults}" SelectedItem="{Binding RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, Path=SelectedLandmark}">
+                            <ListBox ItemsSource="{TemplateBinding SearchResults}" SelectedItem="{Binding RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay, Path=SelectedLandmark}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate x:DataType="models:ISearchable">
                                         <StackPanel>

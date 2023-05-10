@@ -10,7 +10,7 @@
              x:CompileBindings="True">
   <StackPanel VerticalAlignment="Center" Margin="15" Spacing="2">
     <TextBlock Text="{str:Tr Key=LANG_CHANGE}"/>
-    <ComboBox HorizontalAlignment="Stretch" Items="{Binding AvailableLanguages}" SelectedItem="{Binding ChosenLanguage}">
+    <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding AvailableLanguages}" SelectedItem="{Binding ChosenLanguage}">
       <ComboBox.ItemTemplate>
         <DataTemplate>
           <TextBlock Text="{Binding PrettyPrint}"/>

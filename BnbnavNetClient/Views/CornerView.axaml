@@ -88,7 +88,7 @@
                     <TextBlock Text="{str:Tr Key=ROUTE_WARNING_HAVE_WARP}" />
                 </StackPanel>
                 
-                <ListBox Items="{Binding MapService.CurrentRoute.Instructions}" MaxHeight="300">
+                <ListBox ItemsSource="{Binding MapService.CurrentRoute.Instructions}" MaxHeight="300">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <controls:InstructionDisplayControl Instruction="{Binding}" />
