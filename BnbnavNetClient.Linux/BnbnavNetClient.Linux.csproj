@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\BnbnavNetClient.DBus\BnbnavNetClient.DBus.csproj" />
       <ProjectReference Include="..\BnbnavNetClient\BnbnavNetClient.csproj" />
     </ItemGroup>
 
