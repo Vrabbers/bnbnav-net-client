@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\BnbnavNetClient.JsonRpc\BnbnavNetClient.JsonRpc.csproj" />
       <ProjectReference Include="..\BnbnavNetClient\BnbnavNetClient.csproj" />
     </ItemGroup>
 
