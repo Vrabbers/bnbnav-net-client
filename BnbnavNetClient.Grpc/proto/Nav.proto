@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+service Nav {
+  rpc Ping (PingMessage) returns (PingReply);
+}
+
+message PingMessage {
+  
+}
+
+message PingReply {
+  string message = 1;
+}

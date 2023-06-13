@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\BnbnavNetClient.Grpc\BnbnavNetClient.Grpc.csproj" />
       <ProjectReference Include="..\BnbnavNetClient\BnbnavNetClient.csproj" />
     </ItemGroup>
 
