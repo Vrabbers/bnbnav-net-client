@@ -20,7 +20,7 @@ public class JsonRpcSession
     {
         var formatter = new JsonMessageFormatter(Encoding.UTF8);
         var handler = new NewLineDelimitedMessageHandler(_stream, _stream, formatter);
-        var rpc = new StreamJsonRpc.JsonRpc(handler);
+        var rpc = new StreamJsonRpc.JsonRpc(handler, _sessionObject);
         rpc.StartListening();
         try
         {
