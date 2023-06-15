@@ -1,6 +1,6 @@
 namespace BnbnavNetClient.JsonRpc;
 
-public class BnbnavJsonRpcSession
+public class JsonRpcSessionObject
 {
     public Task<string> PingAsync()
     {

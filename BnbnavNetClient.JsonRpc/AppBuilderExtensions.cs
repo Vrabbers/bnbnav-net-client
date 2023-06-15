@@ -6,7 +6,7 @@ public static class AppBuilderExtensions
 {
     public static AppBuilder UseJsonRpc(this AppBuilder appBuilder, string domainSocket)
     {
-        appBuilder.With(new BnbnavJsonRpcServer(domainSocket));
+        appBuilder.With(new JsonRpcServer(domainSocket));
         return appBuilder;
     }   
 }

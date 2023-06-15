@@ -1,11 +1,12 @@
 using System.Net.Sockets;
+using StreamJsonRpc;
 
 namespace BnbnavNetClient.JsonRpc;
 
-public class BnbnavJsonRpcServer
+public class JsonRpcServer
 {
     readonly Socket _socket;
-    public BnbnavJsonRpcServer(string domainSocket)
+    public JsonRpcServer(string domainSocket)
     {
         File.Delete(domainSocket);
         
@@ -23,10 +24,7 @@ public class BnbnavJsonRpcServer
             while (true)
             {
                 var client = await _socket.AcceptAsync(ct);
-                var stream = new NetworkStream(client);
-                var session = new BnbnavJsonRpcSession();
-                var rpc = StreamJsonRpc.JsonRpc.Attach(stream, session);
-                rpc.StartListening();
+                var session = new JsonRpcSession(client);
             }
         }
         catch (OperationCanceledException)
