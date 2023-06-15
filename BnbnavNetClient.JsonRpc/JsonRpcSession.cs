@@ -1,4 +1,5 @@
 using System.Net.Sockets;
+using System.Text;
 using StreamJsonRpc;
 
 namespace BnbnavNetClient.JsonRpc;
@@ -17,7 +18,10 @@ public class JsonRpcSession
 
     public async Task StartRpcAsync()
     {
-        var rpc = StreamJsonRpc.JsonRpc.Attach(_stream, _sessionObject);
+        var formatter = new JsonMessageFormatter(Encoding.UTF8);
+        var handler = new NewLineDelimitedMessageHandler(_stream, _stream, formatter);
+        var rpc = new StreamJsonRpc.JsonRpc(handler);
+        rpc.StartListening();
         try
         {
             await rpc.Completion;
