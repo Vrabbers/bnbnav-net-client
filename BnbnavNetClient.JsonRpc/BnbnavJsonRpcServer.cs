@@ -26,6 +26,7 @@ public class BnbnavJsonRpcServer
                 var stream = new NetworkStream(client);
                 var session = new BnbnavJsonRpcSession();
                 var rpc = StreamJsonRpc.JsonRpc.Attach(stream, session);
+                rpc.StartListening();
             }
         }
         catch (OperationCanceledException)
