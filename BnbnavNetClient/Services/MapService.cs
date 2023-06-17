@@ -350,7 +350,7 @@ public sealed class MapService : ReactiveObject
         }, ct);
     }
 
-    public static async Task<MapService> DownloadInitialMapAsync()
+    public static async Task<MapService?> DownloadInitialMapAsync()
     {
         var content = await HttpClient.GetStringAsync("/api/data");
         using var jsonDom = JsonDocument.Parse(content);

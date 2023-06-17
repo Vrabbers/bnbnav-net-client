@@ -110,6 +110,7 @@ public sealed class MainViewModel : ViewModel
     public async Task InitMapService()
     {
         var mapService = await MapService.DownloadInitialMapAsync();
+        AvaloniaLocator.Current.GetRequiredService<MapServiceProxy>().MapService = mapService;
         MapEditorService.MapService = mapService;
         
         this.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(mapService, x => x.LoggedInUsername);

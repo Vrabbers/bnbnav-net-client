@@ -24,7 +24,7 @@ public class CornerViewModel : ViewModel
 {
     readonly MainViewModel _mainViewModel;
     readonly IAvaloniaI18Next _i18N;
-    public MapService MapService { get; }
+    public MapService? MapService { get; }
 
     [Reactive]
     public AvailableUi CurrentUi { get; set; } = AvailableUi.Search;
@@ -76,7 +76,7 @@ public class CornerViewModel : ViewModel
     [Reactive]
     public bool IsMuteEnabled { get; set; }
 
-    public CornerViewModel(MapService mapService, MainViewModel mainViewModel)
+    public CornerViewModel(MapService? mapService, MainViewModel mainViewModel)
     {
         _mainViewModel = mainViewModel;
         MapService = mapService;

@@ -25,7 +25,7 @@ public class MapViewModel : ViewModel
     [Reactive]
     public double Scale { get; set; } = 1;
 
-    public MapService MapService { get; }
+    public MapService? MapService { get; }
 
     [ObservableAsProperty] 
     [UsedImplicitly] 
@@ -72,7 +72,7 @@ public class MapViewModel : ViewModel
     [Reactive]
     public AvailableUi CurrentUi { get; set; } = AvailableUi.Search;
 
-    public MapViewModel(MapService mapService, MainViewModel mainViewModel)
+    public MapViewModel(MapService? mapService, MainViewModel mainViewModel)
     {
         _mainViewModel = mainViewModel;
         DeleteNodeCommand = ReactiveCommand.Create(() => { }, this.WhenAnyValue(me => me.LastRightClickHitTest).Select(list => list.Any(x => x is Node)));

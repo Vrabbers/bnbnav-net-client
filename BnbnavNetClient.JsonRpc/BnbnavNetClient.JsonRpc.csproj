@@ -12,4 +12,9 @@
         <PackageReference Include="StreamJsonRpc" Version="2.15.29" />
     </ItemGroup>
 
+
+    <ItemGroup>
+      <ProjectReference Include="..\BnbnavNetClient\BnbnavNetClient.csproj" />
+    </ItemGroup>
+
 </Project>

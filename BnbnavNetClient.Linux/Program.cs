@@ -16,10 +16,10 @@ GC.KeepAlive(typeof(Avalonia.Svg.Skia.Svg).Assembly);
 return AppBuilder.Configure<App>()
     .UsePlatformDetect()
     .LogToTrace()
-    .UseReactiveUI()
     .UseJsonRpc($"{Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR") ?? $"/tmp/runtime-{Environment.UserName}"}/bnbnav")
     .UseI18NextLocalization()
     .With<ITextToSpeechProvider>(new SpdTextToSpeechProvider())
     .UseSettings(new SettingsManagerJsonFile())
+    .UseBnbnavAvalonia()
     
     .StartWithClassicDesktopLifetime(args);

@@ -13,10 +13,10 @@ public class JsonRpcServer
         _socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
         _socket.Bind(new UnixDomainSocketEndPoint(domainSocket));
 
-        _ = Listen(CancellationToken.None);
+        _ = ListenAsync(CancellationToken.None);
     }
 
-    public async Task Listen(CancellationToken ct)
+    public async Task ListenAsync(CancellationToken ct)
     {
         try
         {
@@ -24,7 +24,7 @@ public class JsonRpcServer
             while (true)
             {
                 var client = await _socket.AcceptAsync(ct);
-                var session = new JsonRpcSession(client);
+                _ = new JsonRpcSession(client);
             }
         }
         catch (OperationCanceledException)
