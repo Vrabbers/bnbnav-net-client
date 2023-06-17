@@ -29,7 +29,7 @@ public class JsonRpcSessionObject
     public Task<string> GetLoggedInUsernameAsync()
     {
         if (_mapService is null) throw new InvalidOperationException();
-        if (_mapService.LoggedInUsername is null)
+        if (string.IsNullOrEmpty(_mapService.LoggedInUsername))
             throw new LocalRpcException("No logged in user")
             {
                 ErrorCode = JsonRpcError.NoLoggedInUser
