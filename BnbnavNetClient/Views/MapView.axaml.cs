@@ -322,7 +322,7 @@ public partial class MapView : UserControl
             ToWorld(_currentPointerPosition).Deconstruct(out var xd, out var zd);
             var x = (int)xd;
             var z = (int)zd;
-            var landmark = new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z), _i18N["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
+            var landmark = new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z, "world"), _i18N["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
 
             MapViewModel.ContextMenuItems.AddRange(new MenuItem[]
             {

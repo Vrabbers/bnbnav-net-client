@@ -24,7 +24,7 @@ namespace BnbnavNetClient.Services;
 
 public sealed class MapService : ReactiveObject
 {
-    const int ServerApiVersion = 1; 
+    const int ServerApiVersion = 2; 
     
     public class ServerResponse
     {
@@ -59,10 +59,8 @@ public sealed class MapService : ReactiveObject
         BaseAddress = new Uri(BaseUrl),
         DefaultRequestHeaders =
         {
-            UserAgent =
-            {
-                new ProductInfoHeaderValue("bnbnav-dotnet", "1.0")                
-            }
+            { "User-Agent", new ProductInfoHeaderValue("bnbnav-dotnet", "1.0").ToString() },
+            { "X-Bnbnav-Api-Version", ServerApiVersion.ToString() }
         }
     };
 
@@ -82,6 +80,9 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Road> Roads { get; }
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
     public ReadOnlyDictionary<string, Player> Players { get; }
+
+    public IEnumerable<string> Worlds => Nodes.Values.Select(node => node.World)
+        .Union(Players.Values.Select(player => player.World)).Distinct();
     List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
     public Interaction<(string, string, bool), Unit> ErrorMessageInteraction { get; } = new();
@@ -328,7 +329,7 @@ public sealed class MapService : ReactiveObject
             IEnumerable<Edge> GenerateTemporaryEdgesFromPointToEdge(Node point, Edge edge, bool pointToEdge)
             {
                 _ = edge.Line.RightAngleIntersection(point.Point, out var normalLine);
-                var tempNode = new TemporaryNode((int)normalLine.Point1.X, 0, (int)normalLine.Point1.Y);
+                var tempNode = new TemporaryNode((int)normalLine.Point1.X, 0, (int)normalLine.Point1.Y, point.World);
 
                 var isTwoWay = OppositeEdge(edge, edges) is not null;
                 if (pointToEdge)
@@ -423,7 +424,8 @@ public sealed class MapService : ReactiveObject
             var x = obj.GetProperty("x"u8).GetInt32();
             var y = obj.GetProperty("y"u8).GetInt32();
             var z = obj.GetProperty("z"u8).GetInt32();
-            nodes.Add(id, new Node(id, x, y, z));
+            var world = obj.GetProperty("world"u8).GetString()!;
+            nodes.Add(id, new Node(id, x, y, z, world));
         }
 
         var jsonLandmarks = root.GetProperty("landmarks"u8);
@@ -487,7 +489,7 @@ public sealed class MapService : ReactiveObject
             {
                 case NodeCreated node:
                     type = nameof(Nodes);
-                    _nodes.Add(id, new Node(id, node.X, node.Y, node.Z));
+                    _nodes.Add(id, new Node(id, node.X, node.Y, node.Z, node.World));
                     break;
 
                 case UpdatedNode node:

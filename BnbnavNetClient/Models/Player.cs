@@ -139,6 +139,8 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
             }
         }
 
+        World = evt.World;
+
         Task.Run(() =>
         {
             if (!_lastSnapMutex.WaitOne(0)) return;
@@ -190,5 +192,6 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
     public int X => (int)double.Round(Xd);
     public int Y => (int)double.Round(Yd);
     public int Z => (int)double.Round(Zd);
+    public string World { get; private set; }
     public Point Point => new(X, Z);
 }

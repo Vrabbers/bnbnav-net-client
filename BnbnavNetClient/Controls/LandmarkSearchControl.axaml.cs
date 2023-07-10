@@ -71,7 +71,8 @@ public class LandmarkSearchControl : TemplatedControl
                 .Union(MapService.Landmarks.Values.Where(x =>
                     x.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase)));
 
-            var coordinate = TemporaryLandmark.ParseCoordinateString(SearchQuery);
+            //TODO: Update world to current world
+            var coordinate = TemporaryLandmark.ParseCoordinateString(SearchQuery, "world");
             if (coordinate is not null) listItems = listItems.Prepend(coordinate);
             
             SearchResults = new AvaloniaList<ISearchable>(listItems);
