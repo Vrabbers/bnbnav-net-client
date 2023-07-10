@@ -26,7 +26,7 @@ public sealed class MainViewModel : ViewModel
     public string ChosenWorld { get; set; }
     
     [ObservableAsProperty]
-    public IEnumerable<string> AvailableWorlds { get; set; }
+    public IEnumerable<string> AvailableWorlds { get; }
 
     [ObservableAsProperty]
     public string LoginText { get; }

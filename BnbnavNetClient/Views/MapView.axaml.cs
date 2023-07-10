@@ -262,6 +262,8 @@ public partial class MapView : UserControl
                 MapViewModel.Rotation = 0;
             }
         }));
+        MapViewModel.WhenPropertyChanged(x => x.ChosenWorld)
+            .Subscribe(Observer.Create<PropertyValue<MapViewModel, string>>(_ => UpdateDrawnItems()));
 
         MapViewModel.MapService.PlayerUpdateInteraction.RegisterHandler(interaction =>
         {
@@ -363,11 +365,13 @@ public partial class MapView : UserControl
         if (MapViewModel.CurrentUi == AvailableUi.Go)
         {
             MapViewModel.RotationOrigin = new Vector(0.6, 0.8);
+            MapViewModel.ChangeWorld(loggedInPlayer.World);
             PanTo(loggedInPlayer.MarkerCoordinates, 0.6, 0.8);
             MapViewModel.Rotation = loggedInPlayer.MarkerAngle - 90;
         }
         else if (MapViewModel.FollowMeEnabled)
         {
+            MapViewModel.ChangeWorld(loggedInPlayer.World);
             PanTo(loggedInPlayer.MarkerCoordinates);
         }
     }
@@ -410,16 +414,16 @@ public partial class MapView : UserControl
 
         var bounds = boundsRect ?? Bounds;
 
-        DrawnEdges = mapService.AllEdges.Select(edge =>
+        DrawnEdges = mapService.AllEdges.Where(edge => edge.From.World == edge.To.World && edge.To.World == MapViewModel.ChosenWorld).Select(edge =>
         {
             var (from, to) = edge.Extents(this);
             return (from, to, edge);
         }).Where(edge => GeoHelper.LineIntersects(edge.from, edge.to, bounds)).ToList();
 
-        DrawnLandmarks = mapService.Landmarks.Values.Select(landmark => (landmark.BoundingRect(this), landmark))
+        DrawnLandmarks = mapService.Landmarks.Values.Where(landmark => landmark.Node.World == MapViewModel.ChosenWorld).Select(landmark => (landmark.BoundingRect(this), landmark))
             .Where(landmark => bounds.Intersects(landmark.Item1)).ToList();
 
-        DrawnNodes = mapService.Nodes.Values.Select(node => (node.BoundingRect(this), node))
+        DrawnNodes = mapService.Nodes.Values.Where(node => node.World == MapViewModel.ChosenWorld).Select(node => (node.BoundingRect(this), node))
             .Where(node => bounds.Intersects(node.Item1)).ToList();
         
         InvalidateVisual();
@@ -561,7 +565,7 @@ public partial class MapView : UserControl
             operation.Render(this, context);
         }
 
-        foreach (var player in MapViewModel.MapService.Players.Values)
+        foreach (var player in MapViewModel.MapService.Players.Values.Where(player => player.World == MapViewModel.ChosenWorld))
         {
 
             const int playerSize = 48;

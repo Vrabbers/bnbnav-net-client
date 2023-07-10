@@ -81,7 +81,8 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
     public ReadOnlyDictionary<string, Player> Players { get; }
 
-    [Reactive] public IEnumerable<string> Worlds { get; private set; } = new List<string>();
+    [Reactive]
+    public IEnumerable<string> Worlds { get; private set; }
 
     List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
@@ -314,10 +315,7 @@ public sealed class MapService : ReactiveObject
             .Union(Players.Values.Select(player => player.World)).Distinct().ToList();
         
         // Only set if different in order to avoid flickering in UI
-        if (!newWorlds.SequenceEqual(Worlds))
-        {
-            Worlds = newWorlds;
-        }
+        Worlds = newWorlds;
     }
 
     public async Task<CalculatedRoute> ObtainCalculatedRoute(ISearchable from, ISearchable to, RouteOptions routeOptions, CancellationToken ct)

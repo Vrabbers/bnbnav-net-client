@@ -71,6 +71,9 @@ public class MapViewModel : ViewModel
 
     [Reactive]
     public AvailableUi CurrentUi { get; set; } = AvailableUi.Search;
+    
+    [ObservableAsProperty]
+    public string ChosenWorld { get; set; }
 
     public MapViewModel(MapService mapService, MainViewModel mainViewModel)
     {
@@ -82,6 +85,7 @@ public class MapViewModel : ViewModel
 
         mainViewModel.WhenAnyValue(x => x.FollowMeEnabled).ToPropertyEx(this, x => x.FollowMeEnabled);
         mainViewModel.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(this, x => x.LoggedInUsername);
+        mainViewModel.WhenAnyValue(x => x.ChosenWorld).ToPropertyEx(this, x => x.ChosenWorld);
     }
     
     public void QueueDelete(params MapItem[] mapItems)
@@ -110,6 +114,11 @@ public class MapViewModel : ViewModel
     public void DisableFollowMe()
     {
         _mainViewModel.FollowMeEnabled = false;
+    }
+
+    public void ChangeWorld(string world)
+    {
+        _mainViewModel.ChosenWorld = world;
     }
 }
 
