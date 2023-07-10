@@ -22,6 +22,12 @@ public sealed class MainViewModel : ViewModel
     [Reactive]
     public bool FollowMeEnabled { get; set; }
 
+    [Reactive]
+    public string ChosenWorld { get; set; }
+    
+    [ObservableAsProperty]
+    public IEnumerable<string> AvailableWorlds { get; set; }
+
     [ObservableAsProperty]
     public string LoginText { get; }
 
@@ -111,8 +117,11 @@ public sealed class MainViewModel : ViewModel
     {
         var mapService = await MapService.DownloadInitialMapAsync();
         MapEditorService.MapService = mapService;
+
+        ChosenWorld = mapService.Worlds.FirstOrDefault()!;
         
         this.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(mapService, x => x.LoggedInUsername);
+        mapService.WhenAnyValue(x => x.Worlds).ToPropertyEx(this, x => x.AvailableWorlds);
 
         MapViewModel = new MapViewModel(mapService, this);
         CornerViewModel = new CornerViewModel(mapService, this);

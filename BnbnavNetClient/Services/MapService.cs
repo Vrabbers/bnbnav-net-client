@@ -81,8 +81,8 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
     public ReadOnlyDictionary<string, Player> Players { get; }
 
-    public IEnumerable<string> Worlds => Nodes.Values.Select(node => node.World)
-        .Union(Players.Values.Select(player => player.World)).Distinct();
+    [Reactive] public IEnumerable<string> Worlds { get; private set; } = new List<string>();
+
     List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
     public Interaction<(string, string, bool), Unit> ErrorMessageInteraction { get; } = new();
@@ -308,6 +308,18 @@ public sealed class MapService : ReactiveObject
         }));
     }
 
+    void UpdateWorlds()
+    {
+        var newWorlds = Nodes.Values.Select(node => node.World)
+            .Union(Players.Values.Select(player => player.World)).Distinct().ToList();
+        
+        // Only set if different in order to avoid flickering in UI
+        if (!newWorlds.SequenceEqual(Worlds))
+        {
+            Worlds = newWorlds;
+        }
+    }
+
     public async Task<CalculatedRoute> ObtainCalculatedRoute(ISearchable from, ISearchable to, RouteOptions routeOptions, CancellationToken ct)
     {
         return await Task.Run(() =>
@@ -476,6 +488,7 @@ public sealed class MapService : ReactiveObject
         await ws.ConnectAsync(CancellationToken.None);
         var service = new MapService(nodes.Values, edges, roads.Values, landmarks, annotations, ws);
         _ = service.ProcessChangesAsync();
+        service.UpdateWorlds();
         return service;
     }
 
@@ -490,6 +503,7 @@ public sealed class MapService : ReactiveObject
                 case NodeCreated node:
                     type = nameof(Nodes);
                     _nodes.Add(id, new Node(id, node.X, node.Y, node.Z, node.World));
+                    UpdateWorlds();
                     break;
 
                 case UpdatedNode node:
@@ -497,11 +511,13 @@ public sealed class MapService : ReactiveObject
                     _nodes[id].X = node.X;
                     _nodes[id].Y = node.Y;
                     _nodes[id].Z = node.Z;
+                    UpdateWorlds();
                     break;
 
                 case NodeRemoved:
                     type = nameof(Nodes);
                     _nodes.Remove(id);
+                    UpdateWorlds();
                     break;
 
                 case RoadCreated road:
@@ -556,6 +572,7 @@ public sealed class MapService : ReactiveObject
                         p.HandlePlayerMovedEvent(player);
                         _players.Add(player.Id!, p);
                     }
+                    UpdateWorlds();
 
                     break;
                 case PlayerLeft player:
@@ -565,6 +582,7 @@ public sealed class MapService : ReactiveObject
                         _players[player.Id!].HandlePlayerGoneEvent();
                         _players.Remove(player.Id!);
                     }
+                    UpdateWorlds();
                     break;
             }
 
