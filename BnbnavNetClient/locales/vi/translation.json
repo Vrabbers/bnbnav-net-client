@@ -13,6 +13,8 @@
   "EDIT_LANDMARK": "Sửa địa danh",
   "EDIT_MODE": "Chế độ sửa đổi",
   "EDIT_ROAD": "Sửa đường",
+  "ERROR_OUT_OF_DATE_EDIT_MESSAGE": "",
+  "ERROR_OUT_OF_DATE_EDIT_TITLE": "",
   "EXISTING": "Tồn tại",
   "EXISTING_ROAD": "Đường đã tồn tại",
   "FOLLOWING": "Đang theo dõi {{user}}",
@@ -46,6 +48,7 @@
   "INSTRUCTION_TURN_AROUND": "Vòng ngược lại vào {{road}}",
   "INSTRUCTION_TURN_LEFT": "Quẹo trái vào {{road}}",
   "INSTRUCTION_TURN_RIGHT": "Quẹo phải vào {{road}}",
+  "JOIN": "Nối",
   "LABEL": "Nhãn",
   "LABEL_CITY": "Thành phố",
   "LABEL_COUNTRY": "Quốc gia",
@@ -121,10 +124,9 @@
   "ROUTE_WARNING_HAVE_WARP": "Tuyến đường này chứa đường dịch chuyển tức thời",
   "SAVE": "Lưu",
   "SEARCH": "Tìm kiếm",
+  "SELECT": "Chọn",
   "SPLICE": "Ghép mộng",
   "SPY_OPTIONS": "Tùy chọn tỏa sáng",
   "START": "Bắt đầu",
-  "UPDATE": "Cập nhật",
-  "JOIN": "Nối",
-  "SELECT": "Chọn"
+  "UPDATE": "Cập nhật"
 }

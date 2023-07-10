@@ -14,6 +14,8 @@ using System.Reactive.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
+using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.NetworkOperations;
 using DynamicData.Binding;
 using ReactiveUI.Fody.Helpers;
@@ -22,6 +24,8 @@ namespace BnbnavNetClient.Services;
 
 public sealed class MapService : ReactiveObject
 {
+    const int ServerApiVersion = 1; 
+    
     public class ServerResponse
     {
         public required HttpStatusCode StatusCode { get; init; }
@@ -71,6 +75,7 @@ public sealed class MapService : ReactiveObject
     static string? _authenticationToken;
 
     readonly BnbnavWebsocketService _websocketService;
+    readonly IAvaloniaI18Next _i18N;
 
     public ReadOnlyDictionary<string, Node> Nodes { get; }
     public ReadOnlyDictionary<string, Edge> Edges { get; }
@@ -79,6 +84,7 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Player> Players { get; }
     List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
+    public Interaction<(string, string, bool), Unit> ErrorMessageInteraction { get; } = new();
     public Interaction<Unit, Unit> PlayerUpdateInteraction { get; } = new();
     
     [Reactive]
@@ -118,6 +124,8 @@ public sealed class MapService : ReactiveObject
         _players = new Dictionary<string, Player>();
         Players = _players.AsReadOnly();
         _websocketService = websocketService;
+        _i18N = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+
 
         this.WhenAnyValue(x => x.LoggedInUsername).Subscribe(Observer.Create<string?>(_ => UpdateLoggedInPlayer()));
         this.WhenPropertyChanged(x => x.Players)
@@ -173,6 +181,51 @@ public sealed class MapService : ReactiveObject
             return await HandleUnauthorizedResponse(path, json);
         }
 
+        if (resp.StatusCode == HttpStatusCode.BadRequest)
+        {
+            return await HandleBadRequest(resp);
+        }
+
+        return new ServerResponse
+        {
+            StatusCode = resp.StatusCode,
+            Stream = await resp.Content.ReadAsStreamAsync()
+        };
+    }
+
+    async Task<ServerResponse> HandleBadRequest(HttpResponseMessage resp)
+    {
+        var apiVersionHeader = resp.Headers.GetValues("X-Bnbnav-Api-Version").FirstOrDefault();
+        if (apiVersionHeader is null)
+        {
+            return new ServerResponse
+            {
+                StatusCode = resp.StatusCode,
+                Stream = await resp.Content.ReadAsStreamAsync()
+            };
+        }
+
+        if (!int.TryParse(apiVersionHeader, out var apiVersion))
+        {
+            return new ServerResponse
+            {
+                StatusCode = resp.StatusCode,
+                Stream = await resp.Content.ReadAsStreamAsync()
+            };
+        }
+
+        if (apiVersion > ServerApiVersion)
+        {
+            // This client is too old
+            await ErrorMessageInteraction.Handle((_i18N["ERROR_OUT_OF_DATE_EDIT_TITLE"], _i18N["ERROR_OUT_OF_DATE_EDIT_MESSAGE"], true));
+            CancelPendingRequests(new NetworkOperationException($"Client out of date. Client API version: {ServerApiVersion}, Server API version: {apiVersion}"));
+            return new ServerResponse
+            {
+                StatusCode = resp.StatusCode,
+                Stream = await resp.Content.ReadAsStreamAsync()
+            };
+        }
+        
         return new ServerResponse
         {
             StatusCode = resp.StatusCode,

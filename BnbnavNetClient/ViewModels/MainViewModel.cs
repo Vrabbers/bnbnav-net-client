@@ -136,6 +136,29 @@ public sealed class MainViewModel : ViewModel
                 interaction.SetOutput(null);
             }
         });
+        MapViewModel.MapService.ErrorMessageInteraction.RegisterHandler(interaction =>
+        {
+            var (title, message, terminateEditMode) = interaction.Input;
+
+            if (terminateEditMode)
+            {
+                EditModeToken = null;
+                MapEditorService.EditModeEnabled = false;
+            }
+            
+            Popup = new AlertDialogViewModel()
+            {
+                Title = title,
+                Message = message,
+                Ok = ReactiveCommand.Create(() =>
+                {
+                    interaction.SetOutput(Unit.Default);
+                    Popup = null;
+                })
+            };
+            
+            return Task.CompletedTask;
+        });
         CornerViewModel.WhenAnyValue(x => x.SelectedLandmark).BindTo(MapViewModel, x => x.SelectedLandmark);
         CornerViewModel.WhenAnyValue(x => x.GoModeStartPoint).BindTo(MapViewModel, x => x.GoModeStartPoint);
         CornerViewModel.WhenAnyValue(x => x.GoModeEndPoint).BindTo(MapViewModel, x => x.GoModeEndPoint);

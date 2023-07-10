@@ -13,6 +13,8 @@
   "EDIT_LANDMARK": "Bezienswaardigheid Bewerken",
   "EDIT_MODE": "Bewerkmodus",
   "EDIT_ROAD": "Weg Bewerken",
+  "ERROR_OUT_OF_DATE_EDIT_MESSAGE": "",
+  "ERROR_OUT_OF_DATE_EDIT_TITLE": "",
   "EXISTING": "Bestaand",
   "EXISTING_ROAD": "Bestaande Weg",
   "FOLLOWING": "{{user}} aan het volgen",
@@ -48,6 +50,7 @@
   "INSTRUCTION_TURN_AROUND": "",
   "INSTRUCTION_TURN_LEFT": "",
   "INSTRUCTION_TURN_RIGHT": "",
+  "JOIN": "",
   "LABEL": "",
   "LABEL_CITY": "",
   "LABEL_COUNTRY": "",
@@ -123,10 +126,9 @@
   "ROUTE_WARNING_HAVE_WARP": "",
   "SAVE": "",
   "SEARCH": "",
+  "SELECT": "",
   "SPLICE": "",
   "SPY_OPTIONS": "",
   "START": "",
-  "UPDATE": "",
-  "JOIN": "",
-  "SELECT": ""
+  "UPDATE": ""
 }

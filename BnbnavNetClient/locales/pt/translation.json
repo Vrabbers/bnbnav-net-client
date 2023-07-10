@@ -13,6 +13,8 @@
   "EDIT_LANDMARK": "Editar lugar",
   "EDIT_MODE": "Modo editar",
   "EDIT_ROAD": "Editar rua",
+  "ERROR_OUT_OF_DATE_EDIT_MESSAGE": "",
+  "ERROR_OUT_OF_DATE_EDIT_TITLE": "",
   "EXISTING": "Existente",
   "EXISTING_ROAD": "Rua existente",
   "FOLLOWING": "Seguindo {{user}}",

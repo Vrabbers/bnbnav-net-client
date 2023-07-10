@@ -13,6 +13,8 @@
   "EDIT_LANDMARK": "Editare reper",
   "EDIT_MODE": "Mod editare",
   "EDIT_ROAD": "Editare drum",
+  "ERROR_OUT_OF_DATE_EDIT_MESSAGE": "",
+  "ERROR_OUT_OF_DATE_EDIT_TITLE": "",
   "EXISTING": "Existent",
   "EXISTING_ROAD": "Drum existent",
   "FOLLOWING": "Urmărești {{user}}",
@@ -50,6 +52,7 @@
   "INSTRUCTION_TURN_AROUND": "Întoarceți-vă pe {{road}}",
   "INSTRUCTION_TURN_LEFT": "Virați la stânga pe {{road}}",
   "INSTRUCTION_TURN_RIGHT": "Virați la dreapta pe {{road}}",
+  "JOIN": "Îmbinare",
   "LABEL": "Etichetă",
   "LABEL_CITY": "Oraș",
   "LABEL_COUNTRY": "Țară",
@@ -125,10 +128,9 @@
   "ROUTE_WARNING_HAVE_WARP": "Această rută conține șosele Warp",
   "SAVE": "Salvare",
   "SEARCH": "Căutare",
+  "SELECT": "Selectare",
   "SPLICE": "Tăiere",
   "SPY_OPTIONS": "Opțiuni spionaj",
   "START": "Pornire",
-  "UPDATE": "Actualizare",
-  "JOIN": "Îmbinare",
-  "SELECT": "Selectare"
+  "UPDATE": "Actualizare"
 }

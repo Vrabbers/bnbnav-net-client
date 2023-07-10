@@ -13,6 +13,8 @@
   "EDIT_LANDMARK": "Wahrzeichen bearbeiten",
   "EDIT_MODE": "Bearbeitungsmodus",
   "EDIT_ROAD": "",
+  "ERROR_OUT_OF_DATE_EDIT_MESSAGE": "",
+  "ERROR_OUT_OF_DATE_EDIT_TITLE": "",
   "EXISTING": "bestehenden",
   "EXISTING_ROAD": "Bestehende Straßen",
   "FOLLOWING": "Folge {{user}}",

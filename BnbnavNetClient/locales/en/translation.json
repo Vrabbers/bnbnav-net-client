@@ -13,6 +13,8 @@
   "EDIT_LANDMARK": "Edit Landmark",
   "EDIT_MODE": "Edit Mode",
   "EDIT_ROAD": "Edit Road",
+  "ERROR_OUT_OF_DATE_EDIT_MESSAGE": "Sorry, this version of bnbnav is too old to edit the map. Please update bnbnav.",
+  "ERROR_OUT_OF_DATE_EDIT_TITLE": "Bnbnav is out of date",
   "EXISTING": "Existing",
   "EXISTING_ROAD": "Existing Road",
   "FOLLOWING": "Following {{user}}",
@@ -48,6 +50,7 @@
   "INSTRUCTION_TURN_AROUND": "Perform a U-turn onto {{road}}",
   "INSTRUCTION_TURN_LEFT": "Turn left onto {{road}}",
   "INSTRUCTION_TURN_RIGHT": "Turn right onto {{road}}",
+  "JOIN": "Join",
   "LABEL": "Label",
   "LABEL_CITY": "City",
   "LABEL_COUNTRY": "Country",
@@ -123,10 +126,9 @@
   "ROUTE_WARNING_HAVE_WARP": "This route contains warp roads",
   "SAVE": "Save",
   "SEARCH": "Search",
+  "SELECT": "Select",
   "SPLICE": "Splice",
   "SPY_OPTIONS": "Spy Options",
   "START": "Start",
-  "UPDATE": "Update",
-  "JOIN": "Join",
-  "SELECT": "Select"
+  "UPDATE": "Update"
 }
