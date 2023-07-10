@@ -7,7 +7,7 @@
         <entry key="BnbnavNetClient/Controls/DayNightButton.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Controls/InstructionDisplayControl.axaml" value="BnbnavNetClient.Windows/BnbnavNetClient.Windows.csproj" />
         <entry key="BnbnavNetClient/Controls/InstructionImageControl.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
-        <entry key="BnbnavNetClient/Controls/LandmarkSearchControl.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Controls/LandmarkSearchControl.axaml" value="BnbnavNetClient.Linux/BnbnavNetClient.Linux.csproj" />
         <entry key="BnbnavNetClient/Resources/DayTheme.axaml" value="BnbnavNetClient.Linux/BnbnavNetClient.Linux.csproj" />
         <entry key="BnbnavNetClient/Resources/NightTheme.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Views/AlertDialogView.axaml" value="BnbnavNetClient.Linux/BnbnavNetClient.Linux.csproj" />

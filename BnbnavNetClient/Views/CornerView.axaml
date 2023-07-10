@@ -12,7 +12,7 @@
              x:CompileBindings="True">
     <StackPanel Width="400">
         <StackPanel IsVisible="{Binding IsInSearchMode}">
-            <controls:LandmarkSearchControl SelectedLandmark="{Binding SelectedLandmark}" MapService="{Binding MapService}" />
+            <controls:LandmarkSearchControl SelectedLandmark="{Binding SelectedLandmark}" MapService="{Binding MapService}" ChosenWorld="{Binding ChosenWorld}" />
             <Border Background="{DynamicResource FlyoutPresenterBackground}" BorderBrush="{DynamicResource FlyoutBorderThemeBrush}" BorderThickness="{DynamicResource FlyoutBorderThemeThickness}" CornerRadius="{DynamicResource OverlayCornerRadius}" IsVisible="{Binding SelectedLandmark, Converter={x:Static ObjectConverters.IsNotNull}}" Padding="{DynamicResource FlyoutContentThemePadding}">
                 <Grid RowDefinitions="Auto Auto Auto" ColumnDefinitions="Auto Auto" VerticalAlignment="Stretch" >
                     <Svg Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Path="{Binding SelectedLandmark.IconUrl}" />

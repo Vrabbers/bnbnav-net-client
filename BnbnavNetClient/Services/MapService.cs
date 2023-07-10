@@ -327,8 +327,8 @@ public sealed class MapService : ReactiveObject
                 .Where(x => !routeOptions.HasFlag(RouteOptions.AvoidDuongWarp) || x.Road.RoadType != RoadType.DuongWarp)
                 .ToList();
             
-            var point1Edge = edges.MinBy(x => x.Line.RightAngleIntersection(from.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
-            var point2Edge = edges.MinBy(x => x.Line.RightAngleIntersection(to.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
+            var point1Edge = edges.Where(x => x.From.World == from.Location.World).MinBy(x => x.Line.RightAngleIntersection(from.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
+            var point2Edge = edges.Where(x => x.To.World == to.Location.World).MinBy(x => x.Line.RightAngleIntersection(to.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
 
             ct.ThrowIfCancellationRequested();
             if (point1Edge is null || point2Edge is null) throw new NoSuitableEdgeException();

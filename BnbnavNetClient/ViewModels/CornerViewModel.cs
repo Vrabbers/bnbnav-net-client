@@ -75,6 +75,9 @@ public class CornerViewModel : ViewModel
     
     [Reactive]
     public bool IsMuteEnabled { get; set; }
+    
+    [ObservableAsProperty]
+    public string ChosenWorld { get; set; }
 
     public CornerViewModel(MapService mapService, MainViewModel mainViewModel)
     {
@@ -157,6 +160,8 @@ public class CornerViewModel : ViewModel
                 };
             }
         }));
+        
+        mainViewModel.WhenAnyValue(x => x.ChosenWorld).ToPropertyEx(this, x => x.ChosenWorld);
     }
 
     public async Task CalculateAndSetRoute()

@@ -166,6 +166,9 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
     {
         if (!edge.CanSnapTo) return false;
         
+        // Make sure this edge is in the correct world
+        if (edge.From.World != World && edge.To.World != World) return false;
+        
         // TODO: Get the road thickness from resources somehow
         // We are not using GeoHelper because that takes into account the extra space at the end of a road
         if (edge.Line.SetLength(10).NormalLine().MoveCenter(new Point(Xd, Zd)).TryIntersect(edge.Line, out _) !=
