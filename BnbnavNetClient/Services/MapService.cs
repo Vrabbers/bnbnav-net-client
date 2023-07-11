@@ -402,6 +402,13 @@ public sealed class MapService : ReactiveObject
                 {
                     var oldDistance = queue.TryGetValue(edge.To, out var node) ? node.distance : int.MaxValue;
                     var newDistance = (int) (processingNode.distance + edge.Line.Length * edge.Road.RoadType.RoadPenalty());
+                    
+                    // Interworld travel is always instant
+                    if (edge.From.World != edge.To.World)
+                    {
+                        newDistance = 0;
+                    }
+                    
                     if (newDistance < oldDistance)
                     {
                         queue[edge.To] = (edge.To, newDistance, edge);

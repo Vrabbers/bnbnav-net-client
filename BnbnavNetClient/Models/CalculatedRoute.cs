@@ -179,7 +179,13 @@ public class CalculatedRoute : ReactiveObject, IDisposable
             var previousEdge = (Edge) Elements[i - 1];
             var node = (Node)Elements[i];
             var nextEdge = (Edge)Elements[i + 1];
-            currentLength += previousEdge.Line.Length;
+
+            // Only bump the length if we're staying in the same world
+            // Interworld roads always have a length of 0
+            if (previousEdge.From.World == previousEdge.To.World)
+            {
+                currentLength += previousEdge.Line.Length;
+            }
 
             var baseInstruction = new Instruction(node, previousEdge, nextEdge, currentLength,
                 Instruction.InstructionTypes.Arrival);
