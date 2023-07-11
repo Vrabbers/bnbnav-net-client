@@ -25,11 +25,10 @@ public sealed class MainViewModel : ViewModel
     [Reactive]
     public bool FollowMeEnabled { get; set; }
 
-    [Reactive]
-    public string ChosenWorld { get; set; }
+    [Reactive] public string ChosenWorld { get; set; } = null!;
     
     [ObservableAsProperty]
-    public IEnumerable<string> AvailableWorlds { get; }
+    public IEnumerable<string> AvailableWorlds { get; } = Enumerable.Empty<string>();
 
     [ObservableAsProperty]
     public string LoginText { get; }

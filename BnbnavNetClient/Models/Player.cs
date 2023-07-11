@@ -195,6 +195,6 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
     public int X => (int)double.Round(Xd);
     public int Y => (int)double.Round(Yd);
     public int Z => (int)double.Round(Zd);
-    public string World { get; private set; }
+    public string World { get; private set; } = "world";
     public Point Point => new(X, Z);
 }

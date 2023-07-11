@@ -78,11 +78,13 @@ public class CornerViewModel : ViewModel
     
     [Reactive]
     public bool IsMuteEnabled { get; set; }
-    
-    [ObservableAsProperty]
-    public string ChosenWorld { get; set; }
 
+    [ObservableAsProperty] public string ChosenWorld { get; set; }
+
+    // Initialising ChosenWorld causes a compile time error
+#pragma warning disable CS8618
     public CornerViewModel(MapService mapService, MainViewModel mainViewModel)
+#pragma warning restore CS8618
     {
         _mainViewModel = mainViewModel;
         MapService = mapService;

@@ -31,7 +31,7 @@ public class NodeJoinEditController : EditController
         var lastNode = _roadGhosts.Last();
 
         //TODO: Make sure we can't loop back on ourselves: we also need to check RoadGhosts for duplicates
-        if (node.Id == lastNode.Id || _editorService.MapService.Edges.Any(x =>
+        if (node.Id == lastNode.Id || _editorService.MapService!.Edges.Any(x =>
                 x.Value.From == lastNode && x.Value.To == node))
         {
             return false;

@@ -82,8 +82,7 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
     public ReadOnlyDictionary<string, Player> Players { get; }
 
-    [Reactive]
-    public IEnumerable<string> Worlds { get; private set; }
+    [Reactive] public IEnumerable<string> Worlds { get; private set; } = Enumerable.Empty<string>();
 
     List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();

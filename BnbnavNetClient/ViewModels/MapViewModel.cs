@@ -74,11 +74,13 @@ public class MapViewModel : ViewModel
 
     [Reactive]
     public AvailableUi CurrentUi { get; set; } = AvailableUi.Search;
-    
-    [ObservableAsProperty]
-    public string ChosenWorld { get; set; }
 
+    [ObservableAsProperty] public string ChosenWorld { get; set; }
+
+    // Initialising ChosenWorld causes a compile time error
+#pragma warning disable CS8618
     public MapViewModel(MapService mapService, MainViewModel mainViewModel)
+#pragma warning restore CS8618
     {
         _mainViewModel = mainViewModel;
         DeleteNodeCommand = ReactiveCommand.Create(() => { }, this.WhenAnyValue(me => me.LastRightClickHitTest).Select(list => list.Any(x => x is Node)));

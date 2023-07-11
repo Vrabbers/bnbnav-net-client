@@ -24,7 +24,7 @@ public class LandmarkSearchControl : TemplatedControl
     public static readonly DirectProperty<LandmarkSearchControl, AvaloniaList<ISearchable>> SearchResultsProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, AvaloniaList<ISearchable>>(
         "SearchResults", o => o.SearchResults, (o, v) => o.SearchResults = v);
 
-    string _chosenWorld;
+    string _chosenWorld = null!;
     public static readonly DirectProperty<LandmarkSearchControl, string> ChosenWorldProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, string>(
         "ChosenWorld", o => o.ChosenWorld, (o, v) => o.ChosenWorld = v);
 
