@@ -145,6 +145,9 @@ public class CalculatedRoute : ReactiveObject, IDisposable
     public bool RouteContainsDuongWarp { get; set; }
     
     [Reactive]
+    public bool RouteContainsInterWorld { get; set; }
+    
+    [Reactive]
     public bool RouteContainsTolls { get; set; }
     
     [Reactive]
@@ -169,6 +172,7 @@ public class CalculatedRoute : ReactiveObject, IDisposable
     void FinaliseRoute()
     {
         RouteContainsDuongWarp = Edges.Any(x => x.Road.RoadType == RoadType.DuongWarp);
+        RouteContainsInterWorld = Edges.Any(x => x.From.World != x.To.World);
         
         //Always add a departure instruction
         Instructions.Add(new Instruction(Nodes.First(), null, Edges.First(), 0, Instruction.InstructionTypes.Departure));

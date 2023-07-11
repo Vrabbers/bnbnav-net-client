@@ -49,7 +49,8 @@ public sealed class MapService : ReactiveObject
         AvoidMotorways = 1,
         AvoidDuongWarp = 2,
         AvoidTolls = 4,
-        AvoidFerries = 8
+        AvoidFerries = 8,
+        AvoidInterWorld
     }
 
     public static readonly string BaseUrl = Environment.GetEnvironmentVariable("BNBNAV_BASEURL") ?? "https://bnbnav.aircs.racing/";
@@ -325,6 +326,7 @@ public sealed class MapService : ReactiveObject
             var edges = _edges.Values
                 .Where(x => !routeOptions.HasFlag(RouteOptions.AvoidMotorways) || x.Road.RoadType != RoadType.Motorway)
                 .Where(x => !routeOptions.HasFlag(RouteOptions.AvoidDuongWarp) || x.Road.RoadType != RoadType.DuongWarp)
+                .Where(x => !routeOptions.HasFlag(RouteOptions.AvoidInterWorld) || x.From.World == x.To.World)
                 .ToList();
             
             var point1Edge = edges.Where(x => x.From.World == from.Location.World).MinBy(x => x.Line.RightAngleIntersection(from.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
