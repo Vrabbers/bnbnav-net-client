@@ -236,6 +236,9 @@ public partial class MapView : UserControl
         MapViewModel
             .WhenAnyPropertyChanged()
             .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
+        MapViewModel.WhenPropertyChanged(x => x.HighlightInterWorldNodesEnabled)
+            .Subscribe(Observer.Create<PropertyValue<MapViewModel, bool>>(_ => UpdateDrawnItems()));
+        
         MapViewModel.MapEditorService
             .WhenAnyValue(x => x.OngoingNetworkOperations)
             .Subscribe(Observer.Create<IReadOnlyList<NetworkOperation>?>(_ => Dispatcher.UIThread.Post(InvalidateVisual)));
@@ -262,6 +265,8 @@ public partial class MapView : UserControl
                 MapViewModel.Rotation = 0;
             }
         }));
+        MapViewModel.WhenPropertyChanged(x => x.ChosenWorld)
+            .Subscribe(Observer.Create<PropertyValue<MapViewModel, string>>(_ => UpdateDrawnItems()));
 
         MapViewModel.MapService.PlayerUpdateInteraction.RegisterHandler(interaction =>
         {
@@ -322,7 +327,7 @@ public partial class MapView : UserControl
             ToWorld(_currentPointerPosition).Deconstruct(out var xd, out var zd);
             var x = (int)xd;
             var z = (int)zd;
-            var landmark = new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z), _i18N["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
+            var landmark = new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z, MapViewModel.ChosenWorld), _i18N["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
 
             MapViewModel.ContextMenuItems.AddRange(new MenuItem[]
             {
@@ -354,6 +359,7 @@ public partial class MapView : UserControl
     List<(Point, Point, Edge)> DrawnEdges { get; set; } = new();
     List<(Rect, Landmark)> DrawnLandmarks { get; set; } = new();
     public List<(Rect, Node)> DrawnNodes { get; set; } = new();
+    public List<Node> SpiedNodes { get; set; } = new();
 
     void UpdateFollowMeState()
     {
@@ -363,11 +369,13 @@ public partial class MapView : UserControl
         if (MapViewModel.CurrentUi == AvailableUi.Go)
         {
             MapViewModel.RotationOrigin = new Vector(0.6, 0.8);
+            MapViewModel.ChangeWorld(loggedInPlayer.World);
             PanTo(loggedInPlayer.MarkerCoordinates, 0.6, 0.8);
             MapViewModel.Rotation = loggedInPlayer.MarkerAngle - 90;
         }
         else if (MapViewModel.FollowMeEnabled)
         {
+            MapViewModel.ChangeWorld(loggedInPlayer.World);
             PanTo(loggedInPlayer.MarkerCoordinates);
         }
     }
@@ -410,17 +418,26 @@ public partial class MapView : UserControl
 
         var bounds = boundsRect ?? Bounds;
 
-        DrawnEdges = mapService.AllEdges.Select(edge =>
+        DrawnEdges = mapService.AllEdges.Where(edge => edge.From.World == edge.To.World && edge.To.World == MapViewModel.ChosenWorld).Select(edge =>
         {
             var (from, to) = edge.Extents(this);
             return (from, to, edge);
         }).Where(edge => GeoHelper.LineIntersects(edge.from, edge.to, bounds)).ToList();
 
-        DrawnLandmarks = mapService.Landmarks.Values.Select(landmark => (landmark.BoundingRect(this), landmark))
+        DrawnLandmarks = mapService.Landmarks.Values.Where(landmark => landmark.Node.World == MapViewModel.ChosenWorld).Select(landmark => (landmark.BoundingRect(this), landmark))
             .Where(landmark => bounds.Intersects(landmark.Item1)).ToList();
 
-        DrawnNodes = mapService.Nodes.Values.Select(node => (node.BoundingRect(this), node))
+        DrawnNodes = mapService.Nodes.Values.Where(node => node.World == MapViewModel.ChosenWorld).Select(node => (node.BoundingRect(this), node))
             .Where(node => bounds.Intersects(node.Item1)).ToList();
+
+        SpiedNodes = DrawnNodes.Select(nodeInfo => nodeInfo.Item2).Where(node =>
+        {
+            if (MapViewModel.HighlightInterWorldNodesEnabled)
+            {
+                return mapService.AllEdges.Where(edge => edge.From.Id == node.Id || edge.To.Id == node.Id).Any(edge => edge.From.World != edge.To.World);
+            }
+            return false;
+        }).ToList();
         
         InvalidateVisual();
     }
@@ -547,10 +564,20 @@ public partial class MapView : UserControl
         {
             var nodeBorder = (Pen)this.FindResource("NodeBorder")!;
             var nodeBrush = (Brush)this.FindResource("NodeFill")!;
+            var spiedBorder = (Pen)this.FindResource("SpiedNodeBorder")!;
+            var spiedBrush = (Brush)this.FindResource("SpiedNodeFill")!;
             foreach (var (rect, node) in DrawnNodes)
             {
                 if (noRender.Contains(node)) continue;
-                context.DrawRectangle(nodeBrush, nodeBorder, rect);
+
+                if (SpiedNodes.Any(spied => spied.Id == node.Id))
+                {
+                    context.DrawRectangle(spiedBrush, spiedBorder, rect);
+                }
+                else
+                {
+                    context.DrawRectangle(nodeBrush, nodeBorder, rect);
+                }
             }
             
             MapViewModel.MapEditorService.EditController.Render(this, context);
@@ -561,7 +588,7 @@ public partial class MapView : UserControl
             operation.Render(this, context);
         }
 
-        foreach (var player in MapViewModel.MapService.Players.Values)
+        foreach (var player in MapViewModel.MapService.Players.Values.Where(player => player.World == MapViewModel.ChosenWorld))
         {
 
             const int playerSize = 48;

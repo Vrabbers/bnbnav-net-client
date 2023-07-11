@@ -68,6 +68,9 @@ public class CornerViewModel : ViewModel
     public bool AvoidMotorways { get; set; }
     
     [Reactive]
+    public bool AvoidInterWorld { get; set; }
+    
+    [Reactive]
     public bool AvoidFerries { get; set; }
     
     [Reactive]
@@ -76,7 +79,12 @@ public class CornerViewModel : ViewModel
     [Reactive]
     public bool IsMuteEnabled { get; set; }
 
+    [ObservableAsProperty] public string ChosenWorld { get; set; }
+
+    // Initialising ChosenWorld causes a compile time error
+#pragma warning disable CS8618
     public CornerViewModel(MapService mapService, MainViewModel mainViewModel)
+#pragma warning restore CS8618
     {
         _mainViewModel = mainViewModel;
         MapService = mapService;
@@ -107,9 +115,9 @@ public class CornerViewModel : ViewModel
             GoModeStartPoint = MapService.LoggedInPlayer;
         }));
         this.WhenAnyValue(x => x.GoModeStartPoint, x => x.GoModeEndPoint, x => x.AvoidMotorways, x => x.AvoidDuongWarp,
-            x => x.AvoidTolls, x => x.AvoidFerries).Subscribe(Observer.Create<
+            x => x.AvoidTolls, x => x.AvoidFerries, x => x.AvoidInterWorld).Subscribe(Observer.Create<
             // ReSharper disable once AsyncVoidLambda
-            ValueTuple<ISearchable?, ISearchable?, bool, bool, bool, bool>>(async _ =>
+            ValueTuple<ISearchable?, ISearchable?, bool, bool, bool, bool, bool>>(async _ =>
                 {
                     RouteCalculationCancellationSource?.Cancel();
                     RouteCalculationCancellationSource = new CancellationTokenSource();
@@ -157,6 +165,8 @@ public class CornerViewModel : ViewModel
                 };
             }
         }));
+        
+        mainViewModel.WhenAnyValue(x => x.ChosenWorld).ToPropertyEx(this, x => x.ChosenWorld);
     }
 
     public async Task CalculateAndSetRoute()
@@ -175,6 +185,7 @@ public class CornerViewModel : ViewModel
             if (AvoidDuongWarp) routeOptions |= MapService.RouteOptions.AvoidDuongWarp;
             if (AvoidTolls) routeOptions |= MapService.RouteOptions.AvoidTolls;
             if (AvoidFerries) routeOptions |= MapService.RouteOptions.AvoidFerries;
+            if (AvoidInterWorld) routeOptions |= MapService.RouteOptions.AvoidInterWorld;
             
             var route = await MapService.ObtainCalculatedRoute(GoModeStartPoint, GoModeEndPoint, routeOptions,
                 RouteCalculationCancellationSource.Token);

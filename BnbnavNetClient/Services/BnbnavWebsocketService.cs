@@ -101,6 +101,7 @@ internal abstract record NodeMessage : BnbnavMessage
     public required int X { get; init; }
     public required int Y { get; init; }
     public required int Z { get; init; }
+    public required string World { get; init; }
 
     public required string Player { get; init; }
 }
@@ -159,6 +160,7 @@ public sealed record PlayerMoved : BnbnavMessage
     public required double X { get; init; }
     public required double Y { get; init; }
     public required double Z { get; init; }
+    public required string World { get; init; }
 }
 
 internal sealed record PlayerLeft : BnbnavMessage;

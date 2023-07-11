@@ -25,7 +25,7 @@ public class NodeMoveEditController : EditController
         if (mapView.HitTest(pointerPos).FirstOrDefault(x => x is Node) is Node node)
         {
             _movingNode = node;
-            _movedNode = new Node("temp", node.X, node.Y, node.Z);
+            _movedNode = new Node("temp", node.X, node.Y, node.Z, node.World);
             return PointerPressedFlags.DoNotPan;
         }
 
@@ -39,7 +39,7 @@ public class NodeMoveEditController : EditController
         if (_movingNode is not null && _movedNode is not null)
         {
             var newCoords = mapView.ToWorld(pointerPos);
-            _movedNode = new Node("temp", (int)double.Round(newCoords.X), _movingNode.Y, (int)double.Round(newCoords.Y));
+            _movedNode = new Node("temp", (int)double.Round(newCoords.X), _movingNode.Y, (int)double.Round(newCoords.Y), _movedNode.World);
             mapView.InvalidateVisual();
         }
     }

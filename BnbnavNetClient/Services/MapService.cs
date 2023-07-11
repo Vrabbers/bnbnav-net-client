@@ -14,6 +14,8 @@ using System.Reactive.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
+using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.NetworkOperations;
 using DynamicData.Binding;
 using ReactiveUI.Fody.Helpers;
@@ -22,6 +24,8 @@ namespace BnbnavNetClient.Services;
 
 public sealed class MapService : ReactiveObject
 {
+    const int ServerApiVersion = 2; 
+    
     public class ServerResponse
     {
         public required HttpStatusCode StatusCode { get; init; }
@@ -45,7 +49,8 @@ public sealed class MapService : ReactiveObject
         AvoidMotorways = 1,
         AvoidDuongWarp = 2,
         AvoidTolls = 4,
-        AvoidFerries = 8
+        AvoidFerries = 8,
+        AvoidInterWorld
     }
 
     public static readonly string BaseUrl = Environment.GetEnvironmentVariable("BNBNAV_BASEURL") ?? "https://bnbnav.aircs.racing/";
@@ -55,10 +60,8 @@ public sealed class MapService : ReactiveObject
         BaseAddress = new Uri(BaseUrl),
         DefaultRequestHeaders =
         {
-            UserAgent =
-            {
-                new ProductInfoHeaderValue("bnbnav-dotnet", "1.0")                
-            }
+            { "User-Agent", new ProductInfoHeaderValue("bnbnav-dotnet", "1.0").ToString() },
+            { "X-Bnbnav-Api-Version", ServerApiVersion.ToString() }
         }
     };
 
@@ -71,14 +74,19 @@ public sealed class MapService : ReactiveObject
     static string? _authenticationToken;
 
     readonly BnbnavWebsocketService _websocketService;
+    readonly IAvaloniaI18Next _i18N;
 
     public ReadOnlyDictionary<string, Node> Nodes { get; }
     public ReadOnlyDictionary<string, Edge> Edges { get; }
     public ReadOnlyDictionary<string, Road> Roads { get; }
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
     public ReadOnlyDictionary<string, Player> Players { get; }
+
+    [Reactive] public IEnumerable<string> Worlds { get; private set; } = Enumerable.Empty<string>();
+
     List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
+    public Interaction<(string, string, bool), Unit> ErrorMessageInteraction { get; } = new();
     public Interaction<Unit, Unit> PlayerUpdateInteraction { get; } = new();
     
     [Reactive]
@@ -118,6 +126,8 @@ public sealed class MapService : ReactiveObject
         _players = new Dictionary<string, Player>();
         Players = _players.AsReadOnly();
         _websocketService = websocketService;
+        _i18N = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+
 
         this.WhenAnyValue(x => x.LoggedInUsername).Subscribe(Observer.Create<string?>(_ => UpdateLoggedInPlayer()));
         this.WhenPropertyChanged(x => x.Players)
@@ -173,6 +183,51 @@ public sealed class MapService : ReactiveObject
             return await HandleUnauthorizedResponse(path, json);
         }
 
+        if (resp.StatusCode == HttpStatusCode.BadRequest)
+        {
+            return await HandleBadRequest(resp);
+        }
+
+        return new ServerResponse
+        {
+            StatusCode = resp.StatusCode,
+            Stream = await resp.Content.ReadAsStreamAsync()
+        };
+    }
+
+    async Task<ServerResponse> HandleBadRequest(HttpResponseMessage resp)
+    {
+        var apiVersionHeader = resp.Headers.GetValues("X-Bnbnav-Api-Version").FirstOrDefault();
+        if (apiVersionHeader is null)
+        {
+            return new ServerResponse
+            {
+                StatusCode = resp.StatusCode,
+                Stream = await resp.Content.ReadAsStreamAsync()
+            };
+        }
+
+        if (!int.TryParse(apiVersionHeader, out var apiVersion))
+        {
+            return new ServerResponse
+            {
+                StatusCode = resp.StatusCode,
+                Stream = await resp.Content.ReadAsStreamAsync()
+            };
+        }
+
+        if (apiVersion > ServerApiVersion)
+        {
+            // This client is too old
+            await ErrorMessageInteraction.Handle((_i18N["ERROR_OUT_OF_DATE_EDIT_TITLE"], _i18N["ERROR_OUT_OF_DATE_EDIT_MESSAGE"], true));
+            CancelPendingRequests(new NetworkOperationException($"Client out of date. Client API version: {ServerApiVersion}, Server API version: {apiVersion}"));
+            return new ServerResponse
+            {
+                StatusCode = resp.StatusCode,
+                Stream = await resp.Content.ReadAsStreamAsync()
+            };
+        }
+        
         return new ServerResponse
         {
             StatusCode = resp.StatusCode,
@@ -254,6 +309,15 @@ public sealed class MapService : ReactiveObject
         }));
     }
 
+    void UpdateWorlds()
+    {
+        var newWorlds = Nodes.Values.Select(node => node.World)
+            .Union(Players.Values.Select(player => player.World)).Distinct().ToList();
+        
+        // Only set if different in order to avoid flickering in UI
+        Worlds = newWorlds;
+    }
+
     public async Task<CalculatedRoute> ObtainCalculatedRoute(ISearchable from, ISearchable to, RouteOptions routeOptions, CancellationToken ct)
     {
         return await Task.Run(() =>
@@ -261,10 +325,11 @@ public sealed class MapService : ReactiveObject
             var edges = _edges.Values
                 .Where(x => !routeOptions.HasFlag(RouteOptions.AvoidMotorways) || x.Road.RoadType != RoadType.Motorway)
                 .Where(x => !routeOptions.HasFlag(RouteOptions.AvoidDuongWarp) || x.Road.RoadType != RoadType.DuongWarp)
+                .Where(x => !routeOptions.HasFlag(RouteOptions.AvoidInterWorld) || x.From.World == x.To.World)
                 .ToList();
             
-            var point1Edge = edges.MinBy(x => x.Line.RightAngleIntersection(from.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
-            var point2Edge = edges.MinBy(x => x.Line.RightAngleIntersection(to.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
+            var point1Edge = edges.Where(x => x.From.World == from.Location.World).MinBy(x => x.Line.RightAngleIntersection(from.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
+            var point2Edge = edges.Where(x => x.To.World == to.Location.World).MinBy(x => x.Line.RightAngleIntersection(to.Location.Point, out var intersection) ? intersection.Length : int.MaxValue);
 
             ct.ThrowIfCancellationRequested();
             if (point1Edge is null || point2Edge is null) throw new NoSuitableEdgeException();
@@ -275,7 +340,7 @@ public sealed class MapService : ReactiveObject
             IEnumerable<Edge> GenerateTemporaryEdgesFromPointToEdge(Node point, Edge edge, bool pointToEdge)
             {
                 _ = edge.Line.RightAngleIntersection(point.Point, out var normalLine);
-                var tempNode = new TemporaryNode((int)normalLine.Point1.X, 0, (int)normalLine.Point1.Y);
+                var tempNode = new TemporaryNode((int)normalLine.Point1.X, 0, (int)normalLine.Point1.Y, point.World);
 
                 var isTwoWay = OppositeEdge(edge, edges) is not null;
                 if (pointToEdge)
@@ -338,6 +403,13 @@ public sealed class MapService : ReactiveObject
                 {
                     var oldDistance = queue.TryGetValue(edge.To, out var node) ? node.distance : int.MaxValue;
                     var newDistance = (int) (processingNode.distance + edge.Line.Length * edge.Road.RoadType.RoadPenalty());
+                    
+                    // Interworld travel is always instant
+                    if (edge.From.World != edge.To.World)
+                    {
+                        newDistance = 0;
+                    }
+                    
                     if (newDistance < oldDistance)
                     {
                         queue[edge.To] = (edge.To, newDistance, edge);
@@ -370,7 +442,8 @@ public sealed class MapService : ReactiveObject
             var x = obj.GetProperty("x"u8).GetInt32();
             var y = obj.GetProperty("y"u8).GetInt32();
             var z = obj.GetProperty("z"u8).GetInt32();
-            nodes.Add(id, new Node(id, x, y, z));
+            var world = obj.GetProperty("world"u8).GetString()!;
+            nodes.Add(id, new Node(id, x, y, z, world));
         }
 
         var jsonLandmarks = root.GetProperty("landmarks"u8);
@@ -421,6 +494,7 @@ public sealed class MapService : ReactiveObject
         await ws.ConnectAsync(CancellationToken.None);
         var service = new MapService(nodes.Values, edges, roads.Values, landmarks, annotations, ws);
         _ = service.ProcessChangesAsync();
+        service.UpdateWorlds();
         return service;
     }
 
@@ -434,7 +508,8 @@ public sealed class MapService : ReactiveObject
             {
                 case NodeCreated node:
                     type = nameof(Nodes);
-                    _nodes.Add(id, new Node(id, node.X, node.Y, node.Z));
+                    _nodes.Add(id, new Node(id, node.X, node.Y, node.Z, node.World));
+                    UpdateWorlds();
                     break;
 
                 case UpdatedNode node:
@@ -442,11 +517,13 @@ public sealed class MapService : ReactiveObject
                     _nodes[id].X = node.X;
                     _nodes[id].Y = node.Y;
                     _nodes[id].Z = node.Z;
+                    UpdateWorlds();
                     break;
 
                 case NodeRemoved:
                     type = nameof(Nodes);
                     _nodes.Remove(id);
+                    UpdateWorlds();
                     break;
 
                 case RoadCreated road:
@@ -501,6 +578,7 @@ public sealed class MapService : ReactiveObject
                         p.HandlePlayerMovedEvent(player);
                         _players.Add(player.Id!, p);
                     }
+                    UpdateWorlds();
 
                     break;
                 case PlayerLeft player:
@@ -510,6 +588,7 @@ public sealed class MapService : ReactiveObject
                         _players[player.Id!].HandlePlayerGoneEvent();
                         _players.Remove(player.Id!);
                     }
+                    UpdateWorlds();
                     break;
             }
 

@@ -175,7 +175,7 @@ public partial class TemporaryLandmark : Landmark
     {
     }
 
-    public static TemporaryLandmark? ParseCoordinateString(string coordinateString)
+    public static TemporaryLandmark? ParseCoordinateString(string coordinateString, string world)
     {
         var coordinateSearch = CoordinateSearchRegex().Match(coordinateString);
         if (!coordinateSearch.Success)
@@ -186,6 +186,6 @@ public partial class TemporaryLandmark : Landmark
         var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
         var x = Convert.ToInt32(coordinateSearch.Groups["x"].Value);
         var z = Convert.ToInt32(coordinateSearch.Groups["z"].Value);
-        return new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z), t["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
+        return new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z, world), t["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
     }
 }

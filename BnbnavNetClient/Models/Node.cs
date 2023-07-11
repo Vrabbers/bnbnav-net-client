@@ -7,18 +7,20 @@ public class Node : MapItem, ILocatable
 {
     static readonly double NodeSize = 14;
 
-    public Node(string id, int x, int y, int z)
+    public Node(string id, int x, int y, int z, string world)
     {
         this.Id = id;
         this.X = x;
         this.Y = y;
         this.Z = z;
+        World = world;
     }
 
     public string Id { get; init; }
     public int X { get; set; }
     public int Y { get; set; }
     public int Z { get; set; }
+    public string World { get; set; }
 
     public Rect BoundingRect(MapView mapView)
     {
@@ -43,13 +45,13 @@ public class Node : MapItem, ILocatable
 
 public class TemporaryNode : Node
 {
-    public TemporaryNode(int x, int y, int z) : base($"temp@{x},{z}", x, y, z)
+    public TemporaryNode(int x, int y, int z, string world) : base($"temp@{x},{z}", x, y, z, world)
     {
     }
 
     public TemporaryNode(ISearchable original) : base(
         $"temp@{original.Location.X},{original.Location.Z}:{original.Name}", original.Location.X, original.Location.Y,
-        original.Location.Z)
+        original.Location.Z, original.Location.World)
     {
         OriginalSearchable = original;
     }

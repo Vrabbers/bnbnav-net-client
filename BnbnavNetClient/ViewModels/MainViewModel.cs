@@ -18,9 +18,17 @@ public sealed class MainViewModel : ViewModel
 
     [Reactive]
     public bool HighlightTurnRestrictionsEnabled { get; set; }
+    
+    [Reactive]
+    public bool HighlightInterWorldNodesEnabled { get; set; }
 
     [Reactive]
     public bool FollowMeEnabled { get; set; }
+
+    [Reactive] public string ChosenWorld { get; set; } = null!;
+    
+    [ObservableAsProperty]
+    public IEnumerable<string> AvailableWorlds { get; } = Enumerable.Empty<string>();
 
     [ObservableAsProperty]
     public string LoginText { get; }
@@ -111,8 +119,11 @@ public sealed class MainViewModel : ViewModel
     {
         var mapService = await MapService.DownloadInitialMapAsync();
         MapEditorService.MapService = mapService;
+
+        ChosenWorld = mapService.Worlds.FirstOrDefault()!;
         
         this.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(mapService, x => x.LoggedInUsername);
+        mapService.WhenAnyValue(x => x.Worlds).ToPropertyEx(this, x => x.AvailableWorlds);
 
         MapViewModel = new MapViewModel(mapService, this);
         CornerViewModel = new CornerViewModel(mapService, this);
@@ -136,6 +147,29 @@ public sealed class MainViewModel : ViewModel
                 interaction.SetOutput(null);
             }
         });
+        MapViewModel.MapService.ErrorMessageInteraction.RegisterHandler(interaction =>
+        {
+            var (title, message, terminateEditMode) = interaction.Input;
+
+            if (terminateEditMode)
+            {
+                EditModeToken = null;
+                MapEditorService.EditModeEnabled = false;
+            }
+            
+            Popup = new AlertDialogViewModel()
+            {
+                Title = title,
+                Message = message,
+                Ok = ReactiveCommand.Create(() =>
+                {
+                    interaction.SetOutput(Unit.Default);
+                    Popup = null;
+                })
+            };
+            
+            return Task.CompletedTask;
+        });
         CornerViewModel.WhenAnyValue(x => x.SelectedLandmark).BindTo(MapViewModel, x => x.SelectedLandmark);
         CornerViewModel.WhenAnyValue(x => x.GoModeStartPoint).BindTo(MapViewModel, x => x.GoModeStartPoint);
         CornerViewModel.WhenAnyValue(x => x.GoModeEndPoint).BindTo(MapViewModel, x => x.GoModeEndPoint);
@@ -144,6 +178,8 @@ public sealed class MainViewModel : ViewModel
         MapViewModel.WhenAnyValue(x => x.GoModeStartPoint).BindTo(CornerViewModel, x => x.GoModeStartPoint);
         MapViewModel.WhenAnyValue(x => x.GoModeEndPoint).BindTo(CornerViewModel, x => x.GoModeEndPoint);
         MapViewModel.WhenAnyValue(x => x.CurrentUi).BindTo(CornerViewModel, x => x.CurrentUi);
+        this.WhenAnyValue(x => x.HighlightInterWorldNodesEnabled)
+            .BindTo(MapViewModel, x => x.HighlightInterWorldNodesEnabled);
 
         CornerViewModel.WhenAnyValue(x => x.CurrentUi).Subscribe(Observer.Create<AvailableUi>(currentUi =>
         {

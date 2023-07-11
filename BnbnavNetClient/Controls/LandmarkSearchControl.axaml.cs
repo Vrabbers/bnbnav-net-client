@@ -21,9 +21,12 @@ public class LandmarkSearchControl : TemplatedControl
         "SearchQuery", o => o.SearchQuery, (o, v) => o.SearchQuery = v);
 
     AvaloniaList<ISearchable> _searchResults = new();
-
     public static readonly DirectProperty<LandmarkSearchControl, AvaloniaList<ISearchable>> SearchResultsProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, AvaloniaList<ISearchable>>(
         "SearchResults", o => o.SearchResults, (o, v) => o.SearchResults = v);
+
+    string _chosenWorld = null!;
+    public static readonly DirectProperty<LandmarkSearchControl, string> ChosenWorldProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, string>(
+        "ChosenWorld", o => o.ChosenWorld, (o, v) => o.ChosenWorld = v);
 
     public AvaloniaList<ISearchable> SearchResults
     {
@@ -48,6 +51,12 @@ public class LandmarkSearchControl : TemplatedControl
         get { return _mapService; }
         set { SetAndRaise(MapServiceProperty, ref _mapService, value); }
     }
+    
+    public string ChosenWorld
+    {
+        get { return _chosenWorld; }
+        set { SetAndRaise(ChosenWorldProperty, ref _chosenWorld, value); }
+    }
 
     public LandmarkSearchControl()
     {
@@ -71,7 +80,8 @@ public class LandmarkSearchControl : TemplatedControl
                 .Union(MapService.Landmarks.Values.Where(x =>
                     x.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase)));
 
-            var coordinate = TemporaryLandmark.ParseCoordinateString(SearchQuery);
+            //TODO: Update world to current world
+            var coordinate = TemporaryLandmark.ParseCoordinateString(SearchQuery, ChosenWorld);
             if (coordinate is not null) listItems = listItems.Prepend(coordinate);
             
             SearchResults = new AvaloniaList<ISearchable>(listItems);

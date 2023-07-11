@@ -139,6 +139,8 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
             }
         }
 
+        World = evt.World;
+
         Task.Run(() =>
         {
             if (!_lastSnapMutex.WaitOne(0)) return;
@@ -163,6 +165,9 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
     bool CanSnapToEdge(Edge edge)
     {
         if (!edge.CanSnapTo) return false;
+        
+        // Make sure this edge is in the correct world
+        if (edge.From.World != World && edge.To.World != World) return false;
         
         // TODO: Get the road thickness from resources somehow
         // We are not using GeoHelper because that takes into account the extra space at the end of a road
@@ -190,5 +195,6 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
     public int X => (int)double.Round(Xd);
     public int Y => (int)double.Round(Yd);
     public int Z => (int)double.Round(Zd);
+    public string World { get; private set; } = "world";
     public Point Point => new(X, Z);
 }

@@ -68,11 +68,19 @@ public class MapViewModel : ViewModel
     
     [Reactive]
     public ISearchable? GoModeEndPoint { get; set; }
+    
+    [Reactive]
+    public bool HighlightInterWorldNodesEnabled { get; set; }
 
     [Reactive]
     public AvailableUi CurrentUi { get; set; } = AvailableUi.Search;
 
+    [ObservableAsProperty] public string ChosenWorld { get; set; }
+
+    // Initialising ChosenWorld causes a compile time error
+#pragma warning disable CS8618
     public MapViewModel(MapService mapService, MainViewModel mainViewModel)
+#pragma warning restore CS8618
     {
         _mainViewModel = mainViewModel;
         DeleteNodeCommand = ReactiveCommand.Create(() => { }, this.WhenAnyValue(me => me.LastRightClickHitTest).Select(list => list.Any(x => x is Node)));
@@ -82,6 +90,7 @@ public class MapViewModel : ViewModel
 
         mainViewModel.WhenAnyValue(x => x.FollowMeEnabled).ToPropertyEx(this, x => x.FollowMeEnabled);
         mainViewModel.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(this, x => x.LoggedInUsername);
+        mainViewModel.WhenAnyValue(x => x.ChosenWorld).ToPropertyEx(this, x => x.ChosenWorld);
     }
     
     public void QueueDelete(params MapItem[] mapItems)
@@ -110,6 +119,11 @@ public class MapViewModel : ViewModel
     public void DisableFollowMe()
     {
         _mainViewModel.FollowMeEnabled = false;
+    }
+
+    public void ChangeWorld(string world)
+    {
+        _mainViewModel.ChosenWorld = world;
     }
 }
 
