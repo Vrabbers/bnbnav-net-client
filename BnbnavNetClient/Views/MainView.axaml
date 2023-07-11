@@ -39,7 +39,10 @@
           <Button Grid.Column="6" IsVisible="{Binding EditModeEnabled}" Content="{str:Tr Key=SPY_OPTIONS}">
             <Button.Flyout>
               <Flyout>
-                <CheckBox Content="{str:Tr Key=FOLLOW_ME_TURN_RESTRICTIONS}" IsChecked="{Binding HighlightTurnRestrictionsEnabled}"/>
+                <Grid RowDefinitions="Auto Auto">
+                  <CheckBox Content="{str:Tr Key=FOLLOW_ME_TURN_RESTRICTIONS}" IsChecked="{Binding HighlightTurnRestrictionsEnabled}" IsEnabled="False"/>
+                  <CheckBox Grid.Row="1" Content="{str:Tr Key=FOLLOW_ME_INTERWORLD}" IsChecked="{Binding HighlightInterWorldNodesEnabled}"/>
+                </Grid>
               </Flyout>
             </Button.Flyout>
           </Button>

@@ -19,6 +19,7 @@
   "EXISTING_ROAD": "Existing Road",
   "FOLLOWING": "Following {{user}}",
   "FOLLOW_ME": "Follow Me",
+  "FOLLOW_ME_INTERWORLD": "Highlight nodes with interworld connections",
   "FOLLOW_ME_PROMPT": "Enter Minecraft username:",
   "FOLLOW_ME_TURN_RESTRICTIONS": "Highlight nodes with turn restrictions",
   "FOLLOW_ME_WATERMARK": "Username",

@@ -19,6 +19,7 @@
   "EXISTING_ROAD": "Существующая дорога",
   "FOLLOWING": "Следим за {{user}}",
   "FOLLOW_ME": "Следить за мной",
+  "FOLLOW_ME_INTERWORLD": "",
   "FOLLOW_ME_PROMPT": "Введите имя пользователя Майнкрафт:",
   "FOLLOW_ME_TURN_RESTRICTIONS": "Выделить точки с ограничениями поворота",
   "FOLLOW_ME_WATERMARK": "Имя пользователя",

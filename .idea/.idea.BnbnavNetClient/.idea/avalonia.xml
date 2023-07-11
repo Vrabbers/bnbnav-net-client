@@ -9,7 +9,7 @@
         <entry key="BnbnavNetClient/Controls/InstructionImageControl.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
         <entry key="BnbnavNetClient/Controls/LandmarkSearchControl.axaml" value="BnbnavNetClient.Linux/BnbnavNetClient.Linux.csproj" />
         <entry key="BnbnavNetClient/Resources/DayTheme.axaml" value="BnbnavNetClient.Linux/BnbnavNetClient.Linux.csproj" />
-        <entry key="BnbnavNetClient/Resources/NightTheme.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Resources/NightTheme.axaml" value="BnbnavNetClient.Linux/BnbnavNetClient.Linux.csproj" />
         <entry key="BnbnavNetClient/Views/AlertDialogView.axaml" value="BnbnavNetClient.Linux/BnbnavNetClient.Linux.csproj" />
         <entry key="BnbnavNetClient/Views/CornerView.axaml" value="BnbnavNetClient.Linux/BnbnavNetClient.Linux.csproj" />
         <entry key="BnbnavNetClient/Views/EnterPopupView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />

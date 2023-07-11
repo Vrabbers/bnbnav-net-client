@@ -19,6 +19,7 @@
   "EXISTING_ROAD": "Bestehende Straßen",
   "FOLLOWING": "Folge {{user}}",
   "FOLLOW_ME": "Folge mir",
+  "FOLLOW_ME_INTERWORLD": "",
   "FOLLOW_ME_PROMPT": "Geben Sie den Minecraft username ein:",
   "FOLLOW_ME_TURN_RESTRICTIONS": "",
   "FOLLOW_ME_WATERMARK": "Nutzername",

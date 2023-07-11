@@ -68,6 +68,9 @@ public class MapViewModel : ViewModel
     
     [Reactive]
     public ISearchable? GoModeEndPoint { get; set; }
+    
+    [Reactive]
+    public bool HighlightInterWorldNodesEnabled { get; set; }
 
     [Reactive]
     public AvailableUi CurrentUi { get; set; } = AvailableUi.Search;

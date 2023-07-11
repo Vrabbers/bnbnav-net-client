@@ -236,6 +236,9 @@ public partial class MapView : UserControl
         MapViewModel
             .WhenAnyPropertyChanged()
             .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
+        MapViewModel.WhenPropertyChanged(x => x.HighlightInterWorldNodesEnabled)
+            .Subscribe(Observer.Create<PropertyValue<MapViewModel, bool>>(_ => UpdateDrawnItems()));
+        
         MapViewModel.MapEditorService
             .WhenAnyValue(x => x.OngoingNetworkOperations)
             .Subscribe(Observer.Create<IReadOnlyList<NetworkOperation>?>(_ => Dispatcher.UIThread.Post(InvalidateVisual)));
@@ -356,6 +359,7 @@ public partial class MapView : UserControl
     List<(Point, Point, Edge)> DrawnEdges { get; set; } = new();
     List<(Rect, Landmark)> DrawnLandmarks { get; set; } = new();
     public List<(Rect, Node)> DrawnNodes { get; set; } = new();
+    public List<Node> SpiedNodes { get; set; } = new();
 
     void UpdateFollowMeState()
     {
@@ -425,6 +429,15 @@ public partial class MapView : UserControl
 
         DrawnNodes = mapService.Nodes.Values.Where(node => node.World == MapViewModel.ChosenWorld).Select(node => (node.BoundingRect(this), node))
             .Where(node => bounds.Intersects(node.Item1)).ToList();
+
+        SpiedNodes = DrawnNodes.Select(nodeInfo => nodeInfo.Item2).Where(node =>
+        {
+            if (MapViewModel.HighlightInterWorldNodesEnabled)
+            {
+                return mapService.AllEdges.Where(edge => edge.From.Id == node.Id || edge.To.Id == node.Id).Any(edge => edge.From.World != edge.To.World);
+            }
+            return false;
+        }).ToList();
         
         InvalidateVisual();
     }
@@ -551,10 +564,20 @@ public partial class MapView : UserControl
         {
             var nodeBorder = (Pen)this.FindResource("NodeBorder")!;
             var nodeBrush = (Brush)this.FindResource("NodeFill")!;
+            var spiedBorder = (Pen)this.FindResource("SpiedNodeBorder")!;
+            var spiedBrush = (Brush)this.FindResource("SpiedNodeFill")!;
             foreach (var (rect, node) in DrawnNodes)
             {
                 if (noRender.Contains(node)) continue;
-                context.DrawRectangle(nodeBrush, nodeBorder, rect);
+
+                if (SpiedNodes.Any(spied => spied.Id == node.Id))
+                {
+                    context.DrawRectangle(spiedBrush, spiedBorder, rect);
+                }
+                else
+                {
+                    context.DrawRectangle(nodeBrush, nodeBorder, rect);
+                }
             }
             
             MapViewModel.MapEditorService.EditController.Render(this, context);

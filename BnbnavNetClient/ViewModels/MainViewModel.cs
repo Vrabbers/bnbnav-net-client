@@ -18,6 +18,9 @@ public sealed class MainViewModel : ViewModel
 
     [Reactive]
     public bool HighlightTurnRestrictionsEnabled { get; set; }
+    
+    [Reactive]
+    public bool HighlightInterWorldNodesEnabled { get; set; }
 
     [Reactive]
     public bool FollowMeEnabled { get; set; }
@@ -176,6 +179,8 @@ public sealed class MainViewModel : ViewModel
         MapViewModel.WhenAnyValue(x => x.GoModeStartPoint).BindTo(CornerViewModel, x => x.GoModeStartPoint);
         MapViewModel.WhenAnyValue(x => x.GoModeEndPoint).BindTo(CornerViewModel, x => x.GoModeEndPoint);
         MapViewModel.WhenAnyValue(x => x.CurrentUi).BindTo(CornerViewModel, x => x.CurrentUi);
+        this.WhenAnyValue(x => x.HighlightInterWorldNodesEnabled)
+            .BindTo(MapViewModel, x => x.HighlightInterWorldNodesEnabled);
 
         CornerViewModel.WhenAnyValue(x => x.CurrentUi).Subscribe(Observer.Create<AvailableUi>(currentUi =>
         {
