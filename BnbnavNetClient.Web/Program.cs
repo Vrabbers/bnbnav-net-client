@@ -5,6 +5,7 @@ using Avalonia.ReactiveUI;
 using BnbnavNetClient;
 using BnbnavNetClient.I18Next;
 using BnbnavNetClient.Services.TextToSpeech;
+using BnbnavNetClient.Services.Updates;
 using BnbnavNetClient.Settings;
 using BnbnavNetClient.Web.TextToSpeech;
 
@@ -14,6 +15,7 @@ internal partial class Program
 {
     static async Task Main() => await BuildAvaloniaApp()
         .With<ITextToSpeechProvider>(new WebSpeechTextToSpeechProvider())
+        .With<IUpdateService>(new DummyUpdateProvider())
         .UseReactiveUI()
         .UseI18NextLocalization()
         .UseSettings(new DummySettingsManager())

@@ -6,6 +6,7 @@ using Avalonia.Svg.Skia;
 using BnbnavNetClient.I18Next;
 using BnbnavNetClient.Linux.TextToSpeech;
 using BnbnavNetClient.Services.TextToSpeech;
+using BnbnavNetClient.Services.Updates;
 using BnbnavNetClient.Settings;
 
 namespace BnbnavNetClient.Linux;
@@ -28,6 +29,7 @@ internal class Program
             .UseReactiveUI()
             .UseI18NextLocalization()
             .With<ITextToSpeechProvider>(new SpdTextToSpeechProvider())
+            .With<IUpdateService>(new DummyUpdateProvider())
             .UseSettings(new SettingsManagerJsonFile());
     }
 }
