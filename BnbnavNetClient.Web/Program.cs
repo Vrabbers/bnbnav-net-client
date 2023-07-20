@@ -15,7 +15,7 @@ internal partial class Program
 {
     static async Task Main() => await BuildAvaloniaApp()
         .With<ITextToSpeechProvider>(new WebSpeechTextToSpeechProvider())
-        .With<IUpdateService>(new DummyUpdateProvider())
+        .With<IUpdateService>(new DummyUpdateService())
         .UseReactiveUI()
         .UseI18NextLocalization()
         .UseSettings(new DummySettingsManager())

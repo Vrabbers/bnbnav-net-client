@@ -29,7 +29,7 @@ internal class Program
             .UseReactiveUI()
             .UseI18NextLocalization()
             .With<ITextToSpeechProvider>(new SpdTextToSpeechProvider())
-            .With<IUpdateService>(new DummyUpdateProvider())
+            .With<IUpdateService>(new DummyUpdateService())
             .UseSettings(new SettingsManagerJsonFile());
     }
 }
