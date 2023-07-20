@@ -10,6 +10,7 @@ using BnbnavNetClient.I18Next.Services;
 using Avalonia;
 using Avalonia.Controls;
 using BnbnavNetClient.Settings;
+using BnbnavNetClient.Services.Updates;
 
 namespace BnbnavNetClient.ViewModels;
 
@@ -37,6 +38,15 @@ public sealed class MainViewModel : ViewModel
     public string LoggedInUsername { get; set; }
 
     [Reactive]
+    public bool IsUpdateAvailable { get; private set; }
+
+    [Reactive]
+    public string? UpdateInstructions { get; private set; }
+
+    [Reactive]
+    public bool IsUpdateRestartButtonShown { get; private set; }
+
+    [Reactive]
     public string? EditModeToken { get; set; }
 
     [Reactive]
@@ -59,6 +69,8 @@ public sealed class MainViewModel : ViewModel
     readonly IAvaloniaI18Next _tr;
 
     readonly ISettingsManager _settings;
+
+    readonly IUpdateService _updates;
 
     //TODO: make this better
     [ObservableAsProperty] 
@@ -113,6 +125,22 @@ public sealed class MainViewModel : ViewModel
         MapEditorService.WhenAnyValue(x => x.CurrentEditMode).Select(x => x == EditModeControl.Landmark)
             .ToPropertyEx(this, x => x.IsInLandmarkMode);
         MapEditorService.WhenAnyValue(x => x.EditModeEnabled).ToPropertyEx(this, x => x.EditModeEnabled);
+
+        _updates = AvaloniaLocator.Current.GetRequiredService<IUpdateService>();
+    }
+
+    public async Task CheckForUpdatesAsync()
+    {
+        await _updates.CheckForUpdatesAsync();
+
+        IsUpdateAvailable = _updates.IsUpdateAvailable;
+
+        if (IsUpdateAvailable)
+        {
+            UpdateInstructions = _updates.ManualInterventionInstructions ?? "An update is ready! Restart bnbnav to apply the update.";
+
+            if (_updates.ManualInterventionInstructions is null) IsUpdateRestartButtonShown = true;
+        }
     }
 
     public async Task InitMapService()

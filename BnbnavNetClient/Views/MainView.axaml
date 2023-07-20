@@ -50,18 +50,29 @@
       </Grid>
       
       <!-- Main Bar -->
-      <Grid Grid.Row="3" ColumnDefinitions="Auto Auto * Auto Auto Auto" IsVisible="{Binding MainBarVisible}">
+      <Grid Grid.Row="3" ColumnDefinitions="Auto Auto * Auto Auto Auto Auto" IsVisible="{Binding MainBarVisible}">
         <Button Classes="icon" Command="{Binding LanguageButtonPressed}"><PathIcon Data="{StaticResource globe_regular}"/></Button>
         <ToggleButton Grid.Column="1" Command="{Binding EditModePressed}" Content="{str:Tr Key=EDIT_MODE}" IsChecked="{Binding EditModeEnabled}"/>
         <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
-        <ComboBox Grid.Column="3" HorizontalAlignment="Stretch" ItemsSource="{Binding AvailableWorlds, Mode=TwoWay}" SelectedItem="{Binding ChosenWorld, Mode=TwoWay}" IsEnabled="{Binding !FollowMeEnabled}">
+
+        <Button x:Name="UpdateButton" Margin="0,0,50,0" Grid.Column="3" Content="Update Available!" IsVisible="{Binding IsUpdateAvailable}">
+          <Button.Flyout>
+            <Flyout>
+              <StackPanel MaxWidth="400">
+                <TextBlock Text="{Binding UpdateInstructions}" TextWrapping="Wrap"/>
+                <Button Content="Restart Now" IsVisible="{Binding IsUpdateRestartButtonShown}"/>
+              </StackPanel>
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+        <ComboBox Grid.Column="4" HorizontalAlignment="Stretch" ItemsSource="{Binding AvailableWorlds, Mode=TwoWay}" SelectedItem="{Binding ChosenWorld, Mode=TwoWay}" IsEnabled="{Binding !FollowMeEnabled}">
           <ComboBox.ItemTemplate>
             <DataTemplate>
               <TextBlock Text="{Binding}"/>
             </DataTemplate>
           </ComboBox.ItemTemplate>
         </ComboBox>
-        <Button x:Name="UserControlButton" Grid.Column="4" IsVisible="{Binding HaveLoggedInUser}" Content="{Binding LoggedInUsername}">
+        <Button x:Name="UserControlButton" Grid.Column="5" IsVisible="{Binding HaveLoggedInUser}" Content="{Binding LoggedInUsername}">
           <Button.Flyout>
             <Flyout>
               <StackPanel>
@@ -71,8 +82,8 @@
             </Flyout>
           </Button.Flyout>
         </Button>
-        <Button Grid.Column="4" Command="{Binding LoginPressed}" Content="{str:Tr Key=LOG_IN}" IsVisible="{Binding !HaveLoggedInUser}" />
-        <controls:DayNightButton Grid.Column="5" Click="ColorModeSwitch" x:Name="DayNightButton"/>
+        <Button Grid.Column="6" Command="{Binding LoginPressed}" Content="{str:Tr Key=LOG_IN}" IsVisible="{Binding !HaveLoggedInUser}" />
+        <controls:DayNightButton Grid.Column="7" Click="ColorModeSwitch" x:Name="DayNightButton"/>
       </Grid>
     </Grid>
 
