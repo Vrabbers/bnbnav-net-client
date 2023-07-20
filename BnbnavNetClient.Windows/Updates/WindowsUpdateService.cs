@@ -54,4 +54,6 @@ class WindowsUpdateService : IUpdateService
             else throw;
         }
     }
+
+    public void RestartAppForUpdates() => UpdateManager.RestartApp();
 }

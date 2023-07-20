@@ -7,4 +7,6 @@ public interface IUpdateService
     bool IsUpdateAvailable { get; }
 
     string? ManualInterventionInstructions { get; }
+
+    void RestartAppForUpdates();
 }

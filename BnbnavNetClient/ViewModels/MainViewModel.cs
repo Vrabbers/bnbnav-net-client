@@ -11,6 +11,9 @@ using Avalonia;
 using Avalonia.Controls;
 using BnbnavNetClient.Settings;
 using BnbnavNetClient.Services.Updates;
+using Avalonia.Controls.ApplicationLifetimes;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace BnbnavNetClient.ViewModels;
 
@@ -127,9 +130,10 @@ public sealed class MainViewModel : ViewModel
         MapEditorService.WhenAnyValue(x => x.EditModeEnabled).ToPropertyEx(this, x => x.EditModeEnabled);
 
         _updates = AvaloniaLocator.Current.GetRequiredService<IUpdateService>();
+        CheckForUpdates();
     }
 
-    public async Task CheckForUpdatesAsync()
+    public async void CheckForUpdates()
     {
         await _updates.CheckForUpdatesAsync();
 
@@ -322,4 +326,6 @@ public sealed class MainViewModel : ViewModel
         await SetLogin("");
         UserControlButton.Flyout!.Hide();
     }
+
+    public void AppRestartPressed() => _updates.RestartAppForUpdates();
 }

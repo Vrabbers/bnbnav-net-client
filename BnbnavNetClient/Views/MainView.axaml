@@ -55,12 +55,12 @@
         <ToggleButton Grid.Column="1" Command="{Binding EditModePressed}" Content="{str:Tr Key=EDIT_MODE}" IsChecked="{Binding EditModeEnabled}"/>
         <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
 
-        <Button x:Name="UpdateButton" Margin="0,0,50,0" Grid.Column="3" Content="Update Available!" IsVisible="{Binding IsUpdateAvailable}">
+        <Button x:Name="UpdateButton" Grid.Column="3" Content="Update Available!" IsVisible="{Binding IsUpdateAvailable}">
           <Button.Flyout>
             <Flyout>
               <StackPanel MaxWidth="400">
                 <TextBlock Text="{Binding UpdateInstructions}" TextWrapping="Wrap"/>
-                <Button Content="Restart Now" IsVisible="{Binding IsUpdateRestartButtonShown}"/>
+                <Button Content="Restart Now" Command="{Binding AppRestartPressed}" IsVisible="{Binding IsUpdateRestartButtonShown}"/>
               </StackPanel>
             </Flyout>
           </Button.Flyout>
