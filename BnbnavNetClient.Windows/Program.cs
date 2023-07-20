@@ -6,6 +6,7 @@ using BnbnavNetClient.I18Next;
 using BnbnavNetClient.Services.TextToSpeech;
 using BnbnavNetClient.Settings;
 using BnbnavNetClient.Services.Updates;
+using BnbnavNetClient.Windows.Updates;
 
 namespace BnbnavNetClient.Windows;
 
@@ -26,6 +27,6 @@ class Program
             .UseReactiveUI()
             .UseI18NextLocalization()
             .With<ITextToSpeechProvider>(new WindowsTextToSpeechProvider())
-            .With<IUpdateService>(new WindowsUpdateProvider())
+            .With<IUpdateService>(new WindowsUpdateService())
             .UseSettings(new SettingsManagerJsonFile());
 }
