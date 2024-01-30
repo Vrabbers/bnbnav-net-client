@@ -180,16 +180,17 @@ public partial class TemporaryLandmark : Landmark
 
     public static TemporaryLandmark? ParseCoordinateString(string coordinateString, string world)
     {
+        //TODO: this will probably fail if anyone tries using , as thousands separators
+
         var coordinateSearch = CoordinateSearchRegex().Match(coordinateString);
         if (!coordinateSearch.Success)
         {
             return null;
         }
-
-        // TODO: are these actually supposed to be InvariantCulture?
+        
         var t = Locator.Current.GetI18Next();
-        var x = int.Parse(coordinateSearch.Groups["x"].Value, CultureInfo.InvariantCulture);
-        var z = int.Parse(coordinateSearch.Groups["z"].Value, CultureInfo.InvariantCulture);
-        return new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z, world), t["DROPPED_PIN", ("x", x.ToString(CultureInfo.InvariantCulture)), ("z", z.ToString(CultureInfo.InvariantCulture))]);
+        var x = int.Parse(coordinateSearch.Groups["x"].Value, t.CurrentLanguage.NumberFormat);
+        var z = int.Parse(coordinateSearch.Groups["z"].Value, t.CurrentLanguage.NumberFormat);
+        return new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z, world), t["DROPPED_PIN", ("x", x.ToString(t.CurrentLanguage.NumberFormat)), ("z", z.ToString(t.CurrentLanguage.NumberFormat))]);
     }
 }

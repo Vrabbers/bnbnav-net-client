@@ -77,7 +77,7 @@ internal sealed class BnbnavWebsocketService : IDisposable
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        _ws.Dispose();
     }
 }
 

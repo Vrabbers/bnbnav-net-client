@@ -80,7 +80,7 @@ public partial class MapView : UserControl
             {
                 _disablePan = false;
             }
-
+             
             _viewVelocity = Vector.Zero;
             _pointerVelocities.Clear();
         };
