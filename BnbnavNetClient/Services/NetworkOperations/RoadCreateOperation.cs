@@ -25,7 +25,14 @@ public class RoadCreateOperation : NetworkOperation
 
         PendingRoad = new PendingRoad("", name, type.ServerName());
     }
-    
+
+
+    static readonly JsonSerializerOptions RoadResponseSerializerOptions =
+        new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+        };
     public override async Task PerformOperation()
     {
         try
@@ -36,11 +43,7 @@ public class RoadCreateOperation : NetworkOperation
                 Type = _type.ServerName()
             })).AssertSuccess();
 
-            var roadResponse = await JsonSerializer.DeserializeAsync<RoadResponse>(response.Stream, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
-            });
+            var roadResponse = await JsonSerializer.DeserializeAsync<RoadResponse>(response.Stream, RoadResponseSerializerOptions);
             PendingRoad.ProvideId(roadResponse!.Id);
         }
         catch (HttpRequestException e)
@@ -63,7 +66,7 @@ public class RoadCreateOperation : NetworkOperation
         //No need to render anything for a road creation
     }
 
-    class RoadResponse
+    sealed class RoadResponse
     {
         public required string Id { get; set; }
     }

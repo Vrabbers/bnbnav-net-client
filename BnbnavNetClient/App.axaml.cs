@@ -7,7 +7,9 @@ using BnbnavNetClient.ViewModels;
 using BnbnavNetClient.Views;
 using System;
 using System.Globalization;
+using BnbnavNetClient.Extensions;
 using BnbnavNetClient.Services.TextToSpeech;
+using Splat;
 
 namespace BnbnavNetClient;
 
@@ -16,16 +18,17 @@ public class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        var settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
+        var settings = Locator.Current.GetSettingsManager();
         settings.LoadAsync().Wait();
 
         var pseudo = Environment.GetEnvironmentVariable("PSEUDOLOCALIZATION") == "true";
-        var i18N = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        var i18N = Locator.Current.GetI18Next();
         i18N.Initialize("BnbnavNetClient.locales", pseudo);
         i18N.CurrentLanguage = new CultureInfo(settings.Settings.Language);
 
-        var tts = AvaloniaLocator.Current.GetRequiredService<ITextToSpeechProvider>();
-        tts.CurrentCulture = CultureInfo.CurrentUICulture;
+        var tts = Locator.Current.GetService<ITextToSpeechProvider>();
+        if (tts is not null)
+            tts.CurrentCulture = CultureInfo.CurrentUICulture;
     }
 
     public override void OnFrameworkInitializationCompleted()

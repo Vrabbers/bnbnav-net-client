@@ -6,10 +6,10 @@ namespace BnbnavNetClient.Services.EditControllers;
 
 public class DummyEditController : EditController
 {
-    public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs _)
+    public override PointerPressed PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
         // Dummy
-        return PointerPressedFlags.None;
+        return EditControllers.PointerPressed.None;
     }
 
     public override void PointerMoved(MapView mapView, PointerEventArgs args)

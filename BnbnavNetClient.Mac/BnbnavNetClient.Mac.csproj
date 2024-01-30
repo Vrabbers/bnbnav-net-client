@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   
     <PropertyGroup>
-        <TargetFramework>net7.0-macos10.14</TargetFramework>
+        <TargetFramework>net8.0-macos10.14</TargetFramework>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
   

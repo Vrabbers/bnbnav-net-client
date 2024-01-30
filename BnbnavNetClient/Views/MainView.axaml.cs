@@ -4,9 +4,11 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
+using BnbnavNetClient.Extensions;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Settings;
 using BnbnavNetClient.ViewModels;
+using Splat;
 
 namespace BnbnavNetClient.Views;
 
@@ -17,10 +19,10 @@ public partial class MainView : UserControl
 
     public MainView()
     {
-        FlowDirection = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>().IsRightToLeft ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
+        FlowDirection = Locator.Current.GetI18Next().IsRightToLeft ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
         _whiteTextStyle = new Style(static x => x.OfType<TextBlock>());
         _whiteTextStyle.Setters.Add(new Setter(TextBlock.ForegroundProperty, new SolidColorBrush(Colors.White)));
-        _settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
+        _settings = Locator.Current.GetSettingsManager();
         InitializeComponent();
     }
 
@@ -57,9 +59,7 @@ public partial class MainView : UserControl
         {
             Application.Current.Styles.Remove(_whiteTextStyle);
         }
-
-        ((MapThemeResources)Application.Current.Resources.MergedDictionaries[0]).Theme = button.IsNightMode ? MapTheme.Night : MapTheme.Day;
-
+        
         _settings.Settings.NightMode = button.IsNightMode;
         await _settings.SaveAsync();
     }

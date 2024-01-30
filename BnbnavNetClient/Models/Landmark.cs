@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Avalonia;
+using BnbnavNetClient.Extensions;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Views;
+using Splat;
 
 namespace BnbnavNetClient.Models;
 
@@ -80,7 +83,7 @@ public static class LandmarkTypeExtensions
 
     public static string HumanReadableName(this LandmarkType type)
     {
-        var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        var t = Locator.Current.GetI18Next();
         return type switch
         {
             LandmarkType.Unknown => "",
@@ -120,7 +123,7 @@ public static class LandmarkTypeExtensions
     public static string IconUrl(this LandmarkType type) => $"avares://BnbnavNetClient/Assets/Landmarks/{type.ServerName()}.svg";
 
     public static bool IsLandmark(this LandmarkType type) => type != LandmarkType.Unknown && type != LandmarkType.InternalTemporary && !type.IsLabel();
-    public static bool IsLabel(this LandmarkType type) => type.ServerName().StartsWith("label-");
+    public static bool IsLabel(this LandmarkType type) => type.ServerName().StartsWith("label-", StringComparison.InvariantCulture);
 }
 
 public class Landmark : MapItem, ISearchable
@@ -183,9 +186,10 @@ public partial class TemporaryLandmark : Landmark
             return null;
         }
 
-        var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
-        var x = Convert.ToInt32(coordinateSearch.Groups["x"].Value);
-        var z = Convert.ToInt32(coordinateSearch.Groups["z"].Value);
-        return new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z, world), t["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
+        // TODO: are these actually supposed to be InvariantCulture?
+        var t = Locator.Current.GetI18Next();
+        var x = int.Parse(coordinateSearch.Groups["x"].Value, CultureInfo.InvariantCulture);
+        var z = int.Parse(coordinateSearch.Groups["z"].Value, CultureInfo.InvariantCulture);
+        return new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z, world), t["DROPPED_PIN", ("x", x.ToString(CultureInfo.InvariantCulture)), ("z", z.ToString(CultureInfo.InvariantCulture))]);
     }
 }

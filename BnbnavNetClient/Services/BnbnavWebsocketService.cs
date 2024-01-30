@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BnbnavNetClient.Services;
 
-internal sealed class BnbnavWebsocketService
+internal sealed class BnbnavWebsocketService : IDisposable
 {
     ClientWebSocket _ws = null!;
 
@@ -28,7 +29,7 @@ internal sealed class BnbnavWebsocketService
                     {
                         "http" => Uri.UriSchemeWs,
                         "https" => Uri.UriSchemeWss,
-                        _ => throw new ArgumentException()
+                        _ => throw new UnreachableException()
                     },
                     Path = "ws"
                 };
@@ -74,6 +75,10 @@ internal sealed class BnbnavWebsocketService
         return writer.WrittenMemory;
     }
 
+    public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type", IgnoreUnrecognizedTypeDiscriminators = true)]

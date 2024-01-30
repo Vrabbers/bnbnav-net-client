@@ -20,6 +20,7 @@ using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.EditControllers;
 using BnbnavNetClient.Services.NetworkOperations;
+using Splat;
 
 namespace BnbnavNetClient.Views;
 
@@ -40,7 +41,7 @@ public partial class MapView : UserControl
 
     public MapView()
     {
-        _i18N = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        _i18N = Locator.Current.GetService<IAvaloniaI18Next>()!;
 
         InitializeComponent();
     }
@@ -73,7 +74,7 @@ public partial class MapView : UserControl
             if (MapViewModel.IsInEditMode)
             {
                 var flags = MapViewModel.MapEditorService.EditController.PointerPressed(this, eventArgs);
-                _disablePan = flags.HasFlag(PointerPressedFlags.DoNotPan);
+                _disablePan = flags.HasFlag(Services.EditControllers.PointerPressed.DoNotPan);
             }
             else
             {
@@ -184,24 +185,6 @@ public partial class MapView : UserControl
             _viewVelocity = Vector.Zero; // Reset velocities
             _pointerVelocities.Clear();
         };
-
-        // This is the physics part of inertial panning.
-        Clock = new Clock();
-        Clock.Subscribe(
-            _ =>
-            {
-                if (_pointerPressing)
-                    return;
-
-                // Stop the timer, don't waste resources.
-                if (double.Abs(_viewVelocity.X) < 4 && double.Abs(_viewVelocity.Y) < 4)
-                    _viewVelocity = Vector.Zero;
-                else
-                    MapViewModel.Pan += _viewVelocity / MapViewModel.Scale;
-
-                _viewVelocity /= 1.075; // 1.075 is the friction.
-            }
-        );
 
         //why does this happen to me :sob:
         MapViewModel
@@ -327,7 +310,7 @@ public partial class MapView : UserControl
             ToWorld(_currentPointerPosition).Deconstruct(out var xd, out var zd);
             var x = (int)xd;
             var z = (int)zd;
-            var landmark = new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z, MapViewModel.ChosenWorld), _i18N["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
+            var landmark = new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z, MapViewModel.ChosenWorld), _i18N["DROPPED_PIN", ("x", x.ToString(_i18N.CurrentLanguage.NumberFormat)), ("z", z.ToString(_i18N.CurrentLanguage.NumberFormat))]);
 
             MapViewModel.ContextMenuItems.AddRange(new MenuItem[]
             {
@@ -479,7 +462,7 @@ public partial class MapView : UserControl
         }
         
         using (context.PushTransform(matrix))
-        using (context.PushOpacity(drawGhost ? 0.5 : 1, new Rect(0, 0, length, 10)))
+        using (context.PushOpacity(drawGhost ? 0.5 : 1))
             context.DrawLine(pen, new Point(0, 0), new Point(length, 0));
     }
 
@@ -493,7 +476,7 @@ public partial class MapView : UserControl
             {
                 LandmarkType.City => (0.3, 1.15, 60),
                 LandmarkType.Country => (0, 0.3, 120),
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new ArgumentOutOfRangeException(paramName: nameof(landmark))
             };
 
             if (scale < lowerScaleBound || scale > higherScaleBound) return;
@@ -543,7 +526,7 @@ public partial class MapView : UserControl
         {
             //Draw the arrow indicator
             var instruction = MapViewModel.MapService.CurrentRoute?.CurrentInstruction;
-            if (instruction is { From: { }, To: { } })
+            if (instruction is { From: not null, To: not null })
             {
                 var pen = new Pen(new SolidColorBrush(new Color(255, 100, 50, 150)),
                     PenForRoadType(RoadType.Local).Thickness, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);

@@ -116,7 +116,7 @@ public class InstructionImageControl : TemplatedControl
                     CalculatedRoute.Instruction.InstructionTypes.Merge => "merge",
                     CalculatedRoute.Instruction.InstructionTypes.EnterRoundabout => "enter-roundabout",
                     CalculatedRoute.Instruction.InstructionTypes.LeaveRoundabout => "leave-roundabout",
-                    _ => throw new ArgumentOutOfRangeException()
+                    _ => throw new InvalidOperationException(nameof(_instruction) + " was out of range")
                 };
 
                 context.DrawSvgUrl($"avares://BnbnavNetClient/Assets/Instructions/{instructionFile}.svg", bounds);

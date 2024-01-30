@@ -42,7 +42,7 @@ public class NodeJoinEditController : EditController
 
     }
     
-    public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
+    public override PointerPressed PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
         var pointerPos = args.GetPosition(mapView);
         
@@ -55,7 +55,7 @@ public class NodeJoinEditController : EditController
             // Attempt to join two nodes
             if (pointerNode is null)
             {
-                return PointerPressedFlags.None;
+                return EditControllers.PointerPressed.None;
             }
 
             if (pointerNode == _firstNode)
@@ -63,12 +63,12 @@ public class NodeJoinEditController : EditController
                 _firstNode = null;
                 _nodeSet = false;
                 _roadGhosts.Clear();
-                return PointerPressedFlags.DoNotPan;
+                return EditControllers.PointerPressed.DoNotPan;
             }
 
             if (!AppendRoadGhost(pointerNode))
             {
-                return PointerPressedFlags.DoNotPan;
+                return EditControllers.PointerPressed.DoNotPan;
             }
             
             _firstNode = null;
@@ -89,7 +89,7 @@ public class NodeJoinEditController : EditController
                 };
             }
             
-            return PointerPressedFlags.DoNotPan;
+            return EditControllers.PointerPressed.DoNotPan;
         }
         
         if (pointerNode is not null)
@@ -98,10 +98,10 @@ public class NodeJoinEditController : EditController
             _firstNode = pointerNode;
             _roadGhosts.Add(pointerNode);
             mapView.InvalidateVisual();
-            return PointerPressedFlags.DoNotPan;
+            return EditControllers.PointerPressed.DoNotPan;
         }
 
-        return PointerPressedFlags.None;
+        return EditControllers.PointerPressed.None;
     }
 
     public override void PointerMoved(MapView mapView, PointerEventArgs args)

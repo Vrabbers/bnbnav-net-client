@@ -7,6 +7,7 @@ using BnbnavNetClient.I18Next;
 using BnbnavNetClient.Linux.TextToSpeech;
 using BnbnavNetClient.Services.TextToSpeech;
 using BnbnavNetClient.Settings;
+using Splat;
 
 namespace BnbnavNetClient.Linux;
 
@@ -15,6 +16,7 @@ internal class Program
     public static void Main(string[] args)
     {
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        Locator.CurrentMutable.RegisterConstant<ITextToSpeechProvider>(new SpdTextToSpeechProvider());
     }
 
     static AppBuilder BuildAvaloniaApp()
@@ -27,7 +29,6 @@ internal class Program
             .LogToTrace()
             .UseReactiveUI()
             .UseI18NextLocalization()
-            .With<ITextToSpeechProvider>(new SpdTextToSpeechProvider())
             .UseSettings(new SettingsManagerJsonFile());
     }
 }

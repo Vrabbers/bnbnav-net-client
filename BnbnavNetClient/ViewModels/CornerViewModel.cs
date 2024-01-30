@@ -5,11 +5,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Threading;
+using BnbnavNetClient.Extensions;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Splat;
 
 namespace BnbnavNetClient.ViewModels;
 
@@ -88,7 +90,7 @@ public class CornerViewModel : ViewModel
     {
         _mainViewModel = mainViewModel;
         MapService = mapService;
-        _i18N = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        _i18N = Locator.Current.GetI18Next();
 
         this.WhenAnyValue(x => x.CurrentUi).Subscribe(Observer.Create<AvailableUi>(_ =>
         {

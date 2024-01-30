@@ -23,9 +23,9 @@ public class SpliceEditController : EditController
         this._editorService = editorService;
     }
 
-    public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
+    public override PointerPressed PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
-        if (_editorService.MapService is null) return PointerPressedFlags.None;
+        if (_editorService.MapService is null) return EditControllers.PointerPressed.None;
         
         var pointerPos = args.GetPosition(mapView);
         
@@ -40,10 +40,10 @@ public class SpliceEditController : EditController
             {
                 ItemsNotToRender.Add(opposite);
             }
-            return PointerPressedFlags.DoNotPan;
+            return EditControllers.PointerPressed.DoNotPan;
         }
 
-        return PointerPressedFlags.None;
+        return EditControllers.PointerPressed.None;
     }
 
     public override void PointerMoved(MapView mapView, PointerEventArgs args)

@@ -24,11 +24,10 @@ public static class DrawingContextExtensions
         }
         else
         {
-            var assetLoader = AvaloniaLocator.Current.GetService<IAssetLoader>()!;
             var uri = new Uri(url);
-            if (assetLoader.Exists(uri))
+            if (AssetLoader.Exists(uri))
             {
-                var asset = assetLoader.Open(uri);
+                var asset = AssetLoader.Open(uri);
 
                 svg = new SKSvg();
                 svg.Load(asset);

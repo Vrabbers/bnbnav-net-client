@@ -9,7 +9,9 @@ using BnbnavNetClient.Models;
 using BnbnavNetClient.I18Next.Services;
 using Avalonia;
 using Avalonia.Controls;
+using BnbnavNetClient.Extensions;
 using BnbnavNetClient.Settings;
+using Splat;
 
 namespace BnbnavNetClient.ViewModels;
 
@@ -87,9 +89,10 @@ public sealed class MainViewModel : ViewModel
     public MainViewModel()
     {
         MapEditorService = new MapEditorService();
-        
-        _settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
-        _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+
+        //TODO: Splat has a source generator for this. use it
+        _settings = Locator.Current.GetSettingsManager();
+        _tr = Locator.Current.GetI18Next();
         var followMeText = this
             .WhenAnyValue(me => me.FollowMeEnabled, me => me.LoggedInUsername)
             .Select(x => x.Item1 ? _tr["FOLLOWING", ("user", x.Item2)] : _tr["FOLLOW_ME"]);
@@ -215,7 +218,7 @@ public sealed class MainViewModel : ViewModel
         {
             EditModeToken = null;
             MapEditorService.EditModeEnabled = false;
-            cs.SetException(new Exception());
+            cs.SetException(new OperationCanceledException());
             Popup = null;
         });
         Popup = editModePopup;

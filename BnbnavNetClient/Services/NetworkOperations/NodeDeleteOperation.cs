@@ -39,7 +39,7 @@ public class NodeDeleteOperation : NetworkOperation
         var nodeBorder = (Pen)mapView.FindResource("NodeBorder")!;
         var nodeBrush = (Brush)mapView.FindResource("NodeFill")!;
         var rect = _node.BoundingRect(mapView);
-        using (context.PushOpacity(0.5, rect))
+        using (context.PushOpacity(0.5))
             context.DrawRectangle(nodeBrush, nodeBorder, rect);
     }
 }

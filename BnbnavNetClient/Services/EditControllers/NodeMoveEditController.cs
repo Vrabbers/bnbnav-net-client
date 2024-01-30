@@ -18,7 +18,7 @@ public class NodeMoveEditController : EditController
         _editorService = editorService;
     }
 
-    public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
+    public override PointerPressed PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
         var pointerPos = args.GetPosition(mapView);
         
@@ -26,10 +26,10 @@ public class NodeMoveEditController : EditController
         {
             _movingNode = node;
             _movedNode = new Node("temp", node.X, node.Y, node.Z, node.World);
-            return PointerPressedFlags.DoNotPan;
+            return EditControllers.PointerPressed.DoNotPan;
         }
 
-        return PointerPressedFlags.None;
+        return EditControllers.PointerPressed.None;
     }
 
     public override void PointerMoved(MapView mapView, PointerEventArgs args)

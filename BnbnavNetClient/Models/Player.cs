@@ -6,8 +6,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media;
+using BnbnavNetClient.Extensions;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services;
+using Splat;
 using Timer = System.Timers.Timer;
 
 namespace BnbnavNetClient.Models;
@@ -24,7 +26,7 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
     {
         get
         {
-            var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+            var t = Locator.Current.GetI18Next();
             return t["PLAYER"];
         }
     }

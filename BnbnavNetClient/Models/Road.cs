@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Avalonia;
+using BnbnavNetClient.Extensions;
 using BnbnavNetClient.I18Next.Services;
+using Splat;
 
 namespace BnbnavNetClient.Models;
 
@@ -40,7 +42,7 @@ public static class RoadTypeExtensions
 
     public static string HumanReadableName(this RoadType type)
     {
-        var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        var t = Locator.Current.GetI18Next();
         return type switch
         {
             RoadType.Unknown => t["ROAD_TYPE_UNKNOWN"],

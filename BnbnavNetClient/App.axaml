@@ -10,8 +10,7 @@
   <Application.Resources>
     <ResourceDictionary>  
       <ResourceDictionary.MergedDictionaries>
-        <local:MapThemeResources Theme="Day"/>
-        
+        <ResourceInclude Source="/Resources/DayTheme.axaml"/>        
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>
@@ -30,6 +29,9 @@
     <Style Selector=":is(Button).icon">
       <Setter Property="MinWidth" Value="0"/>
       <Setter Property="VerticalAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector=":is(Button).accent">
+      <Setter Property="FontWeight" Value="Bold"/>
     </Style>
     <Style Selector="ComboBox">
       <Setter Property="Margin" Value="2"/>

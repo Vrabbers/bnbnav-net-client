@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using BnbnavNetClient.I18Next.Services;
+using Splat;
 
 namespace BnbnavNetClient.I18Next;
 public sealed class TrString : AvaloniaObject
@@ -36,7 +37,7 @@ public sealed class TrString : AvaloniaObject
 
     public TrString()
     {
-        _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        _tr = Locator.Current.GetService<IAvaloniaI18Next>() ?? throw new InvalidOperationException("AvaloniaI18Next must be registered for TrString to be constructed");
     }
 
     public override string ToString()

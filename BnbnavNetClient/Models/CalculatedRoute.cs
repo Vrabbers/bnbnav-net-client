@@ -1,18 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
+using BnbnavNetClient.Extensions;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services;
 using BnbnavNetClient.Services.TextToSpeech;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Splat;
 
 namespace BnbnavNetClient.Models;
 
-public class CalculatedRoute : ReactiveObject, IDisposable
+public sealed class CalculatedRoute : ReactiveObject, IDisposable
 {
     readonly MapService _mapService;
 
@@ -43,13 +46,14 @@ public class CalculatedRoute : ReactiveObject, IDisposable
             EnterRoundabout,
             LeaveRoundabout
         }
-
+        
+        //TODO: Why are these here?
         public double TurnAngle => 0;
         public double? RoundaboutExitAngle => RoundaboutExit is not null ? From?.Line.AngleTo(RoundaboutExit.Line) : null;
 
         public string HumanReadableString(int distance)
         {
-            var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+            var t = Locator.Current.GetI18Next();
             return t["INSTRUCTION_DISTANCE_PROMPT", ("count", distance), ("instruction", InstructionString)];
         }
         
@@ -57,10 +61,10 @@ public class CalculatedRoute : ReactiveObject, IDisposable
         {
             get
             {
-                var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+                var t = Locator.Current.GetI18Next();
                 var args = new Dictionary<string, object?>();
                 if (To is not null) args["road"] = TargetRoadName;
-                if (RoundaboutExitNumber is not null) args["exit"] = RoundaboutExitNumber.ToString();
+                if (RoundaboutExitNumber is not null) args["exit"] = RoundaboutExitNumber.Value.ToString(NumberFormatInfo.CurrentInfo);
 
                 return InstructionType switch
                 {
@@ -90,7 +94,7 @@ public class CalculatedRoute : ReactiveObject, IDisposable
 
         public string Speech(double distance, Instruction? thenInstruction)
         {
-            var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+            var t = Locator.Current.GetI18Next();
             var log = double.Log10(distance);
             var roundIncrements = (int) double.Pow(10, log) / 20;
             if (roundIncrements == 0) roundIncrements = 5;
@@ -438,8 +442,8 @@ public class CalculatedRoute : ReactiveObject, IDisposable
 
         if (!Mute)
         {
-            var tts = AvaloniaLocator.Current.GetRequiredService<ITextToSpeechProvider>();
-            tts.SpeakAsync(CurrentVoicePrompt.Instruction.Speech(BlocksToNextInstruction,
+            var tts = Locator.Current.GetService<ITextToSpeechProvider>();
+            tts?.SpeakAsync(CurrentVoicePrompt.Instruction.Speech(BlocksToNextInstruction,
                 DisplayThenInstruction ? ThenInstruction : null));
         }
     }
