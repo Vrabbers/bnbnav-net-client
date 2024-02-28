@@ -1,27 +1,20 @@
 using Avalonia;
-using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Media;
 using BnbnavNetClient.ViewModels;
 using DynamicData.Binding;
 using ReactiveUI;
-using System;
-using System.Linq;
 using System.Reactive;
 using BnbnavNetClient.Services;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Helpers;
 using Avalonia.Controls.Primitives;
-using Avalonia.Styling;
 using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
-using BnbnavNetClient.Services.EditControllers;
 using BnbnavNetClient.Services.NetworkOperations;
-using Microsoft.Extensions.DependencyInjection;
 using Splat;
 
 namespace BnbnavNetClient.Views;
@@ -209,7 +202,7 @@ public partial class MapView : UserControl
                     
                     matrix *=
                         Matrix.CreateTranslation(-centerOfBounds) *
-                        Matrix.CreateRotation(MathHelper.ToRad(rotate)) * 
+                        Matrix.CreateRotation(double.DegreesToRadians(rotate)) * 
                         Matrix.CreateTranslation(centerOfBounds);
                 }
 

@@ -38,7 +38,7 @@
             </ComboBox.ItemTemplate>
           </ComboBox>
           <DockPanel HorizontalAlignment="Stretch" LastChildFill="True">
-            <Button DockPanel.Dock="Right" MinWidth="0" Command="{Binding ActivateRoadSyringe}" IsVisible="False">
+            <Button DockPanel.Dock="Right" MinWidth="0"  IsVisible="False"> <!-- Command="{Binding ActivateRoadSyringe}" -->
               [pick]
             </Button>
             <StackPanel Orientation="Horizontal" IsVisible="False">

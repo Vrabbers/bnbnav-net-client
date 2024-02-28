@@ -47,7 +47,7 @@ public static class DrawingContextExtensions
         var translateMatrix = Matrix.CreateTranslation(
             rect.X * sourceSize.Width / rect.Width,
             rect.Y * sourceSize.Height / rect.Height);
-        var rotateMatrix = Matrix.CreateRotation(MathHelper.ToRad(angle));
+        var rotateMatrix = Matrix.CreateRotation(double.DegreesToRadians(angle));
         var preRotateMatrix = Matrix.CreateTranslation(-sourceSize.Width / 2, -sourceSize.Width / 2);
 
         using (context.PushClip(rect))

@@ -29,7 +29,7 @@ public readonly struct ExtendedLine
 
     public double Angle
     {
-        get => MathHelper.ToDeg(double.Atan2(-Dy, Dx));
+        get => double.RadiansToDegrees(double.Atan2(-Dy, Dx));
     }
 
     public double Length => double.Sqrt(Dx * Dx + Dy * Dy);
@@ -45,7 +45,7 @@ public readonly struct ExtendedLine
     [Pure]
     public ExtendedLine SetAngle(double angle)
     {
-        var angleR = MathHelper.ToRad(angle);
+        var angleR = double.DegreesToRadians(angle);
         var dx = double.Cos(angleR) * Length;
         var dy = -double.Sin(angleR) * Length;
         

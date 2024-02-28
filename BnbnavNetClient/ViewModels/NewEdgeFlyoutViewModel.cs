@@ -100,12 +100,6 @@ public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
             }));
     }
 
-    //TODO: What is this doing here?
-    public void ActivateRoadSyringe()
-    {
-        
-    }
-
     public void CreateClicked()
     {
         Road road;

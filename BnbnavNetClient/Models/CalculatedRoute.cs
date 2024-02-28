@@ -46,10 +46,6 @@ public sealed class CalculatedRoute : ReactiveObject, IDisposable
             EnterRoundabout,
             LeaveRoundabout
         }
-        
-        //TODO: Why are these here?
-        public double TurnAngle => 0;
-        public double? RoundaboutExitAngle => RoundaboutExit is not null ? From?.Line.AngleTo(RoundaboutExit.Line) : null;
 
         public string HumanReadableString(int distance)
         {
