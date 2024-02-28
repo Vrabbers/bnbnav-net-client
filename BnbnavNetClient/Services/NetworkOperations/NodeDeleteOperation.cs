@@ -5,24 +5,15 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.NetworkOperations;
 
-public class NodeDeleteOperation : NetworkOperation
+public class NodeDeleteOperation(MapEditorService editorService, Node node) : NetworkOperation
 {
-    readonly MapEditorService _editorService;
-    readonly Node _node;
-
-    public NodeDeleteOperation(MapEditorService editorService, Node node)
-    {
-        _editorService = editorService;
-        _node = node;
-    }
-    
     public override async Task PerformOperation()
     {
-        ItemsNotToRender.Add(_node);
+        ItemsNotToRender.Add(node);
         
         try
         {
-            (await _editorService.MapService!.Delete($"/nodes/{_node.Id}")).AssertSuccess();
+            (await editorService.MapService!.Delete($"/nodes/{node.Id}")).AssertSuccess();
         }
         catch (HttpRequestException)
         {
@@ -36,7 +27,7 @@ public class NodeDeleteOperation : NetworkOperation
     {
         var nodeBorder = (Pen)mapView.FindResource("NodeBorder")!;
         var nodeBrush = (Brush)mapView.FindResource("NodeFill")!;
-        var rect = _node.BoundingRect(mapView);
+        var rect = node.BoundingRect(mapView);
         using (context.PushOpacity(0.5))
             context.DrawRectangle(nodeBrush, nodeBorder, rect);
     }

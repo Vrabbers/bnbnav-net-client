@@ -9,14 +9,9 @@ using ReactiveUI.Fody.Helpers;
 
 namespace BnbnavNetClient.ViewModels;
 
-public class RoadTypeHelper
+public class RoadTypeHelper(RoadType roadType)
 {
-    public RoadType RoadType { get; }
-
-    public RoadTypeHelper(RoadType roadType)
-    {
-        RoadType = roadType;
-    }
+    public RoadType RoadType { get; } = roadType;
 
     public string HumanReadableName => RoadType.HumanReadableName();
 }
@@ -38,7 +33,7 @@ public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
     public Road? RoadPickedWithRoadSyringe { get; set; }
 
     [Reactive]
-    public AvaloniaList<Road> FoundRoads { get; set; } = new();
+    public AvaloniaList<Road> FoundRoads { get; set; } = [];
     
     [Reactive]
     public Road? SelectedRoad { get; set; }
@@ -50,7 +45,7 @@ public sealed class NewEdgeFlyoutViewModel : ViewModel, IOpenableAsFlyout
     public int CurrentTabIndex { get; set; }
     
     [Reactive]
-    public AvaloniaList<RoadTypeHelper> RoadTypes { get; set; } = new();
+    public AvaloniaList<RoadTypeHelper> RoadTypes { get; set; } = [];
 
     [Reactive]
     public RoadTypeHelper? SelectedRoadType { get; set; }

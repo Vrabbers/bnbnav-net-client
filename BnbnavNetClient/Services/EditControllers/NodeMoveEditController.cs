@@ -6,16 +6,10 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.EditControllers;
 
-public class NodeMoveEditController : EditController
+public class NodeMoveEditController(MapEditorService editorService) : EditController
 {
-    readonly MapEditorService _editorService;
     Node? _movingNode;
     Node? _movedNode;
-
-    public NodeMoveEditController(MapEditorService editorService)
-    {
-        _editorService = editorService;
-    }
 
     public override PointerPressed PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
@@ -47,7 +41,7 @@ public class NodeMoveEditController : EditController
     {
         if (_movingNode is not null && _movedNode is not null)
         {
-            _editorService.TrackNetworkOperation(new NodeMoveOperation(_editorService, _movingNode, _movedNode));
+            editorService.TrackNetworkOperation(new NodeMoveOperation(editorService, _movingNode, _movedNode));
         }
         
         _movingNode = null;

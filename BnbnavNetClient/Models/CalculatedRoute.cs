@@ -8,17 +8,10 @@ using Splat;
 
 namespace BnbnavNetClient.Models;
 
-public sealed class CalculatedRoute : ReactiveObject, IDisposable
+public sealed class CalculatedRoute(MapService mapService) : ReactiveObject, IDisposable
 {
-    readonly MapService _mapService;
-
     public event EventHandler<EventArgs>? RerouteRequested;
 
-    public CalculatedRoute(MapService mapService)
-    {
-        _mapService = mapService;
-    }
-    
     public record Instruction(Node Node, Edge? From, Edge? To, double Distance, Instruction.InstructionTypes InstructionType, int? RoundaboutExitNumber = null, Edge? RoundaboutExit = null)
     {
         public enum InstructionTypes
@@ -111,11 +104,11 @@ public sealed class CalculatedRoute : ReactiveObject, IDisposable
         public required double Distance { get; init; }
     }
 
-    List<MapItem> Elements { get; } = new();
+    List<MapItem> Elements { get; } = [];
     public IEnumerable<Node> Nodes => Elements.Where(x => x is Node).Cast<Node>();
     public IEnumerable<Edge> Edges => Elements.Where(x => x is Edge).Cast<Edge>();
-    public List<VoicePrompt> VoicePrompts { get; } = new();
-    public List<Instruction> Instructions { get; } = new();
+    public List<VoicePrompt> VoicePrompts { get; } = [];
+    public List<Instruction> Instructions { get; } = [];
     
     public VoicePrompt? CurrentVoicePrompt { get; set; }
     
@@ -190,8 +183,8 @@ public sealed class CalculatedRoute : ReactiveObject, IDisposable
             if (nextEdge is TemporaryEdge) continue;
 
             //Determine if this node connects two different roads together
-            var isMultiRoad = _mapService.Edges.Values.Count(x => x.To == node) !=
-                _mapService.Edges.Values.Count(x => x.From == node) || _mapService.Edges.Values
+            var isMultiRoad = mapService.Edges.Values.Count(x => x.To == node) !=
+                mapService.Edges.Values.Count(x => x.From == node) || mapService.Edges.Values
                     .Where(x => x.From == node || x.To == node).Any(x => x.Road.Name != nextEdge.Road.Name);
             
             //Determine if we are turning onto the same road
@@ -209,7 +202,7 @@ public sealed class CalculatedRoute : ReactiveObject, IDisposable
                 foreach (var testEdge in Edges.SkipWhile(x => x != nextEdge))
                 {
                     //Bump the exit number if, at this edge, there is at least one way out of the roundabout
-                    if (_mapService.Edges.Values.Count(x => x.From == testEdge.From) > 1) 
+                    if (mapService.Edges.Values.Count(x => x.From == testEdge.From) > 1) 
                         exitNumber++;
                     if (testEdge.Road.RoadType != RoadType.Roundabout)
                     {
@@ -335,7 +328,7 @@ public sealed class CalculatedRoute : ReactiveObject, IDisposable
     {
         lock (_currentInstructionMutex)
         {
-            if (_mapService.LoggedInPlayer is null)
+            if (mapService.LoggedInPlayer is null)
             {
                 _ = QueueReroute();
                 CurrentInstruction = null;
@@ -344,7 +337,7 @@ public sealed class CalculatedRoute : ReactiveObject, IDisposable
                 return;
             }
 
-            if (!Edges.Contains(_mapService.LoggedInPlayer.SnappedEdge))
+            if (!Edges.Contains(mapService.LoggedInPlayer.SnappedEdge))
             {
                 _ = QueueReroute();
                 return;
@@ -385,7 +378,7 @@ public sealed class CalculatedRoute : ReactiveObject, IDisposable
                     blocksToNextInstruction += edge.Line.Length;
                 }
 
-                if (_mapService.LoggedInPlayer.SnappedEdge == edge)
+                if (mapService.LoggedInPlayer.SnappedEdge == edge)
                 {
                     //We found the edge that the player is on
                     CurrentInstruction = Instructions[instructionIndex];
@@ -401,7 +394,7 @@ public sealed class CalculatedRoute : ReactiveObject, IDisposable
                     }
 
                     instructionFound = true;
-                    blocksToNextInstruction += new ExtendedLine(edge.To.Point, _mapService.LoggedInPlayer.Point).Length;
+                    blocksToNextInstruction += new ExtendedLine(edge.To.Point, mapService.LoggedInPlayer.Point).Length;
                 }
             }
 

@@ -5,30 +5,20 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.NetworkOperations;
 
-public class NodeMoveOperation : NetworkOperation
+public class NodeMoveOperation(MapEditorService? editorService, Node toUpdate, Node updateTo)
+    : NetworkOperation
 {
-    readonly MapEditorService? _editorService;
-    readonly Node _toUpdate;
-    readonly Node _updateTo;
-
-    public NodeMoveOperation(MapEditorService? editorService, Node toUpdate, Node updateTo)
-    {
-        _editorService = editorService;
-        _toUpdate = toUpdate;
-        _updateTo = updateTo;
-    }
-
     public override async Task PerformOperation()
     {
         try
         {
-            if (_editorService is not null)
+            if (editorService is not null)
             {
-                (await _editorService.MapService!.Submit($"/nodes/{_toUpdate.Id}", new
+                (await editorService.MapService!.Submit($"/nodes/{toUpdate.Id}", new
                 {
-                    _updateTo.X,
-                    _updateTo.Y,
-                    _updateTo.Z
+                    updateTo.X,
+                    updateTo.Y,
+                    updateTo.Z
                 })).AssertSuccess();
             }
         }
@@ -47,8 +37,8 @@ public class NodeMoveOperation : NetworkOperation
         var nodeBorder = (Pen)mapView.FindResource("NodeBorder")!;
         var selNodeBrush = (Brush)mapView.FindResource("SelectedNodeFill")!;
 
-        var movingRect = _toUpdate.BoundingRect(mapView);
-        var movedRect = _updateTo.BoundingRect(mapView);
+        var movingRect = toUpdate.BoundingRect(mapView);
+        var movedRect = updateTo.BoundingRect(mapView);
 
         var lineBetween = new ExtendedLine(movingRect.Center, movedRect.Center);
 
@@ -67,7 +57,7 @@ public class NodeMoveOperation : NetworkOperation
         context.DrawLine(pen, lineBetween.Point1, lineBetween.Point2);
         context.DrawGeometry(null, pen, geo);
 
-        context.DrawRectangle(selNodeBrush, nodeBorder, _toUpdate.BoundingRect(mapView));
-        context.DrawRectangle(selNodeBrush, nodeBorder, _updateTo.BoundingRect(mapView));
+        context.DrawRectangle(selNodeBrush, nodeBorder, toUpdate.BoundingRect(mapView));
+        context.DrawRectangle(selNodeBrush, nodeBorder, updateTo.BoundingRect(mapView));
     }
 }

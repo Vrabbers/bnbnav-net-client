@@ -3,16 +3,9 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Models;
 
-public class Edge : MapItem
+public class Edge(string id, Road road, Node from, Node to)
+    : MapItem
 {
-    public Edge(string id, Road road, Node from, Node to)
-    {
-        this.Id = id;
-        this.Road = road;
-        this.From = from;
-        this.To = to;
-    }
-
     public (Point, Point) Extents(MapView mapView)
     {
         var from = mapView.ToScreen(From.Point);
@@ -20,10 +13,10 @@ public class Edge : MapItem
         return (from, to);
     }
 
-    public string Id { get; init; }
-    public Road Road { get; init; }
-    public Node From { get; init; }
-    public Node To { get; init; }
+    public string Id { get; init; } = id;
+    public Road Road { get; init; } = road;
+    public Node From { get; init; } = from;
+    public Node To { get; init; } = to;
 
     public void Deconstruct(out string id, out Road road, out Node from, out Node to)
     {
@@ -42,9 +35,4 @@ public class Edge : MapItem
     };
 }
 
-public class TemporaryEdge : Edge
-{
-    public TemporaryEdge(Road road, Node from, Node to) : base("somegeneratedid", road, from, to)
-    {
-    }
-}
+public class TemporaryEdge(Road road, Node from, Node to) : Edge("somegeneratedid", road, from, to);

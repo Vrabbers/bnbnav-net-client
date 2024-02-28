@@ -6,22 +6,9 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace BnbnavNetClient.Services.NetworkOperations;
 
-public class RoadCreateOperation : NetworkOperation
+public class RoadCreateOperation(MapEditorService editorService, string name, RoadType type) : NetworkOperation
 {
-    readonly MapEditorService _editorService;
-    readonly string _name;
-    readonly RoadType _type;
-    
-    public PendingRoad PendingRoad { get; }
-
-    public RoadCreateOperation(MapEditorService editorService, string name, RoadType type)
-    {
-        _editorService = editorService;
-        _name = name;
-        _type = type;
-
-        PendingRoad = new PendingRoad("", name, type.ServerName());
-    }
+    public PendingRoad PendingRoad { get; } = new("", name, type.ServerName());
 
 
     static readonly JsonSerializerOptions RoadResponseSerializerOptions =
@@ -34,10 +21,10 @@ public class RoadCreateOperation : NetworkOperation
     {
         try
         {
-            var response = (await _editorService.MapService!.Submit($"/roads/add", new
+            var response = (await editorService.MapService!.Submit($"/roads/add", new
             {
-                Name = _name,
-                Type = _type.ServerName()
+                Name = name,
+                Type = type.ServerName()
             })).AssertSuccess();
 
             var roadResponse = await JsonSerializer.DeserializeAsync<RoadResponse>(response.Stream, RoadResponseSerializerOptions);

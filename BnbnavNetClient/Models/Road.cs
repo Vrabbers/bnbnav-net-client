@@ -73,15 +73,8 @@ public static class RoadTypeExtensions
     };
 }
 
-public class Road
+public class Road(string id, string name, string type)
 {
-    public Road(string id, string name, string type)
-    {
-        this.Id = id;
-        this.Name = name;
-        this.Type = type;
-    }
-
     public RoadType RoadType => Type switch
     {
         "local" => RoadType.Local,
@@ -98,9 +91,9 @@ public class Road
     };
 
     public string HumanReadableName => $"{Name} [{RoadType.HumanReadableName()}]";
-    public string Id { get; protected set; }
-    public string Name { get; set; }
-    public string Type { get; set; }
+    public string Id { get; protected set; } = id;
+    public string Name { get; set; } = name;
+    public string Type { get; set; } = type;
 
     public void Deconstruct(out string id, out string name, out string type)
     {
@@ -110,13 +103,9 @@ public class Road
     }
 }
 
-public class PendingRoad : Road
+public class PendingRoad(string id, string name, string type) : Road(id, name, type)
 {
     readonly TaskCompletionSource<string> _completionSource = new();
-
-    public PendingRoad(string id, string name, string type) : base(id, name, type)
-    {
-    }
 
     public Task<string> WaitForReadyTask => _completionSource.Task;
     

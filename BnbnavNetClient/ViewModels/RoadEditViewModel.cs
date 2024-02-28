@@ -15,7 +15,7 @@ public class RoadEditViewModel : ViewModel, IOpenableAsFlyout
     readonly Road _road;
 
     [Reactive]
-    public AvaloniaList<RoadTypeHelper> RoadTypes { get; set; } = new();
+    public AvaloniaList<RoadTypeHelper> RoadTypes { get; set; } = [];
 
     [Reactive]
     public RoadTypeHelper? SelectedRoadType { get; set; }

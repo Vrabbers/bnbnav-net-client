@@ -8,7 +8,7 @@ namespace BnbnavNetClient.Services;
 
 public class MapEditorService : ReactiveObject
 {
-    List<NetworkOperation> _networkOperations = new();
+    List<NetworkOperation> _networkOperations = [];
     
     public MapEditorService()
     {

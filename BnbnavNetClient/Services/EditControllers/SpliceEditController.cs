@@ -7,9 +7,8 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.EditControllers;
 
-public class SpliceEditController : EditController
+public class SpliceEditController(MapEditorService editorService) : EditController
 {
-    readonly MapEditorService _editorService;
     Point _pointerPrevPosition;
     Edge? _splicingEdge;
     Node? _splicingAt;
@@ -17,14 +16,9 @@ public class SpliceEditController : EditController
     bool _mouseDown;
 #pragma warning restore CS0414 // C# compiler seems to be having a little weird moment here?
 
-    public SpliceEditController(MapEditorService editorService)
-    {
-        this._editorService = editorService;
-    }
-
     public override PointerPressed PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
-        if (_editorService.MapService is null) return EditControllers.PointerPressed.None;
+        if (editorService.MapService is null) return EditControllers.PointerPressed.None;
         
         var pointerPos = args.GetPosition(mapView);
         
@@ -35,7 +29,7 @@ public class SpliceEditController : EditController
             _mouseDown = true;
             _splicingEdge = edge;
             ItemsNotToRender.Add(_splicingEdge);
-            if (_editorService.MapService.OppositeEdge(_splicingEdge) is { } opposite)
+            if (editorService.MapService.OppositeEdge(_splicingEdge) is { } opposite)
             {
                 ItemsNotToRender.Add(opposite);
             }
@@ -65,19 +59,19 @@ public class SpliceEditController : EditController
 
     public override void PointerReleased(MapView mapView, PointerReleasedEventArgs args)
     {
-        if (_editorService.MapService is null) return;
+        if (editorService.MapService is null) return;
         
         if (_splicingEdge is not null)
         {
             if (_splicingAt is not null)
             {
-                var otherEdge = _editorService.MapService.OppositeEdge(_splicingEdge);
+                var otherEdge = editorService.MapService.OppositeEdge(_splicingEdge);
                 
-                _editorService.TrackNetworkOperation(new EdgeCreateOperation(_editorService, _splicingEdge.Road, _splicingEdge.From, _splicingAt, otherEdge is not null));
-                _editorService.TrackNetworkOperation(new EdgeCreateOperation(_editorService, _splicingEdge.Road, _splicingAt, _splicingEdge.To, otherEdge is not null));
+                editorService.TrackNetworkOperation(new EdgeCreateOperation(editorService, _splicingEdge.Road, _splicingEdge.From, _splicingAt, otherEdge is not null));
+                editorService.TrackNetworkOperation(new EdgeCreateOperation(editorService, _splicingEdge.Road, _splicingAt, _splicingEdge.To, otherEdge is not null));
                 
-                _editorService.TrackNetworkOperation(new EdgeDeleteOperation(_editorService, _splicingEdge));
-                if (otherEdge is not null) _editorService.TrackNetworkOperation(new EdgeDeleteOperation(_editorService, otherEdge));
+                editorService.TrackNetworkOperation(new EdgeDeleteOperation(editorService, _splicingEdge));
+                if (otherEdge is not null) editorService.TrackNetworkOperation(new EdgeDeleteOperation(editorService, otherEdge));
             }
             _splicingEdge = null;
         }

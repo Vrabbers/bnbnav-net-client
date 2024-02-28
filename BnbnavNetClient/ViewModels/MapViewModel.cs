@@ -56,7 +56,7 @@ public class MapViewModel : ViewModel
     public string? LoggedInUsername { get; set; }
 
     [Reactive] 
-    public AvaloniaList<MenuItem> ContextMenuItems { get; set; } = new();
+    public AvaloniaList<MenuItem> ContextMenuItems { get; set; } = [];
     
     [Reactive]
     public ISearchable? SelectedLandmark { get; set; }

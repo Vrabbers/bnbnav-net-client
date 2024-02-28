@@ -26,7 +26,7 @@ public partial class MapView : UserControl
     Point _pointerPrevPosition;
     Point _currentPointerPosition;
     Vector _viewVelocity = Vector.Zero;
-    readonly List<Point> _pointerVelocities = new();
+    readonly List<Point> _pointerVelocities = [];
     // This list is averaged to get smooth panning.
 
     Matrix _toScreenMtx = Matrix.Identity;
@@ -101,39 +101,37 @@ public partial class MapView : UserControl
 
             UpdateContextMenuItems();
 
-            if (_pointerPressing)
+            if (!_pointerPressing) return;
+            if (_disablePan)
             {
-                if (_disablePan)
-                {
-                    InvalidateVisual();
-                } 
-                else
-                {
-                    //Turn off Follow Me
-                    MapViewModel.DisableFollowMe();
+                InvalidateVisual();
+            } 
+            else
+            {
+                //Turn off Follow Me
+                MapViewModel.DisableFollowMe();
                     
-                    // We need to pan _more_ when scale is smaller:
-                    MapViewModel.Pan += (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
+                // We need to pan _more_ when scale is smaller:
+                MapViewModel.Pan += (_pointerPrevPosition - pointerPos) / MapViewModel.Scale;
                     
-                    _pointerVelocities.Add(_pointerPrevPosition - pointerPos);
+                _pointerVelocities.Add(_pointerPrevPosition - pointerPos);
 
-                    if (_pointerVelocities.Count > 5)
-                        _pointerVelocities.RemoveAt(0);
+                if (_pointerVelocities.Count > 5)
+                    _pointerVelocities.RemoveAt(0);
 
-                    var xAverage = _pointerVelocities.Average(i => i.X);
-                    var yAverage = _pointerVelocities.Average(i => i.Y);
+                var xAverage = _pointerVelocities.Average(i => i.X);
+                var yAverage = _pointerVelocities.Average(i => i.Y);
 
-                    _viewVelocity = new Vector(xAverage, yAverage);
+                _viewVelocity = new Vector(xAverage, yAverage);
 
-                    if (double.Abs(_viewVelocity.Y) < 7 && double.Abs(_viewVelocity.Y) < 7)
-                        _viewVelocity = Vector.Zero;
+                if (double.Abs(_viewVelocity.Y) < 7 && double.Abs(_viewVelocity.Y) < 7)
+                    _viewVelocity = Vector.Zero;
 
-                    // The actual view velocity should be the average of the last 5
-                    // computed velocities, due to how low-quality mouses work (low-quality
-                    // mouses have a tendency to move in angles snapped to 45 degrees).
-                }
-                _pointerPrevPosition = pointerPos;
+                // The actual view velocity should be the average of the last 5
+                // computed velocities, due to how low-quality mouses work (low-quality
+                // mouses have a tendency to move in angles snapped to 45 degrees).
             }
+            _pointerPrevPosition = pointerPos;
         };
 
         PointerReleased += (_, eventArgs) =>
@@ -151,21 +149,7 @@ public partial class MapView : UserControl
 
             var hitTestResultsE = HitTest(eventArgs.GetPosition(this));
             var hitTestResults = hitTestResultsE as MapItem[] ?? hitTestResultsE.ToArray();
-            foreach (var item in hitTestResults)
-            {
-                switch (item)
-                {
-                    case Node node:
-                        Console.WriteLine($"Clicked on Node   x: {node.X}  y: {node.Y}  z: {node.Z}");
-                        break;
-                    case Landmark landmark:
-                        Console.WriteLine($"Clicked on Landmark  type: {landmark.Type}  name: {landmark.Name}");
-                        break;
-                    case Edge edge:
-                        Console.WriteLine($"Clicked on Edge  road: {edge.Road.Name}");
-                        break;
-                }
-            }
+
             _pointerVelocities.Clear(); // Make sure we're not using velocities from previous pan.
             
             if (!MapViewModel.IsInEditMode)
@@ -229,8 +213,20 @@ public partial class MapView : UserControl
             .Subscribe(Observer.Create<IReadOnlyList<NetworkOperation>?>(_ => Dispatcher.UIThread.Post(InvalidateVisual)));
 
         MapViewModel.MapService.WhenPropertyChanged(x => x.Players)
-            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Player>>>(_ =>
+            .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Player>>>(prop =>
             {
+                if (prop.Value is null)
+                    return;
+                
+                var moved = prop.Value
+                    .Where(kvp => 
+                        kvp.Value.World == MapViewModel.ChosenWorld && 
+                        Bounds.Contains(ToScreen(kvp.Value.Point)))
+                    .Aggregate(false, (current, kvp) => current | kvp.Value.Moved);
+
+                if (!moved)
+                    return; // If no one who is on screen moved, then don't update stuff.
+                
                 InvalidateVisual();
                 UpdateFollowMeState();
             }));
@@ -350,10 +346,10 @@ public partial class MapView : UserControl
 
     readonly IAvaloniaI18Next _i18N;
 
-    List<(Point, Point, Edge)> DrawnEdges { get; set; } = new();
-    List<(Rect, Landmark)> DrawnLandmarks { get; set; } = new();
-    public List<(Rect, Node)> DrawnNodes { get; set; } = new();
-    public List<Node> SpiedNodes { get; set; } = new();
+    List<(Point, Point, Edge)> DrawnEdges { get; set; } = [];
+    List<(Rect, Landmark)> DrawnLandmarks { get; set; } = [];
+    public List<(Rect, Node)> DrawnNodes { get; set; } = [];
+    public List<Node> SpiedNodes { get; set; } = [];
 
     void UpdateFollowMeState()
     {
@@ -412,12 +408,20 @@ public partial class MapView : UserControl
 
         var bounds = boundsRect ?? Bounds;
 
-        DrawnEdges = mapService.AllEdges.Where(edge => edge.From.World == edge.To.World && edge.To.World == MapViewModel.ChosenWorld).Select(edge =>
+        var drawnEdgesEnumerable = mapService.AllEdges
+            .Where(edge => edge.From.World == edge.To.World && edge.To.World == MapViewModel.ChosenWorld).Select(edge =>
+            {
+                var (from, to) = edge.Extents(this);
+                return (from, to, edge);
+            }).Where(edge => GeometryHelper.LineIntersects(edge.from, edge.to, bounds));
+        
+        // This avoids re-allocating the whole entire drawn edge list, instead using the same one as before.
+        DrawnEdges.Clear();
+        foreach (var edge in drawnEdgesEnumerable)
         {
-            var (from, to) = edge.Extents(this);
-            return (from, to, edge);
-        }).Where(edge => GeometryHelper.LineIntersects(edge.from, edge.to, bounds)).ToList();
-
+            DrawnEdges.Add(edge);
+        }
+        
         DrawnLandmarks = mapService.Landmarks.Values.Where(landmark => landmark.Node.World == MapViewModel.ChosenWorld).Select(landmark => (landmark.BoundingRect(this), landmark))
             .Where(landmark => bounds.Intersects(landmark.Item1)).ToList();
 
@@ -585,9 +589,9 @@ public partial class MapView : UserControl
             operation.Render(this, context);
         }
 
-        foreach (var player in MapViewModel.MapService.Players.Values.Where(player => player.World == MapViewModel.ChosenWorld))
+        foreach (var player in MapViewModel.MapService.Players.Values
+                     .Where(player => player.World == MapViewModel.ChosenWorld && Bounds.Contains(ToScreen(player.Point))))
         {
-
             const int playerSize = 48;
             var rect = new Rect(ToScreen(player.MarkerCoordinates) - new Point(playerSize, playerSize) / 2, new Size(playerSize, playerSize));
             const string? uriString = "avares://BnbnavNetClient/Assets/playermark.svg";
@@ -605,19 +609,19 @@ public partial class MapView : UserControl
             var textCenter = rect.Center + new Point(0, rect.Height / 2 + 10 + player.PlayerText.Height / 2);
             context.DrawText(player.PlayerText, textCenter - new Point(player.PlayerText.Width, player.PlayerText.Height) / 2);
 
-            if (player.SnappedEdge is not null)
-            {
-                var roadText = new FormattedText(player.SnappedEdge.Road.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                    new Typeface(FontFamily), 20, new SolidColorBrush(new Color(255, 255, 255, 255)));
+            if (player.SnappedEdge is null)
+                continue;
+            
+            var roadText = new FormattedText(player.SnappedEdge.Road.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
+                new Typeface(FontFamily), 20, new SolidColorBrush(new Color(255, 255, 255, 255)));
 
-                var roadCenter = textCenter + new Point(0, player.PlayerText.Height / 2 + 10 + roadText.Height / 2);
-                var roadRect = new Rect(roadCenter - new Point(roadText.Width + 10, roadText.Height) / 2,
-                    new Size(roadText.Width + 10, roadText.Height));
-                var backingRect = roadRect.Inflate(3);
-                context.DrawRectangle(new SolidColorBrush(new Color(255, 0, 120, 130)), null, backingRect,
-                    backingRect.Height / 2, backingRect.Height / 2);
-                context.DrawText(roadText, roadCenter - new Point(roadText.Width / 2, roadText.Height / 2));
-            }
+            var roadCenter = textCenter + new Point(0, player.PlayerText.Height / 2 + 10 + roadText.Height / 2);
+            var roadRect = new Rect(roadCenter - new Point(roadText.Width + 10, roadText.Height) / 2,
+                new Size(roadText.Width + 10, roadText.Height));
+            var backingRect = roadRect.Inflate(3);
+            context.DrawRectangle(new SolidColorBrush(new Color(255, 0, 120, 130)), null, backingRect,
+                backingRect.Height / 2, backingRect.Height / 2);
+            context.DrawText(roadText, roadCenter - new Point(roadText.Width / 2, roadText.Height / 2));
         }
 
         base.Render(context);

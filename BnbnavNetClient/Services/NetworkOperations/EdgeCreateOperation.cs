@@ -4,55 +4,41 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.NetworkOperations;
 
-public class EdgeCreateOperation : NetworkOperation
+public class EdgeCreateOperation(MapEditorService editorService, Road road, Node from, Node to, bool twoWay)
+    : NetworkOperation
 {
-    readonly MapEditorService _editorService;
-    readonly Road _road;
-    readonly Node _from;
-    readonly Node _to;
-    readonly bool _twoWay;
-
-    public EdgeCreateOperation(MapEditorService editorService, Road road, Node from, Node to, bool twoWay)
-    {
-        _editorService = editorService;
-        _road = road;
-        _from = from;
-        _to = to;
-        _twoWay = twoWay;
-    }
-    
     public override async Task PerformOperation()
     {
         try
         {
             string roadId;
-            if (_road is PendingRoad pendingRoad)
+            if (road is PendingRoad pendingRoad)
             {
                 roadId = await pendingRoad.WaitForReadyTask;
             }
             else
             {
-                roadId = _road.Id;
+                roadId = road.Id;
             }
 
             var tasks = new List<Task<MapService.ServerResponse>>
             {
-                _editorService.MapService!.Submit("/edges/add", new
+                editorService.MapService!.Submit("/edges/add", new
                 {
                     Road = roadId,
-                    Node1 = _from.Id,
-                    Node2 = _to.Id
+                    Node1 = from.Id,
+                    Node2 = to.Id
                 })
             };
 
-            if (_twoWay)
+            if (twoWay)
             {
                 tasks.Add(
-                    _editorService.MapService.Submit("/edges/add", new
+                    editorService.MapService.Submit("/edges/add", new
                     {
                         Road = roadId,
-                        Node1 = _to.Id,
-                        Node2 = _from.Id
+                        Node1 = to.Id,
+                        Node2 = from.Id
                     }));
             }
 
@@ -74,6 +60,6 @@ public class EdgeCreateOperation : NetworkOperation
 
     public override void Render(MapView mapView, DrawingContext context)
     {
-        mapView.DrawEdge(context, _road.RoadType, _from.BoundingRect(mapView).Center, _to.BoundingRect(mapView).Center, true);
+        mapView.DrawEdge(context, road.RoadType, from.BoundingRect(mapView).Center, to.BoundingRect(mapView).Center, true);
     }
 }

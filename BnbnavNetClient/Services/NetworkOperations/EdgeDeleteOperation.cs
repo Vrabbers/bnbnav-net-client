@@ -4,24 +4,15 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.NetworkOperations;
 
-public class EdgeDeleteOperation : NetworkOperation
+public class EdgeDeleteOperation(MapEditorService editorService, Edge edge) : NetworkOperation
 {
-    readonly MapEditorService _editorService;
-    readonly Edge _edge;
-
-    public EdgeDeleteOperation(MapEditorService editorService, Edge edge)
-    {
-        _editorService = editorService;
-        _edge = edge;
-    }
-    
     public override async Task PerformOperation()
     {
-        ItemsNotToRender.Add(_edge);
+        ItemsNotToRender.Add(edge);
         
         try
         {
-            (await _editorService.MapService!.Delete($"/edges/{_edge.Id}")).AssertSuccess();
+            (await editorService.MapService!.Delete($"/edges/{edge.Id}")).AssertSuccess();
         }
         catch (HttpRequestException)
         {
@@ -35,7 +26,7 @@ public class EdgeDeleteOperation : NetworkOperation
 
     public override void Render(MapView mapView, DrawingContext context)
     {
-        var (from, to) = _edge.Extents(mapView);
-        mapView.DrawEdge(context, _edge.Road.RoadType, from, to, true);
+        var (from, to) = edge.Extents(mapView);
+        mapView.DrawEdge(context, edge.Road.RoadType, from, to, true);
     }
 }

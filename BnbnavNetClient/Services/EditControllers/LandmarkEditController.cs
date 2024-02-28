@@ -7,16 +7,10 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.EditControllers;
 
-public class LandmarkEditController : EditController
+public class LandmarkEditController(MapEditorService mapEditorService) : EditController
 {
-    readonly MapEditorService _mapEditorService;
     Point _initialPointerPosition;
 
-    public LandmarkEditController(MapEditorService mapEditorService)
-    {
-        _mapEditorService = mapEditorService;
-    }
-    
     public override PointerPressed PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
         var pointerPos = args.GetPosition(mapView);
@@ -39,7 +33,7 @@ public class LandmarkEditController : EditController
             var mapItem = mapView.HitTest(pointerPos).FirstOrDefault(x => x is Node);
             if (mapItem is Node node)
             {
-                mapView.OpenFlyout(new LandmarkFlyoutViewModel(_mapEditorService, node));
+                mapView.OpenFlyout(new LandmarkFlyoutViewModel(mapEditorService, node));
             }
         }
     }

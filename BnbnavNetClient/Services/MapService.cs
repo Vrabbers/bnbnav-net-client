@@ -79,7 +79,7 @@ public sealed class MapService : ReactiveObject
 
     [Reactive] public IEnumerable<string> Worlds { get; private set; } = Enumerable.Empty<string>();
 
-    List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
+    List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = [];
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
     public Interaction<(string, string, bool), Unit> ErrorMessageInteraction { get; } = new();
     public Interaction<Unit, Unit> PlayerUpdateInteraction { get; } = new();

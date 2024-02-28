@@ -4,29 +4,19 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.NetworkOperations;
 
-public class LandmarkUpdateOperation : NetworkOperation
+public class LandmarkUpdateOperation(MapEditorService editorService, Landmark? toUpdate, Landmark? updateAs)
+    : NetworkOperation
 {
-    readonly MapEditorService _editorService;
-    readonly Landmark? _toUpdate;
-    readonly Landmark? _updateAs;
-
-    public LandmarkUpdateOperation(MapEditorService editorService, Landmark? toUpdate, Landmark? updateAs)
-    {
-        _editorService = editorService;
-        _toUpdate = toUpdate;
-        _updateAs = updateAs;
-    }
-    
     public override async Task PerformOperation()
     {
 
-        if (_toUpdate is not null)
+        if (toUpdate is not null)
         {
-            ItemsNotToRender.Add(_toUpdate);
+            ItemsNotToRender.Add(toUpdate);
             
             try
             {
-                (await _editorService.MapService!.Delete($"/landmarks/{_toUpdate.Id}")).AssertSuccess();
+                (await editorService.MapService!.Delete($"/landmarks/{toUpdate.Id}")).AssertSuccess();
             }
             catch (HttpRequestException)
             {
@@ -38,15 +28,15 @@ public class LandmarkUpdateOperation : NetworkOperation
             }
         }
 
-        if (_updateAs is not null)
+        if (updateAs is not null)
         {
             try
             {
-                (await _editorService.MapService!.Submit("/landmarks/add", new
+                (await editorService.MapService!.Submit("/landmarks/add", new
                 {
-                    name = _updateAs.Name,
-                    type = _updateAs.Type,
-                    node = _updateAs.Node.Id
+                    name = updateAs.Name,
+                    type = updateAs.Type,
+                    node = updateAs.Node.Id
                 })).AssertSuccess();
             }
             catch (HttpRequestException)
@@ -62,17 +52,17 @@ public class LandmarkUpdateOperation : NetworkOperation
 
     public override void Render(MapView mapView, DrawingContext context)
     {
-        if (_updateAs is not null)
+        if (updateAs is not null)
         {
-            var rect = _updateAs.BoundingRect(mapView);
+            var rect = updateAs.BoundingRect(mapView);
             using (context.PushOpacity(0.5))
-                mapView.DrawLandmark(context, _updateAs, rect);
+                mapView.DrawLandmark(context, updateAs, rect);
         }
-        else if (_toUpdate is not null)
+        else if (toUpdate is not null)
         {
-            var rect = _toUpdate.BoundingRect(mapView);
+            var rect = toUpdate.BoundingRect(mapView);
             using (context.PushOpacity(0.5))
-                mapView.DrawLandmark(context, _toUpdate, rect);
+                mapView.DrawLandmark(context, toUpdate, rect);
         }
     }
 }

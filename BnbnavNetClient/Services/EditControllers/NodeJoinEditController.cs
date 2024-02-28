@@ -10,28 +10,22 @@ using DynamicData.Kernel;
 
 namespace BnbnavNetClient.Services.EditControllers;
 
-public class NodeJoinEditController : EditController
+public class NodeJoinEditController(MapEditorService editorService) : EditController
 {
-    readonly MapEditorService _editorService;
     bool _mouseDown;
-    readonly List<Node> _roadGhosts = new();
+    readonly List<Node> _roadGhosts = [];
     bool _lockRoadGhosts;
     Point _pointerPrevPosition;
     Node? _firstNode;
     Node? _hoveredNode;
     bool _nodeSet = true;
 
-    public NodeJoinEditController(MapEditorService editorService)
-    {
-        _editorService = editorService;
-    }
-
     bool AppendRoadGhost(Node node)
     {
         var lastNode = _roadGhosts.Last();
 
         //TODO: Make sure we can't loop back on ourselves: we also need to check RoadGhosts for duplicates
-        if (node.Id == lastNode.Id || _editorService.MapService!.Edges.Any(x =>
+        if (node.Id == lastNode.Id || editorService.MapService!.Edges.Any(x =>
                 x.Value.From == lastNode && x.Value.To == node))
         {
             return false;
@@ -77,7 +71,7 @@ public class NodeJoinEditController : EditController
             mapView.InvalidateVisual();
             
             _lockRoadGhosts = true;
-            var flyout = mapView.OpenFlyout(new NewEdgeFlyoutViewModel(_editorService, _roadGhosts));
+            var flyout = mapView.OpenFlyout(new NewEdgeFlyoutViewModel(editorService, _roadGhosts));
 
             if (flyout is not null)
             {
@@ -106,7 +100,7 @@ public class NodeJoinEditController : EditController
 
     public override void PointerMoved(MapView mapView, PointerEventArgs args)
     {
-        if (_editorService.MapService is null) return;
+        if (editorService.MapService is null) return;
         
         var pointerPos = args.GetPosition(mapView);
         
@@ -136,7 +130,7 @@ public class NodeJoinEditController : EditController
 
     public override void PointerReleased(MapView mapView, PointerReleasedEventArgs args)
     {
-        if (_editorService.MapService is null) return;
+        if (editorService.MapService is null) return;
 
         var pointerPos = args.GetPosition(mapView);
         _mouseDown = false;
@@ -145,7 +139,7 @@ public class NodeJoinEditController : EditController
         if (_roadGhosts.Count > 1)
         {
             _lockRoadGhosts = true;
-            var flyout = mapView.OpenFlyout(new NewEdgeFlyoutViewModel(_editorService, _roadGhosts));
+            var flyout = mapView.OpenFlyout(new NewEdgeFlyoutViewModel(editorService, _roadGhosts));
 
             if (flyout is not null)
             {

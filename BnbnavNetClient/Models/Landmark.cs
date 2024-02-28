@@ -122,22 +122,15 @@ public static class LandmarkTypeExtensions
     public static bool IsLabel(this LandmarkType type) => type.ServerName().StartsWith("label-", StringComparison.InvariantCulture);
 }
 
-public class Landmark : MapItem, ISearchable
+public class Landmark(string id, Node node, string name, string type)
+    : MapItem, ISearchable
 {
-    static readonly double LandmarkSize = 10;
-    
-    public Landmark(string id, Node node, string name, string type)
-    {
-        this.Id = id;
-        this.Node = node;
-        this.Name = name;
-        this.Type = type;
-    }
+    const double LandmarkSize = 10;
 
-    public string Id { get; init; }
-    public Node Node { get; init; }
-    public string Name { get; init; }
-    public string Type { get; init; }
+    public string Id { get; init; } = id;
+    public Node Node { get; init; } = node;
+    public string Name { get; init; } = name;
+    public string Type { get; init; } = type;
 
     public LandmarkType LandmarkType => Enum.GetValues<LandmarkType>().FirstOrDefault(x => x.ServerName() == Type);
     public string? IconUrl => LandmarkType.IconUrl();
@@ -165,14 +158,11 @@ public class Landmark : MapItem, ISearchable
     }
 }
 
-public partial class TemporaryLandmark : Landmark
+public partial class TemporaryLandmark(string id, Node node, string name)
+    : Landmark(id, node, name, "internal-temporary")
 {
     [GeneratedRegex(@"^\(?(?<x>-?\d+), ?(?<z>-?\d+)\)?$", RegexOptions.CultureInvariant)]
     private static partial Regex CoordinateSearchRegex();
-
-    public TemporaryLandmark(string id, Node node, string name) : base(id, node, name, "internal-temporary")
-    {
-    }
 
     public static TemporaryLandmark? ParseCoordinateString(string coordinateString, string world)
     {

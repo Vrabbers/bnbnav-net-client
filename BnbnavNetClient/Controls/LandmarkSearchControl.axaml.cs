@@ -18,7 +18,7 @@ public class LandmarkSearchControl : TemplatedControl
     public static readonly DirectProperty<LandmarkSearchControl, string> SearchQueryProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, string>(
         "SearchQuery", o => o.SearchQuery, (o, v) => o.SearchQuery = v);
 
-    AvaloniaList<ISearchable> _searchResults = new();
+    AvaloniaList<ISearchable> _searchResults = [];
     public static readonly DirectProperty<LandmarkSearchControl, AvaloniaList<ISearchable>> SearchResultsProperty = AvaloniaProperty.RegisterDirect<LandmarkSearchControl, AvaloniaList<ISearchable>>(
         "SearchResults", o => o.SearchResults, (o, v) => o.SearchResults = v);
 
@@ -69,7 +69,7 @@ public class LandmarkSearchControl : TemplatedControl
 
             if (string.IsNullOrEmpty(SearchQuery))
             {
-                SearchResults = new AvaloniaList<ISearchable>();
+                SearchResults = [];
                 return;
             }
 

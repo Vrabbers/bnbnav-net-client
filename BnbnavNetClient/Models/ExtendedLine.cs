@@ -4,14 +4,8 @@ using Avalonia.Controls.Shapes;
 
 namespace BnbnavNetClient.Models;
 
-public readonly struct ExtendedLine
+public readonly struct ExtendedLine(Point point1, Point point2)
 {
-    public ExtendedLine(Point point1, Point point2)
-    {
-        Point1 = point1;
-        Point2 = point2;
-    }
-
     public enum IntersectionType
     {
         Parallel,
@@ -19,17 +13,14 @@ public readonly struct ExtendedLine
         IntersectsInterpolated
     }
     
-    public Point Point1 { get; init; }
-    public Point Point2 { get; init; }
+    public Point Point1 { get; init; } = point1;
+    public Point Point2 { get; init; } = point2;
 
     public double Dx => Point2.X - Point1.X;
 
     public double Dy => Point2.Y - Point1.Y;
 
-    public double Angle
-    {
-        get => double.RadiansToDegrees(double.Atan2(-Dy, Dx));
-    }
+    public double Angle => double.RadiansToDegrees(double.Atan2(-Dy, Dx));
 
     public double Length => double.Sqrt(Dx * Dx + Dy * Dy);
 
@@ -121,28 +112,21 @@ public readonly struct ExtendedLine
     public ExtendedLine FlipDirection() => new(Point2, Point1);
 
     [Pure]
-    public double AngleTo(ExtendedLine other)
-    {
-        return double.Ieee754Remainder(other.Angle - Angle, 360);
-    }
+    public double AngleTo(ExtendedLine other) => double.Ieee754Remainder(other.Angle - Angle, 360);
 
     [Pure]
-    public ExtendedLine MovePoint1(Point point)
-    {
-        return new ExtendedLine
+    public ExtendedLine MovePoint1(Point point) =>
+        new()
         {
             Point1 = point, 
             Point2 = point + new Point(Dx, Dy)
         };
-    }
 
     [Pure]
-    public ExtendedLine MoveCenter(Point point)
-    {
-        return new ExtendedLine
+    public ExtendedLine MoveCenter(Point point) =>
+        new()
         {
             Point1 = point - new Point(Dx, Dy) / 2,
             Point2 = point + new Point(Dx, Dy) / 2
         };
-    }
 }

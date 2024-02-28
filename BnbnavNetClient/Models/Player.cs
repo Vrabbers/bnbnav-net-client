@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Media;
 using BnbnavNetClient.Extensions;
 using BnbnavNetClient.Services;
+using BnbnavNetClient.Views;
 using Splat;
 using Timer = System.Timers.Timer;
 
@@ -32,10 +33,12 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
     public double Yd { get; private set; }
     public double Zd { get; private set; }
 
+    public bool Moved { get; private set; } = true;
+    
     public Edge? SnappedEdge { get; private set; }
 
     public double MarkerAngle { get; private set; }
-
+    
     public FormattedText? PlayerText { get; set; }
 
     public Point MarkerCoordinates 
@@ -56,7 +59,7 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         }
     }
 
-    public List<(DateTime, Point)> PosHistory { get; set; } = new();
+    public List<(DateTime, Point)> PosHistory { get; set; } = [];
 
     public ExtendedLine Velocity => new()
     {
@@ -116,8 +119,14 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         var newZ = evt.Z;
 
         // ReSharper disable CompareOfFloatsByEqualityOperator
-        if (Xd == newX && Yd == newY && Zd == newZ) return;
+        if (Xd == newX && Yd == newY && Zd == newZ)
         // ReSharper restore CompareOfFloatsByEqualityOperator
+        {
+            Moved = false;
+            return;
+        }
+
+        Moved = true;
 
         Xd = newX;
         Yd = newY;
@@ -143,7 +152,7 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
 
             try
             {
-                var currentEdges = _mapService.AllEdges.Reverse().ToList();
+                var currentEdges = _mapService.AllEdges.Reverse();
                 var shouldChangeEdge = SnappedEdge is null || (!_mapService.CurrentRoute?.Edges.Contains(SnappedEdge) ?? false);
                 //TODO: Also change edge if the current route contains the edge to change to or if the current route does not contain the currently snapped edge
                 if (shouldChangeEdge)
@@ -160,10 +169,12 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
 
     bool CanSnapToEdge(Edge edge)
     {
-        if (!edge.CanSnapTo) return false;
+        if (!edge.CanSnapTo) 
+            return false;
         
         // Make sure this edge is in the correct world
-        if (edge.From.World != World && edge.To.World != World) return false;
+        if (edge.From.World != World && edge.To.World != World)
+            return false;
         
         // TODO: Get the road thickness from resources somehow
         // We are not using GeoHelper because that takes into account the extra space at the end of a road
@@ -187,7 +198,7 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         _timer.Dispose();
         _lastSnapMutex.Dispose();
     }
-
+    
     public int X => (int)double.Round(Xd);
     public int Y => (int)double.Round(Yd);
     public int Z => (int)double.Round(Zd);
