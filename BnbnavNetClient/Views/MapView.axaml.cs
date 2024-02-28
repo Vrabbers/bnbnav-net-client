@@ -44,6 +44,11 @@ public partial class MapView : UserControl
     protected override void OnInitialized()
     {
         base.OnInitialized();
+
+        ActualThemeVariantChanged += (_, _) =>
+        {
+            InvalidateVisual();
+        };
         
         PointerPressed += (_, eventArgs) =>
         {

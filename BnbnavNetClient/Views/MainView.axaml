@@ -74,6 +74,11 @@
         <Button Grid.Column="4" Command="{Binding LoginPressed}" Content="{str:Tr Key=LOG_IN}" IsVisible="{Binding !HaveLoggedInUser}" />
         <controls:DayNightButton Grid.Column="5" Click="ColorModeSwitch" x:Name="DayNightButton"/>
       </Grid>
+      <Grid.Styles>
+        <Style Selector=":is(Button)">
+          <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
+      </Grid.Styles>
     </Grid>
 
     <!-- Popup -->
