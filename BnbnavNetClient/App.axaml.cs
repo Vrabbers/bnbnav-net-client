@@ -1,11 +1,8 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using BnbnavNetClient.I18Next.Services;
-using BnbnavNetClient.Settings;
 using BnbnavNetClient.ViewModels;
 using BnbnavNetClient.Views;
-using System;
 using System.Globalization;
 using BnbnavNetClient.Extensions;
 using BnbnavNetClient.Services.TextToSpeech;

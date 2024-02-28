@@ -1,10 +1,6 @@
-﻿using System;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Avalonia;
 using BnbnavNetClient.Extensions;
-using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Views;
 using Splat;
 

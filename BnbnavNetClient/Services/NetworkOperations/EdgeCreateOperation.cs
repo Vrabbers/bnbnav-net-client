@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Avalonia.Media;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Views;

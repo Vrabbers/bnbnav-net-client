@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive;
+﻿using System.Reactive;
 using Avalonia.Collections;
 using Avalonia.Controls.Primitives;
 using BnbnavNetClient.Models;

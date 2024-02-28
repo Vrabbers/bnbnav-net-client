@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using Avalonia;
 using Avalonia.Media;
 using BnbnavNetClient.Extensions;
-using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services;
 using Splat;
 using Timer = System.Timers.Timer;

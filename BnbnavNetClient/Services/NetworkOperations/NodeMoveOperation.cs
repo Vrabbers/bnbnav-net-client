@@ -1,5 +1,3 @@
-using System.Net.Http;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Media;
 using BnbnavNetClient.Models;

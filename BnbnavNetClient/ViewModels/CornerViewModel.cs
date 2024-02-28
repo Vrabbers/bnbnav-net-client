@@ -1,9 +1,5 @@
-using System;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Threading;
 using BnbnavNetClient.Extensions;
 using BnbnavNetClient.I18Next.Services;

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Avalonia;
-using BnbnavNetClient.Extensions;
-using BnbnavNetClient.I18Next.Services;
+﻿using BnbnavNetClient.Extensions;
 using Splat;
 
 namespace BnbnavNetClient.Models;

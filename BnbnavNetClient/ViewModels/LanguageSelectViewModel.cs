@@ -1,11 +1,7 @@
-﻿using Avalonia;
-using BnbnavNetClient.I18Next.Services;
-using BnbnavNetClient.Settings;
+﻿using BnbnavNetClient.I18Next.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using BnbnavNetClient.Extensions;

@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Avalonia;
 using BnbnavNetClient.Extensions;
-using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services;
 using BnbnavNetClient.Services.TextToSpeech;
 using ReactiveUI;

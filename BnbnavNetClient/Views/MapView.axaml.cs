@@ -170,13 +170,15 @@ public partial class MapView : UserControl
                     MapViewModel.SelectedLandmark = landmark;
                 }
             }
+            
+            TopLevel.GetTopLevel(this)?.RequestAnimationFrame(InertialPan);
         };
 
         PointerWheelChanged += (_, eventArgs) =>
         {
             var deltaScale = eventArgs.Delta.Y * MapViewModel.Scale / 10.0;
             Zoom(deltaScale, (eventArgs.GetPosition(this)));
-
+            
             _viewVelocity = Vector.Zero; // Reset velocities
             _pointerVelocities.Clear();
         };
@@ -258,6 +260,15 @@ public partial class MapView : UserControl
         }));
     }
 
+    void InertialPan(TimeSpan time)
+    {
+        if (_viewVelocity.Length < 0.1) 
+            return;
+        MapViewModel.Pan += _viewVelocity / MapViewModel.Scale;
+        _viewVelocity /= 1.1;
+        TopLevel.GetTopLevel(this)?.RequestAnimationFrame(InertialPan);
+    }
+    
     void UpdateContextMenuItems()
     {
         var seenEdges = new List<Edge>();

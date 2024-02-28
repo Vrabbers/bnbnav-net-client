@@ -1,7 +1,6 @@
 using System.Diagnostics.Contracts;
 using Avalonia;
 using Avalonia.Controls.Shapes;
-using BnbnavNetClient.Helpers;
 
 namespace BnbnavNetClient.Models;
 

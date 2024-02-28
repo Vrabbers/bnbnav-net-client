@@ -1,5 +1,4 @@
-﻿using System;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.ReactiveUI;
 using BnbnavNetClient.Windows.TextToSpeech;
 using BnbnavNetClient.I18Next;

@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace BnbnavNetClient.Settings;
+﻿namespace BnbnavNetClient.Settings;
 public sealed class DummySettingsManager : ISettingsManager
 {
     public SettingsObject Settings => SettingsObject.Defaults;

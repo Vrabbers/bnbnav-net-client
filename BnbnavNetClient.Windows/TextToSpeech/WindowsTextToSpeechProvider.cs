@@ -1,7 +1,5 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Speech.Synthesis;
-using System.Threading.Tasks;
 using BnbnavNetClient.Services.TextToSpeech;
 
 namespace BnbnavNetClient.Windows.TextToSpeech;

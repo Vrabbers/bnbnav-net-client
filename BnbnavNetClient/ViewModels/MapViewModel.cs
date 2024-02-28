@@ -3,9 +3,6 @@ using BnbnavNetClient.Models;
 using BnbnavNetClient.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Collections;
@@ -58,7 +55,8 @@ public class MapViewModel : ViewModel
     [ObservableAsProperty] 
     public string? LoggedInUsername { get; set; }
 
-    [Reactive] public AvaloniaList<MenuItem> ContextMenuItems { get; set; } = new();
+    [Reactive] 
+    public AvaloniaList<MenuItem> ContextMenuItems { get; set; } = new();
     
     [Reactive]
     public ISearchable? SelectedLandmark { get; set; }
@@ -75,7 +73,8 @@ public class MapViewModel : ViewModel
     [Reactive]
     public AvailableUi CurrentUi { get; set; } = AvailableUi.Search;
 
-    [ObservableAsProperty] public string ChosenWorld { get; set; }
+    [ObservableAsProperty] 
+    public string ChosenWorld { get; set; }
 
     // Initialising ChosenWorld causes a compile time error
 #pragma warning disable CS8618

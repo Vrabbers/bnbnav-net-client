@@ -1,7 +1,4 @@
-using System;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Avalonia.Media;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Views;

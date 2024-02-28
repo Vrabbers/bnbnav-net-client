@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
-using System;
 
 namespace BnbnavNetClient.Controls;
 public class DayNightButton : TemplatedControl

@@ -1,5 +1,3 @@
-
-using Avalonia;
 using Avalonia.Markup.Xaml;
 using BnbnavNetClient.I18Next.Services;
 using Splat;
