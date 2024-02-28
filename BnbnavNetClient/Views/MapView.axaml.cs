@@ -16,10 +16,12 @@ using System.Globalization;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Helpers;
 using Avalonia.Controls.Primitives;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.EditControllers;
 using BnbnavNetClient.Services.NetworkOperations;
+using Microsoft.Extensions.DependencyInjection;
 using Splat;
 
 namespace BnbnavNetClient.Views;
@@ -427,20 +429,20 @@ public partial class MapView : UserControl
 
     Pen PenForRoadType(RoadType type) => (Pen)(type switch
     {
-        RoadType.Local => this.FindResource("LocalRoadPen")!,
-        RoadType.Main => this.FindResource("MainRoadPen")!,
-        RoadType.Highway => this.FindResource("HighwayRoadPen")!,
-        RoadType.Expressway => this.FindResource("ExpresswayRoadPen")!,
-        RoadType.Motorway => this.FindResource("MotorwayRoadPen")!,
-        RoadType.Footpath => this.FindResource("FootpathRoadPen")!,
-        RoadType.Waterway => this.FindResource("WaterwayRoadPen")!,
-        RoadType.Private => this.FindResource("PrivateRoadPen")!,
-        RoadType.Roundabout => this.FindResource("RoundaboutRoadPen")!,
-        RoadType.DuongWarp => this.FindResource("DuongWarpRoadPen")!,
-        _ => this.FindResource("UnknownRoadPen")!,
+        RoadType.Local => ThemeDict["LocalRoadPen"]!,
+        RoadType.Main => ThemeDict["MainRoadPen"]!,
+        RoadType.Highway => ThemeDict["HighwayRoadPen"]!,
+        RoadType.Expressway => ThemeDict["ExpresswayRoadPen"]!,
+        RoadType.Motorway => ThemeDict["MotorwayRoadPen"]!,
+        RoadType.Footpath => ThemeDict["FootpathRoadPen"]!,
+        RoadType.Waterway => ThemeDict["WaterwayRoadPen"]!,
+        RoadType.Private => ThemeDict["PrivateRoadPen"]!,
+        RoadType.Roundabout => ThemeDict["RoundaboutRoadPen"]!,
+        RoadType.DuongWarp => ThemeDict["DuongWarpRoadPen"]!,
+        _ => ThemeDict["UnknownRoadPen"]!,
     });
 
-    public double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? this.FindResource("MotorwayThickness")! : this.FindResource("RoadThickness")!);
+    public double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? ThemeDict["MotorwayThickness"]! : ThemeDict["RoadThickness"]!);
 
     public void DrawEdge(DrawingContext context, RoadType roadType, Point from, Point to, bool drawGhost = false, bool drawRoute = false)
     {
@@ -482,7 +484,7 @@ public partial class MapView : UserControl
             if (scale < lowerScaleBound || scale > higherScaleBound) return;
 
             var text = new FormattedText(landmark.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                new Typeface(FontFamily), size * scale, (Brush)this.FindResource("ForegroundBrush")!);
+                new Typeface(FontFamily), size * scale, (Brush)ThemeDict["ForegroundBrush"]!);
 
             context.DrawText(text, rect.Center - new Point(text.Width / 2, text.Height / 2));
             return;
@@ -497,11 +499,14 @@ public partial class MapView : UserControl
         context.DrawSvgUrl(landmark.IconUrl, rect);
     }
 
+    // For some reason, using the proper method, (i.e. ResourceDictionary.ThemeDictionaries) does not seem to work here.
+    // This is a pretty crap solution, so if we find a better way it would probably be worthwhile implementing it
+    IResourceDictionary ThemeDict => (IResourceDictionary)this.FindResource(ActualThemeVariant.ToString())!;
+    
     [SuppressMessage("ReSharper", "PossibleLossOfFraction")]
     public override void Render(DrawingContext context)
     {
-
-        context.FillRectangle((Brush)this.FindResource("BackgroundBrush")!, Bounds);
+        context.FillRectangle((Brush)ThemeDict["BackgroundBrush"]!, Bounds);
 
         var noRender = new List<MapItem>();
         noRender.AddRange(MapViewModel.MapEditorService.EditController.ItemsNotToRender);
@@ -545,10 +550,10 @@ public partial class MapView : UserControl
 
         if (MapViewModel.IsInEditMode)
         {
-            var nodeBorder = (Pen)this.FindResource("NodeBorder")!;
-            var nodeBrush = (Brush)this.FindResource("NodeFill")!;
-            var spiedBorder = (Pen)this.FindResource("SpiedNodeBorder")!;
-            var spiedBrush = (Brush)this.FindResource("SpiedNodeFill")!;
+            var nodeBorder = (Pen)ThemeDict["NodeBorder"]!;
+            var nodeBrush = (Brush)ThemeDict["NodeFill"]!;
+            var spiedBorder = (Pen)ThemeDict["SpiedNodeBorder"]!;
+            var spiedBrush = (Brush)ThemeDict["SpiedNodeFill"]!;
             foreach (var (rect, node) in DrawnNodes)
             {
                 if (noRender.Contains(node)) continue;
@@ -580,7 +585,7 @@ public partial class MapView : UserControl
             context.DrawSvgUrl(uriString, rect, -player.MarkerAngle + MapViewModel.Rotation);
 
             //Draw the player name
-            var textBrush = (Brush)this.FindResource("ForegroundBrush")!;
+            var textBrush = (Brush)ThemeDict["ForegroundBrush"]!;
 
             if (player.PlayerText is null)
             {
