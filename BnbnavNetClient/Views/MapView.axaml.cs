@@ -374,7 +374,7 @@ public partial class MapView : UserControl
 
         foreach (var (a, b, edge) in DrawnEdges)
         {
-            if (GeoHelper.LineSegmentToPointDistance(a, b, point) <= ThicknessForRoadType(edge.Road.RoadType) * MapViewModel.Scale / 2)
+            if (GeometryHelper.LineSegmentToPointDistance(a, b, point) <= ThicknessForRoadType(edge.Road.RoadType) * MapViewModel.Scale / 2)
                 yield return edge;
         }
     }
@@ -400,7 +400,7 @@ public partial class MapView : UserControl
         {
             var (from, to) = edge.Extents(this);
             return (from, to, edge);
-        }).Where(edge => GeoHelper.LineIntersects(edge.from, edge.to, bounds)).ToList();
+        }).Where(edge => GeometryHelper.LineIntersects(edge.from, edge.to, bounds)).ToList();
 
         DrawnLandmarks = mapService.Landmarks.Values.Where(landmark => landmark.Node.World == MapViewModel.ChosenWorld).Select(landmark => (landmark.BoundingRect(this), landmark))
             .Where(landmark => bounds.Intersects(landmark.Item1)).ToList();
