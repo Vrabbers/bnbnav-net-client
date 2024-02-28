@@ -2,7 +2,9 @@ namespace BnbnavNetClient.Helpers;
 
 public class MathHelper
 {
-    public static double ToDeg(double rad) => rad * (180 / double.Pi);
+    [Obsolete("Use double.RadiansToDegrees instead.")]
+    public static double ToDeg(double rad) => double.RadiansToDegrees(rad);
 
-    public static double ToRad(double deg) => deg * (double.Pi / 180);
+    [Obsolete("Use double.DegreesToRadians instead.")]
+    public static double ToRad(double deg) => double.DegreesToRadians(deg);
 }
