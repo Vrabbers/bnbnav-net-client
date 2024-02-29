@@ -522,17 +522,8 @@ public sealed class CalculatedRoute(MapService mapService) : ReactiveObject, IDi
     bool _disposed;
 }
 
-public class RoutingException : Exception
-{
+public class RoutingException : Exception;
 
-}
+public class NoSuitableEdgeException : RoutingException;
 
-public class NoSuitableEdgeException : RoutingException
-{
-    
-}
-
-public class DisjointNetworkException : RoutingException
-{
-    
-}
+public class DisjointNetworkException : RoutingException;

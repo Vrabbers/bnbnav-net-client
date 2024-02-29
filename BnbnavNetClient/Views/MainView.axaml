@@ -54,7 +54,7 @@
         <Button Classes="icon" Command="{Binding LanguageButtonPressed}"><PathIcon Data="{StaticResource globe_regular}"/></Button>
         <ToggleButton Grid.Column="1" Command="{Binding EditModePressed}" Content="{str:Tr Key=EDIT_MODE}" IsChecked="{Binding EditModeEnabled}"/>
         <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
-        <ComboBox Grid.Column="3" HorizontalAlignment="Stretch" ItemsSource="{Binding AvailableWorlds, Mode=TwoWay}" SelectedItem="{Binding ChosenWorld, Mode=TwoWay}" IsEnabled="{Binding !FollowMeEnabled}">
+        <ComboBox Grid.Column="3" HorizontalAlignment="Stretch" Margin="2" ItemsSource="{Binding AvailableWorlds, Mode=TwoWay}" SelectedItem="{Binding ChosenWorld, Mode=TwoWay}" IsEnabled="{Binding !FollowMeEnabled}">
           <ComboBox.ItemTemplate>
             <DataTemplate>
               <TextBlock Text="{Binding}"/>
@@ -82,9 +82,9 @@
     </Grid>
 
     <!-- Popup -->
-    <Grid IsVisible="{Binding Popup, Converter={x:Static ObjectConverters.IsNotNull}}" ColumnDefinitions="* Auto *" RowDefinitions="* Auto *" Background="#7f000000">
+    <Grid IsVisible="{Binding Popup, Converter={x:Static ObjectConverters.IsNotNull}}" ColumnDefinitions="* 3* *" RowDefinitions="* Auto *" Background="#7f000000">
       <Border CornerRadius="3" Grid.Column="1" Grid.Row="1" BoxShadow="0 0 200 0 Black" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-        <UserControl Content="{Binding Popup}"/>
+        <UserControl Content="{Binding Popup}" MaxWidth="{Binding $parent[Grid].Bounds.Width}"/>
       </Border>
     </Grid>
   </Grid>

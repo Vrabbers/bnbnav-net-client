@@ -16,7 +16,6 @@ internal class Program
     public static void Main(string[] args)
     {
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-        Locator.CurrentMutable.RegisterConstant<ITextToSpeechProvider>(new SpdTextToSpeechProvider());
     }
 
     static AppBuilder BuildAvaloniaApp()
@@ -29,6 +28,7 @@ internal class Program
             .LogToTrace()
             .UseReactiveUI()
             .UseI18NextLocalization()
+            .UseTextToSpeechProvider(new SpdTextToSpeechProvider())
             .UseSettings(new SettingsManagerJsonFile());
     }
 }

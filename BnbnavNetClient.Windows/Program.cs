@@ -17,7 +17,6 @@ class Program
     public static void Main(string[] args)
     {
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-        Locator.CurrentMutable.RegisterConstant<ITextToSpeechProvider>(new WindowsTextToSpeechProvider());
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.
@@ -27,5 +26,6 @@ class Program
             .LogToTrace()
             .UseReactiveUI()
             .UseI18NextLocalization()
+            .UseTextToSpeechProvider(new WindowsTextToSpeechProvider())
             .UseSettings(new SettingsManagerJsonFile());
 }
