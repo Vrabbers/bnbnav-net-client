@@ -3,7 +3,13 @@
              xmlns:local="using:BnbnavNetClient"
              xmlns:controls="clr-namespace:BnbnavNetClient.Controls"
              x:Class="BnbnavNetClient.App"
+             Name="bnbnav"
              RequestedThemeVariant="Light">
+  <NativeMenu.Menu>
+    <NativeMenu>
+      <NativeMenuItem Header="About bnbnav"></NativeMenuItem>
+    </NativeMenu>
+  </NativeMenu.Menu>
   <Application.DataTemplates>
     <local:ViewLocator/>
   </Application.DataTemplates>
