@@ -4,7 +4,6 @@ using BnbnavNetClient.Windows.TextToSpeech;
 using BnbnavNetClient.I18Next;
 using BnbnavNetClient.Services.TextToSpeech;
 using BnbnavNetClient.Settings;
-using Splat;
 
 namespace BnbnavNetClient.Windows;
 

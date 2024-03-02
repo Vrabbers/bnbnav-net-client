@@ -1,5 +1,4 @@
 ﻿using Avalonia;
-using BnbnavNetClient.I18Next.Services;
 using Splat;
 
 namespace BnbnavNetClient.Services.TextToSpeech;

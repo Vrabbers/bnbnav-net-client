@@ -7,7 +7,6 @@ using ReactiveUI;
 using System.Reactive;
 using BnbnavNetClient.Services;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Helpers;
@@ -29,11 +28,17 @@ public partial class MapView : UserControl
     readonly List<Point> _pointerVelocities = [];
     // This list is averaged to get smooth panning.
 
+    // For some reason, using the proper method, (i.e. ResourceDictionary.ThemeDictionaries) does not seem to work here.
+    // This is a pretty crap solution, so if we find a better way it would probably be worthwhile implementing it
+    IResourceDictionary _themeDict = default!;
+    
     Matrix _toScreenMtx = Matrix.Identity;
     Matrix _toWorldMtx = Matrix.Identity;
 
     public MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
+    const int PlayerSize = 48;
+    
     public MapView()
     {
         _i18N = Locator.Current.GetService<IAvaloniaI18Next>()!;
@@ -223,7 +228,8 @@ public partial class MapView : UserControl
                 foreach (var (name, player) in prop.Value)
                 {
                     if ((MapViewModel.FollowMeEnabled && name == MapViewModel.LoggedInUsername) ||
-                        (player.World == MapViewModel.ChosenWorld && Bounds.Contains(ToScreen(player.Point))))
+                        (player.World == MapViewModel.ChosenWorld && 
+                         Bounds.Intersects(GeometryHelper.SquareCenteredOn(ToScreen(player.Point), PlayerSize))))
                     {
                         if (!player.Moved)
                             continue;
@@ -453,20 +459,20 @@ public partial class MapView : UserControl
 
     Pen PenForRoadType(RoadType type) => (Pen)(type switch
     {
-        RoadType.Local => ThemeDict["LocalRoadPen"]!,
-        RoadType.Main => ThemeDict["MainRoadPen"]!,
-        RoadType.Highway => ThemeDict["HighwayRoadPen"]!,
-        RoadType.Expressway => ThemeDict["ExpresswayRoadPen"]!,
-        RoadType.Motorway => ThemeDict["MotorwayRoadPen"]!,
-        RoadType.Footpath => ThemeDict["FootpathRoadPen"]!,
-        RoadType.Waterway => ThemeDict["WaterwayRoadPen"]!,
-        RoadType.Private => ThemeDict["PrivateRoadPen"]!,
-        RoadType.Roundabout => ThemeDict["RoundaboutRoadPen"]!,
-        RoadType.DuongWarp => ThemeDict["DuongWarpRoadPen"]!,
-        _ => ThemeDict["UnknownRoadPen"]!,
+        RoadType.Local => _themeDict["LocalRoadPen"]!,
+        RoadType.Main => _themeDict["MainRoadPen"]!,
+        RoadType.Highway => _themeDict["HighwayRoadPen"]!,
+        RoadType.Expressway => _themeDict["ExpresswayRoadPen"]!,
+        RoadType.Motorway => _themeDict["MotorwayRoadPen"]!,
+        RoadType.Footpath => _themeDict["FootpathRoadPen"]!,
+        RoadType.Waterway => _themeDict["WaterwayRoadPen"]!,
+        RoadType.Private => _themeDict["PrivateRoadPen"]!,
+        RoadType.Roundabout => _themeDict["RoundaboutRoadPen"]!,
+        RoadType.DuongWarp => _themeDict["DuongWarpRoadPen"]!,
+        _ => _themeDict["UnknownRoadPen"]!,
     });
 
-    public double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? ThemeDict["MotorwayThickness"]! : ThemeDict["RoadThickness"]!);
+    public double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? _themeDict["MotorwayThickness"]! : _themeDict["RoadThickness"]!);
 
     public void DrawEdge(DrawingContext context, RoadType roadType, Point from, Point to, bool drawGhost = false, bool drawRoute = false)
     {
@@ -508,7 +514,7 @@ public partial class MapView : UserControl
             if (scale < lowerScaleBound || scale > higherScaleBound) return;
 
             var text = new FormattedText(landmark.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                new Typeface(FontFamily), size * scale, (Brush)ThemeDict["ForegroundBrush"]!);
+                new Typeface(FontFamily), size * scale, (Brush)_themeDict["ForegroundBrush"]!);
 
             context.DrawText(text, rect.Center - new Point(text.Width / 2, text.Height / 2));
             return;
@@ -522,15 +528,12 @@ public partial class MapView : UserControl
         
         context.DrawSvgUrl(landmark.IconUrl, rect);
     }
-
-    // For some reason, using the proper method, (i.e. ResourceDictionary.ThemeDictionaries) does not seem to work here.
-    // This is a pretty crap solution, so if we find a better way it would probably be worthwhile implementing it
-    IResourceDictionary ThemeDict => (IResourceDictionary)this.FindResource(ActualThemeVariant.ToString())!;
     
-    [SuppressMessage("ReSharper", "PossibleLossOfFraction")]
     public override void Render(DrawingContext context)
     {
-        context.FillRectangle((Brush)ThemeDict["BackgroundBrush"]!, Bounds);
+        _themeDict = (IResourceDictionary)this.FindResource(ActualThemeVariant.ToString())!;
+        
+        context.FillRectangle((Brush)_themeDict["BackgroundBrush"]!, Bounds);
 
         var noRender = new List<MapItem>();
         noRender.AddRange(MapViewModel.MapEditorService.EditController.ItemsNotToRender);
@@ -574,10 +577,10 @@ public partial class MapView : UserControl
 
         if (MapViewModel.IsInEditMode)
         {
-            var nodeBorder = (Pen)ThemeDict["NodeBorder"]!;
-            var nodeBrush = (Brush)ThemeDict["NodeFill"]!;
-            var spiedBorder = (Pen)ThemeDict["SpiedNodeBorder"]!;
-            var spiedBrush = (Brush)ThemeDict["SpiedNodeFill"]!;
+            var nodeBorder = (Pen)_themeDict["NodeBorder"]!;
+            var nodeBrush = (Brush)_themeDict["NodeFill"]!;
+            var spiedBorder = (Pen)_themeDict["SpiedNodeBorder"]!;
+            var spiedBrush = (Brush)_themeDict["SpiedNodeFill"]!;
             foreach (var (rect, node) in DrawnNodes)
             {
                 if (noRender.Contains(node)) continue;
@@ -603,13 +606,12 @@ public partial class MapView : UserControl
         foreach (var player in MapViewModel.MapService.Players.Values
                      .Where(player => player.World == MapViewModel.ChosenWorld && Bounds.Contains(ToScreen(player.Point))))
         {
-            const int playerSize = 48;
-            var rect = new Rect(ToScreen(player.MarkerCoordinates) - new Point(playerSize, playerSize) / 2, new Size(playerSize, playerSize));
+            var rect = GeometryHelper.SquareCenteredOn(ToScreen(player.MarkerCoordinates), PlayerSize);
             const string? uriString = "avares://BnbnavNetClient/Assets/playermark.svg";
             context.DrawSvgUrl(uriString, rect, -player.MarkerAngle + MapViewModel.Rotation);
 
             //Draw the player name
-            var textBrush = (Brush)ThemeDict["ForegroundBrush"]!;
+            var textBrush = (Brush)_themeDict["ForegroundBrush"]!;
 
             if (player.PlayerText is null)
             {

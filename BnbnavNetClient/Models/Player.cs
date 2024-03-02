@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
-using System.Transactions;
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -60,7 +59,7 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         }
     }
 
-    const int PosHistorySize = 8;
+    const int PosHistorySize = 12;
     readonly Point[] _posHistory = new Point[PosHistorySize];
     int _posHistoryIx;
     DateTime _lastPosTime = DateTime.MinValue;
@@ -76,37 +75,43 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         _mapService = mapService;
         Name = name;
 
-        _timer = new DispatcherTimer(DispatcherPriority.Background);
-        _timer.Tick += (_, _) =>
+        _timer = new DispatcherTimer(DispatcherPriority.Background)
         {
-            var targetAngle = SnappedEdge is null ? Velocity.Angle : SnappedEdge.Line.Angle;
-            if (targetAngle < 0) targetAngle += 360;
-
-            Debug.Assert(MarkerAngle is >= 0 and < 360);
-            Debug.Assert(targetAngle is >= 0 and < 360);
-
-            var angleDifference = double.Ieee754Remainder(targetAngle - MarkerAngle, 360);
-
-            Debug.Assert(angleDifference is >= -180 and <= 180);
-
-            if (double.Abs(angleDifference) < 0.1)
-            {
-                Moved = false;
-                return;
-            }
-
-            var newAngle = double.Ieee754Remainder(MarkerAngle + angleDifference * 0.1, 360);
-            if (newAngle < 0)
-                newAngle += 360;
-
-            MarkerAngle = newAngle;
-
-            Debug.Assert(MarkerAngle is >= 0 and < 360);
-
-            Moved = true;
-            PlayerUpdateEvent?.Invoke(this, EventArgs.Empty);
+            Interval = TimeSpan.FromSeconds(1.0/20.0)
         };
+        _timer.Tick += TimerOnTick;
         _timer.Start();
+    }
+
+    void TimerOnTick(object? o, EventArgs eventArgs)
+    {
+        var targetAngle = SnappedEdge is null ? Velocity.Angle : SnappedEdge.Line.Angle;
+        if (targetAngle < 0)
+            targetAngle += 360;
+        
+        Debug.Assert(MarkerAngle is >= 0 and < 360);
+        Debug.Assert(targetAngle is >= 0 and < 360);
+
+        var angleDifference = double.Ieee754Remainder(targetAngle - MarkerAngle, 360);
+
+        Debug.Assert(angleDifference is >= -180 and <= 180);
+
+        if (double.Abs(angleDifference) < 0.1)
+        {
+            Moved = false;
+            return;
+        }
+
+        var newAngle = double.Ieee754Remainder(MarkerAngle + angleDifference * 0.2, 360);
+        if (newAngle < 0)
+            newAngle += 360;
+
+        MarkerAngle = newAngle;
+
+        Debug.Assert(MarkerAngle is >= 0 and < 360);
+
+        Moved = true;
+        PlayerUpdateEvent?.Invoke(this, EventArgs.Empty);
     }
 
     public void GeneratePlayerText(FontFamily fontFamily)
@@ -150,13 +155,10 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
 
         _lastPosTime = DateTime.Now;
 
-        if (SnappedEdge is not null)
+        if (SnappedEdge is not null && !CanSnapToEdge(SnappedEdge))
         {
             //Ensure the snapped edge is still valid
-            if (!CanSnapToEdge(SnappedEdge))
-            {
-                SnappedEdge = null;
-            }
+            SnappedEdge = null;
         }
 
         World = evt.World;
@@ -164,49 +166,54 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
 
     public void StartCalculateSnappedEdge()
     {
-        Task.Factory.StartNew(static obj =>
-        {
-            var me = (Player)obj!;
-            Console.WriteLine($"Calculating snap edge for {me.Name}");
+        Task.Factory.StartNew(CalculateSnappedEdge, this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+    }
 
-            // if the lock is already taken, finish
-            if (!Monitor.TryEnter(me._snapMutex))
+    static void CalculateSnappedEdge(object? obj)
+    {
+        var self = (Player)obj!;
+
+        // if the lock is already taken, finish
+        if (!Monitor.TryEnter(self._snapMutex))
+            return;
+
+        try
+        {
+            var shouldChangeEdge = self.SnappedEdge is null || (!self._mapService.CurrentRoute?.Edges.Contains(self.SnappedEdge) ?? false);
+
+            if (!shouldChangeEdge)
                 return;
 
-            try
+            Edge? snapEdge = null;
+            if (self.SnappedEdge is not null && self.CanSnapToEdge(self.SnappedEdge))
             {
-                var shouldChangeEdge = me.SnappedEdge is null ||
-                                       (!me._mapService.CurrentRoute?.Edges.Contains(me.SnappedEdge) ?? false);
-                //TODO: Also change edge if the current route contains the edge to change to or if the current route does not contain the currently snapped edge
-                if (!shouldChangeEdge)
-                    return;
-
-                Edge? snapEdge = null;
-                if (me._mapService.CurrentRoute is not null)
-                {
-                    // If we're in a route, try finding edges in the route only.
-                    snapEdge = me._mapService.CurrentRoute.Edges.FirstOrDefault(me.CanSnapToEdge);
-                }
-                else
-                {
-                    // this is the more common and longer path (outside go mode) so we avoid LINQ here
-                    foreach (var edge in me._mapService.Edges)
-                    {
-                        if (!me.CanSnapToEdge(edge.Value))
-                            continue;
-
-                        snapEdge = edge.Value;
-                        break;
-                    }
-                }
-
-                me.SnappedEdge = snapEdge;
+                // stay snapped!
+                return;
             }
-            finally
+            else if (self._mapService.CurrentRoute is not null)
             {
-                Monitor.Exit(me._snapMutex);
+                // If we're in a route, try finding edges in the route only.
+                snapEdge = self._mapService.CurrentRoute.Edges.FirstOrDefault(self.CanSnapToEdge);
             }
-        }, this);
+            else
+            {
+                // this is the more common and longer path (outside go mode) so avoid LINQ here
+                foreach (var edge in self._mapService.Edges)
+                {
+                    if (!self.CanSnapToEdge(edge.Value))
+                        continue;
+
+                    snapEdge = edge.Value;
+                    break;
+                }
+            }
+
+            self.SnappedEdge = snapEdge;
+        }
+        finally
+        {
+            Monitor.Exit(self._snapMutex);
+        }
     }
 
     bool CanSnapToEdge(Edge edge)

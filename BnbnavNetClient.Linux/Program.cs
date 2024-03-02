@@ -1,11 +1,9 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
-using Avalonia.Svg.Skia;
 using BnbnavNetClient.I18Next;
 using BnbnavNetClient.Linux.TextToSpeech;
 using BnbnavNetClient.Services.TextToSpeech;
 using BnbnavNetClient.Settings;
-using Splat;
 
 namespace BnbnavNetClient.Linux;
 
