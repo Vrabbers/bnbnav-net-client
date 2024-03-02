@@ -217,14 +217,24 @@ public partial class MapView : UserControl
             {
                 if (prop.Value is null)
                     return;
-                
-                var moved = prop.Value
-                    .Where(kvp => 
-                        kvp.Value.World == MapViewModel.ChosenWorld && 
-                        Bounds.Contains(ToScreen(kvp.Value.Point)))
-                    .Aggregate(false, (current, kvp) => current | kvp.Value.Moved);
 
-                if (!moved)
+                var anyMoved = false;
+                
+                foreach (var (name, player) in prop.Value)
+                {
+                    if ((MapViewModel.FollowMeEnabled && name == MapViewModel.LoggedInUsername) ||
+                        (player.World == MapViewModel.ChosenWorld && Bounds.Contains(ToScreen(player.Point))))
+                    {
+                        if (!player.Moved)
+                            continue;
+                        
+                        anyMoved = true;
+                        player.StartCalculateSnappedEdge(); // only do so if the player is on screen!
+                    }
+
+                }
+
+                if (!anyMoved)
                     return; // If no one who is on screen moved, then don't update stuff.
                 
                 InvalidateVisual();
@@ -370,7 +380,8 @@ public partial class MapView : UserControl
         }
     }
 
-    void PanTo(Point worldCoords, double xOffset = 0.5, double yOffset = 0.5) => MapViewModel.Pan = worldCoords - new Point(Bounds.Size.Width * xOffset, Bounds.Size.Height * yOffset) / MapViewModel.Scale;
+    void PanTo(Point worldCoords, double xOffset = 0.5, double yOffset = 0.5) => 
+        MapViewModel.Pan = worldCoords - new Point(Bounds.Size.Width * xOffset, Bounds.Size.Height * yOffset) / MapViewModel.Scale;
 
     public IEnumerable<MapItem> HitTest(Point point)
     {
