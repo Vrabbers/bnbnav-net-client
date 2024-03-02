@@ -142,7 +142,7 @@ public sealed class MainViewModel : ViewModel
                 var token = await ShowAuthenticationPopup();
                 interaction.SetOutput(token);
             }
-            catch (Exception)
+            catch (OperationCanceledException)
             {
                 interaction.SetOutput(null);
             }
@@ -200,31 +200,26 @@ public sealed class MainViewModel : ViewModel
         Popup = languagePopup;
     }
 
-    Task<string> ShowAuthenticationPopup()
+    Task<string?> ShowAuthenticationPopup()
     {
-        var cs = new TaskCompletionSource<string>();
+        var cs = new TaskCompletionSource<string?>();
         var editModePopup = new EnterPopupViewModel(_tr["EDITNAV_PROMPT"], _tr["EDITNAV_WATERMARK"]);
         editModePopup.Ok.Subscribe(token =>
         {
-            EditModeToken = token;
-            MapEditorService.EditModeEnabled = true;
             cs.SetResult(token);
             Popup = null;
         });
         editModePopup.Cancel.Subscribe(_ =>
         {
-            EditModeToken = null;
-            MapEditorService.EditModeEnabled = false;
-            cs.SetException(new OperationCanceledException());
+            cs.SetCanceled();
             Popup = null;
         });
         Popup = editModePopup;
         return cs.Task;
     }
 
-    public void EditModePressed()
+    public async Task EditModePressed()
     {
-        //MapEditorService.EditModeEnabled = !MapEditorService.EditModeEnabled;
         if (!MapEditorService.EditModeEnabled)
         {
             if (EditModeToken is not null)
@@ -232,7 +227,19 @@ public sealed class MainViewModel : ViewModel
                 MapEditorService.EditModeEnabled = true;
                 return;
             }
-            ShowAuthenticationPopup();
+
+            try
+            {
+                var auth = await ShowAuthenticationPopup();
+                EditModeToken = auth;
+                MapEditorService.EditModeEnabled = true;
+            }
+            catch (OperationCanceledException)
+            {
+                EditModeToken = null;
+                MapEditorService.EditModeEnabled = false;
+            }
+            this.RaisePropertyChanged(nameof(EditModeEnabled));
         }
         else
         {

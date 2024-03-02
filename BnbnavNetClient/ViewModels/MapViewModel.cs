@@ -35,9 +35,6 @@ public class MapViewModel : ViewModel
     // As a % of the window bounds
     [Reactive]
     public Vector RotationOrigin { get; set; } = new(0.5, 0.5);
-    
-    [Reactive]
-    public string Test { get; set; } = string.Empty;
 
     public MapEditorService MapEditorService { get; set; }
 

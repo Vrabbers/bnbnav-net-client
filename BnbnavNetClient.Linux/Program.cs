@@ -1,6 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.ReactiveUI;
 using Avalonia.Svg.Skia;
 using BnbnavNetClient.I18Next;
@@ -11,18 +9,15 @@ using Splat;
 
 namespace BnbnavNetClient.Linux;
 
-internal class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
-    static AppBuilder BuildAvaloniaApp()
+    public static AppBuilder BuildAvaloniaApp()
     {
-        GC.KeepAlive(typeof(SvgImageExtension).Assembly);
-        GC.KeepAlive(typeof(Avalonia.Svg.Skia.Svg).Assembly);
-
         return AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .LogToTrace()
