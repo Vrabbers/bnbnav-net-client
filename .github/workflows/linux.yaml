@@ -19,7 +19,7 @@ jobs:
         with:
           submodules: 'recursive'
       - name: "Install .NET"
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
       - name: "Build Project"
@@ -36,7 +36,7 @@ jobs:
           curl https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool-x86_64.AppImage -L
           chmod +x appimagetool-x86_64.AppImage
           ./appimagetool-x86_64.AppImage --appimage-extract-and-run bnbnav.AppDir
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: "Upload Artifact"
         with:
           name: "bnbnav-linux.AppImage"

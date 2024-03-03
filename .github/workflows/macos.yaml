@@ -23,7 +23,7 @@ jobs:
         run: |
           npm install -g appdmg
       - name: "Install .NET"
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
       - uses: actions/checkout@v1
@@ -36,7 +36,7 @@ jobs:
         working-directory: dist
       - name: "Create Disk Image"
         run: appdmg dist/app-dmg-spec.json ./bnbnav-mac-${{ matrix.arch }}.dmg
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: "Upload Artifact"
         with:
           name: "bnbnav-mac-${{ matrix.arch }}.dmg"
