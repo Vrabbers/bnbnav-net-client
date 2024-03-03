@@ -28,7 +28,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         name: "Upload Artifact"
         with:
-          name: "bnbnav-win"
+          name: "bnbnav-win-${{ matrix.arch }}"
           path: "BnbnavNetClient.Windows/bin/Release/net8.0-windows/win-${{ matrix.arch }}/publish"
   release:
     runs-on: ubuntu-latest
