@@ -28,6 +28,9 @@
       <Setter Property="Margin" Value="2"/>
       <Setter Property="Padding" Value="0"/>
     </Style>
+    <Style Selector=":is(Button).icon PathIcon">
+      <Setter Property="RenderTransform" Value="scale(0.875)"/>
+    </Style>
     <Style Selector="ComboBox">
       <Setter Property="Margin" Value="2"/>
     </Style>

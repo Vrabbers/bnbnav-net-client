@@ -40,6 +40,14 @@ public partial class MainView : UserControl
         MapPanel.Children.Add(new MapView { DataContext = vm.MapViewModel });
         WorldSelectComboBox.IsVisible = true;
         vm.RaisePropertyChanged(nameof(MainViewModel.PanText));
+
+        vm.WhenAnyValue<MainViewModel, ViewModel?>(x => x.Popup).Subscribe(p =>
+        {
+            if (p is null)
+                MainUiGrid.Classes.Clear();
+            else
+                MainUiGrid.Classes.Add("blur");
+        });
     }
 
     public async void ColorModeSwitch(object? _, RoutedEventArgs? __)

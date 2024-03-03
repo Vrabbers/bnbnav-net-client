@@ -21,7 +21,12 @@
 
     <Grid>
         <!-- Main UI -->
-        <Grid RowDefinitions="* Auto Auto Auto">
+        <Grid Name="MainUiGrid" RowDefinitions="* Auto Auto Auto" Classes="">
+            <Grid.Styles>
+                <Style Selector="Grid.blur">
+                    <Setter Property="Effect" Value="blur(5)"/>
+                </Style>
+            </Grid.Styles>
             <!-- Map -->
             <ProgressBar IsIndeterminate="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}"
                          IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0" />
@@ -82,8 +87,8 @@
                     <Button.Flyout>
                         <Flyout>
                             <StackPanel>
-                                <ToggleButton Content="{str:Tr Key=FOLLOW_ME}" IsChecked="{Binding FollowMeEnabled}" />
-                                <Button Content="{str:Tr Key=LOG_OUT}" Command="{Binding LogoutPressed}" />
+                                <ToggleButton HorizontalAlignment="Stretch" Content="{str:Tr Key=FOLLOW_ME}" IsChecked="{Binding FollowMeEnabled}" />
+                                <Button HorizontalAlignment="Stretch" Content="{str:Tr Key=LOG_OUT}" Command="{Binding LogoutPressed}" />
                             </StackPanel>
                         </Flyout>
                     </Button.Flyout>
@@ -102,7 +107,7 @@
         <!-- Popup -->
         <Grid IsVisible="{Binding Popup, Converter={x:Static ObjectConverters.IsNotNull}}" ColumnDefinitions="15 6* 15"
               RowDefinitions="* Auto *" Background="#7f000000">
-            <Border MaxWidth="400" CornerRadius="3" Grid.Column="1" Grid.Row="1" BoxShadow="0 0 200 0 Black"
+            <Border MaxWidth="400" CornerRadius="3" Grid.Column="1" Grid.Row="1"
                     Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
                 <UserControl Content="{Binding Popup}"/>
             </Border>
