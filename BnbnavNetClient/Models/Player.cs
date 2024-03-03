@@ -120,7 +120,7 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
     public void GeneratePlayerText(FontFamily fontFamily)
     {
         PlayerText = new FormattedText(Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-            new Typeface(fontFamily), 20, null);
+            new Typeface(fontFamily), 16, null);
     }
 
     public void HandlePlayerMovedEvent(PlayerMoved evt)

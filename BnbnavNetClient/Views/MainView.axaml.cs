@@ -6,6 +6,7 @@ using Avalonia.Styling;
 using BnbnavNetClient.Extensions;
 using BnbnavNetClient.Settings;
 using BnbnavNetClient.ViewModels;
+using ReactiveUI;
 using Splat;
 
 namespace BnbnavNetClient.Views;
@@ -37,7 +38,9 @@ public partial class MainView : UserControl
         await vm.InitMapService();
 
         MapPanel.Children.Add(new MapView { DataContext = vm.MapViewModel });
-   }
+        WorldSelectComboBox.IsVisible = true;
+        vm.RaisePropertyChanged(nameof(MainViewModel.PanText));
+    }
 
     public async void ColorModeSwitch(object? _, RoutedEventArgs? __)
     {

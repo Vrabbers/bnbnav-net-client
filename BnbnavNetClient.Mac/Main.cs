@@ -9,6 +9,7 @@ using BnbnavNetClient.Settings;
 AppBuilder BuildAvaloniaApp()
     => AppBuilder.Configure<App>()
         .UsePlatformDetect()
+        .WithInterFont()
         .LogToTrace()
         .UseReactiveUI()
         .UseI18NextLocalization()

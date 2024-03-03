@@ -627,16 +627,16 @@ public partial class MapView : UserControl
             }
             player.PlayerText!.SetForegroundBrush(textBrush);
 
-            var textCenter = rect.Center + new Point(0, rect.Height / 2 + 10 + player.PlayerText.Height / 2);
+            var textCenter = rect.Center + new Point(0, rect.Height / 2 + 8 + player.PlayerText.Height / 2);
             context.DrawText(player.PlayerText, textCenter - new Point(player.PlayerText.Width, player.PlayerText.Height) / 2);
 
             if (player.SnappedEdge is null)
                 continue;
             
             var roadText = new FormattedText(player.SnappedEdge.Road.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                new Typeface(FontFamily), 20, new SolidColorBrush(new Color(255, 255, 255, 255)));
+                new Typeface(FontFamily), 16, new SolidColorBrush(new Color(255, 255, 255, 255)));
 
-            var roadCenter = textCenter + new Point(0, player.PlayerText.Height / 2 + 10 + roadText.Height / 2);
+            var roadCenter = textCenter + new Point(0, player.PlayerText.Height / 2 + 8 + roadText.Height / 2);
             var roadRect = new Rect(roadCenter - new Point(roadText.Width + 10, roadText.Height) / 2,
                 new Size(roadText.Width + 10, roadText.Height));
             var backingRect = roadRect.Inflate(3);

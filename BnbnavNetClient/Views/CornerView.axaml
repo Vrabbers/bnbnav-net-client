@@ -10,7 +10,7 @@
              xmlns:controls="clr-namespace:BnbnavNetClient.Controls"
              xmlns:views="clr-namespace:BnbnavNetClient.Views"
              x:CompileBindings="True">
-    <StackPanel Width="400">
+    <StackPanel HorizontalAlignment="Stretch">
         <StackPanel IsVisible="{Binding IsInSearchMode}">
             <controls:LandmarkSearchControl SelectedLandmark="{Binding SelectedLandmark}" MapService="{Binding MapService}" ChosenWorld="{Binding ChosenWorld}" />
             <Border Background="{DynamicResource FlyoutPresenterBackground}" BorderBrush="{DynamicResource FlyoutBorderThemeBrush}" BorderThickness="{DynamicResource FlyoutBorderThemeThickness}" CornerRadius="{DynamicResource OverlayCornerRadius}" IsVisible="{Binding SelectedLandmark, Converter={x:Static ObjectConverters.IsNotNull}}" Padding="{DynamicResource FlyoutContentThemePadding}">
