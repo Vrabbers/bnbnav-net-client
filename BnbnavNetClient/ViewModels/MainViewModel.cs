@@ -3,6 +3,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System.Reactive;
 using System.Reactive.Linq;
+using Avalonia.Collections;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.I18Next.Services;
 using Avalonia.Controls;
@@ -24,10 +25,11 @@ public sealed class MainViewModel : ViewModel
     [Reactive]
     public bool FollowMeEnabled { get; set; }
 
-    [Reactive] public string ChosenWorld { get; set; } = null!;
-    
+    [Reactive] 
+    public string ChosenWorld { get; set; } = null!;
+
     [ObservableAsProperty]
-    public IEnumerable<string> AvailableWorlds { get; } = Enumerable.Empty<string>();
+    public AvaloniaList<string> AvailableWorlds { get; } = [];
 
     [ObservableAsProperty]
     public string LoginText { get; }
@@ -82,7 +84,7 @@ public sealed class MainViewModel : ViewModel
     public bool MainBarVisible { get; set; } = true;
 
     public MapEditorService MapEditorService { get; set; }
-
+    
     public MainViewModel()
     {
         MapEditorService = new MapEditorService();
@@ -124,7 +126,11 @@ public sealed class MainViewModel : ViewModel
         
         this.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(mapService, x => x.LoggedInUsername);
         mapService.WhenAnyValue(x => x.Worlds).ToPropertyEx(this, x => x.AvailableWorlds);
-
+        
+        // do this manually as the binding was set up after the object was initialised.
+        this.RaisePropertyChanged(nameof(AvailableWorlds));
+        this.RaisePropertyChanged(nameof(ChosenWorld));
+        
         MapViewModel = new MapViewModel(mapService, this);
         CornerViewModel = new CornerViewModel(mapService, this);
         

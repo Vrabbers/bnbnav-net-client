@@ -8,6 +8,7 @@ using System.Net.Http.Json;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Text.Json;
+using Avalonia.Collections;
 using BnbnavNetClient.Extensions;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.NetworkOperations;
@@ -76,8 +77,10 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Road> Roads { get; }
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
     public ReadOnlyDictionary<string, Player> Players { get; }
+    public bool PlayerGone { get; set; }
 
-    [Reactive] public IEnumerable<string> Worlds { get; private set; } = Enumerable.Empty<string>();
+    [Reactive] 
+    public AvaloniaList<string> Worlds { get; private set; } = [];
 
     List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = [];
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
@@ -304,13 +307,15 @@ public sealed class MapService : ReactiveObject
         }));
     }
 
-    void UpdateWorlds()
+    void SetupWorlds()
     {
-        var newWorlds = Nodes.Values.Select(node => node.World)
-            .Union(Players.Values.Select(player => player.World)).Distinct().ToList();
+        var newWorlds = Nodes.Values.Select(node => node.World).Distinct().ToList();
         
         // Only set if different in order to avoid flickering in UI
-        Worlds = newWorlds;
+        if (!newWorlds.All(Worlds.Contains))
+        {
+            Worlds = new AvaloniaList<string>(newWorlds);
+        }
     }
 
     public async Task<CalculatedRoute> ObtainCalculatedRoute(ISearchable from, ISearchable to, RouteOptions routeOptions, CancellationToken ct)
@@ -489,7 +494,7 @@ public sealed class MapService : ReactiveObject
         await ws.ConnectAsync(CancellationToken.None);
         var service = new MapService(nodes.Values, edges, roads.Values, landmarks, annotations, ws);
         _ = service.ProcessChangesAsync();
-        service.UpdateWorlds();
+        service.SetupWorlds();
         return service;
     }
 
@@ -505,7 +510,8 @@ public sealed class MapService : ReactiveObject
                 case NodeCreated node:
                     type = nameof(Nodes);
                     _nodes.Add(id, new Node(id, node.X, node.Y, node.Z, node.World));
-                    UpdateWorlds();
+                    if (!Worlds.Contains(node.World, StringComparer.InvariantCulture))
+                        Worlds.Add(node.World);
                     break;
 
                 case UpdatedNode node:
@@ -513,13 +519,13 @@ public sealed class MapService : ReactiveObject
                     _nodes[id].X = node.X;
                     _nodes[id].Y = node.Y;
                     _nodes[id].Z = node.Z;
-                    UpdateWorlds();
+                    if (!Worlds.Contains(node.World, StringComparer.InvariantCulture))
+                        Worlds.Add(node.World);                    
                     break;
 
                 case NodeRemoved:
                     type = nameof(Nodes);
                     _nodes.Remove(id);
-                    UpdateWorlds();
                     break;
 
                 case RoadCreated road:
@@ -574,7 +580,6 @@ public sealed class MapService : ReactiveObject
                         p.HandlePlayerMovedEvent(player);
                         _players.Add(player.Id!, p);
                     }
-                    UpdateWorlds();
 
                     break;
                 case PlayerLeft player:
@@ -582,9 +587,10 @@ public sealed class MapService : ReactiveObject
                     if (_players.TryGetValue(player.Id!, out value))
                     {
                         value.HandlePlayerGoneEvent();
+                        PlayerGone = true;
                         _players.Remove(player.Id!);
                     }
-                    UpdateWorlds();
+                    this.RaisePropertyChanged(nameof(Players));
                     break;
             }
 

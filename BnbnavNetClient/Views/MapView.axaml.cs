@@ -225,24 +225,32 @@ public partial class MapView : UserControl
 
                 var anyMoved = false;
                 
-                foreach (var (name, player) in prop.Value)
+                // if any players have gone, we need to update visuals anyway, so skip all this
+                if (!MapViewModel.MapService.PlayerGone)
                 {
-                    if ((MapViewModel.FollowMeEnabled && name == MapViewModel.LoggedInUsername) ||
-                        (player.World == MapViewModel.ChosenWorld && 
-                         Bounds.Intersects(GeometryHelper.SquareCenteredOn(ToScreen(player.Point), PlayerSize))))
+                    foreach (var (name, player) in prop.Value)
                     {
-                        if (!player.Moved)
-                            continue;
-                        
-                        anyMoved = true;
-                        player.StartCalculateSnappedEdge(); // only do so if the player is on screen!
+                        if ((MapViewModel.FollowMeEnabled && name == MapViewModel.LoggedInUsername) ||
+                            (player.World == MapViewModel.ChosenWorld &&
+                             Bounds.Intersects(GeometryHelper.SquareCenteredOn(ToScreen(player.Point), PlayerSize))))
+                        {
+                            if (!player.Moved)
+                                continue;
+
+                            anyMoved = true;
+                            player.StartCalculateSnappedEdge(); // only do so if the player is on screen!
+                        }
+
                     }
 
+                    if (!anyMoved)
+                        return; // If no one who is on screen moved, then don't update stuff.
+                }
+                else
+                {
+                    MapViewModel.MapService.PlayerGone = false; // reset value
                 }
 
-                if (!anyMoved)
-                    return; // If no one who is on screen moved, then don't update stuff.
-                
                 InvalidateVisual();
                 UpdateFollowMeState();
             }));

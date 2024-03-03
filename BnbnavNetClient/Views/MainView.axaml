@@ -51,12 +51,12 @@
       <!-- Main Bar -->
       <Grid Grid.Row="3" ColumnDefinitions="Auto Auto * Auto Auto Auto" IsVisible="{Binding MainBarVisible}">
         <Button Classes="icon" Command="{Binding LanguageButtonPressed}"><PathIcon Data="{StaticResource globe_regular}"/></Button>
-        <ToggleButton Grid.Column="1" Click="EditModeButtonClick" Name="EditModeButton" Command="{Binding EditModePressed}" Content="{str:Tr Key=EDIT_MODE}" IsChecked="{Binding EditModeEnabled, Mode=OneWay}"/>
+        <ToggleButton Grid.Column="1" Click="EditModeButtonClick" Name="EditModeButton" Command="{Binding EditModePressed}" Content="{str:Tr Key=EDIT_MODE}" IsChecked="{Binding EditModeEnabled}"/>
         <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding PanText}"/>
         <ComboBox Grid.Column="3" HorizontalAlignment="Stretch" Margin="2" ItemsSource="{Binding AvailableWorlds, Mode=TwoWay}" SelectedItem="{Binding ChosenWorld, Mode=TwoWay}" IsEnabled="{Binding !FollowMeEnabled}">
           <ComboBox.ItemTemplate>
             <DataTemplate>
-              <TextBlock Text="{Binding}"/>
+              <TextBlock Margin="0" Text="{Binding}"/>
             </DataTemplate>
           </ComboBox.ItemTemplate>
         </ComboBox>

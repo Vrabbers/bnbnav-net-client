@@ -28,7 +28,9 @@
     <Style Selector=":is(Button).icon">
       <Setter Property="MinWidth" Value="0"/>
       <Setter Property="VerticalAlignment" Value="Stretch"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
       <Setter Property="Margin" Value="2"/>
+      <Setter Property="Padding" Value="7, 0"/>
     </Style>
     <Style Selector=":is(Button).accent">
       <Setter Property="FontWeight" Value="Bold"/>

@@ -40,6 +40,9 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
     public double MarkerAngle { get; private set; }
 
     public FormattedText? PlayerText { get; set; }
+    
+    public event EventHandler<EventArgs>? PlayerUpdateEvent;
+
 
     public Point MarkerCoordinates
     {
@@ -238,11 +241,11 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
 
     public void HandlePlayerGoneEvent()
     {
+        Moved = true;
+        PlayerUpdateEvent?.Invoke(this, EventArgs.Empty);
         _timer.Stop();
     }
-
-    public event EventHandler<EventArgs>? PlayerUpdateEvent;
-
+    
     public void Dispose()
     {
         _timer.Stop();
