@@ -30,7 +30,7 @@
                             HorizontalAlignment="Left" />
 
             <!-- Edit Controls -->
-            <Grid Grid.Row="2" IsVisible="{Binding EditModeEnabled}">
+            <Grid Grid.Row="2" IsVisible="{Binding EditModeEnabled}" Margin="2 2 2 -2">
                 <Grid ColumnDefinitions="Auto Auto Auto Auto Auto * Auto">
                     <ToggleButton Grid.Column="0" Command="{Binding SelectModePressed}" Content="{str:Tr Key=SELECT}"
                                   IsChecked="{Binding IsInSelectMode}" />
@@ -58,7 +58,7 @@
             </Grid>
 
             <!-- Main Bar -->
-            <Grid Grid.Row="3" ColumnDefinitions="Auto Auto * Auto Auto Auto" IsVisible="{Binding MainBarVisible}">
+            <Grid Grid.Row="3" ColumnDefinitions="Auto Auto * Auto Auto Auto" IsVisible="{Binding MainBarVisible}" Margin="2 2 2 2">
                 <Button Classes="icon" Command="{Binding LanguageButtonPressed}">
                     <PathIcon Data="{StaticResource globe_regular}" />
                 </Button>
