@@ -198,7 +198,7 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
                 // If we're in a route, try finding edges in the route only.
                 snapEdge = self._mapService.CurrentRoute.Edges.FirstOrDefault(self.CanSnapToEdge);
             }
-            else
+            else if (snapEdge is null)
             {
                 // this is the more common and longer path (outside go mode) so avoid LINQ here
                 foreach (var edge in self._mapService.Edges)

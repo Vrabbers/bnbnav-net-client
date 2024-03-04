@@ -223,27 +223,32 @@ public partial class MapView : UserControl
                 if (prop.Value is null)
                     return;
 
-                var anyMoved = false;
+                var shouldUpdateVisuals = false;
                 
                 // if any players have gone, we need to update visuals anyway, so skip all this
                 if (!MapViewModel.MapService.PlayerGone)
                 {
                     foreach (var (name, player) in prop.Value)
                     {
-                        if ((MapViewModel.FollowMeEnabled && name == MapViewModel.LoggedInUsername) ||
+                        if (((MapViewModel.FollowMeEnabled) && name == MapViewModel.LoggedInUsername) ||
                             (player.World == MapViewModel.ChosenWorld &&
                              Bounds.Intersects(GeometryHelper.SquareCenteredOn(ToScreen(player.Point), PlayerSize))))
                         {
                             if (!player.Moved)
                                 continue;
 
-                            anyMoved = true;
+                            shouldUpdateVisuals = true;
                             player.StartCalculateSnappedEdge(); // only do so if the player is on screen!
                         }
-
+                        else if (MapViewModel.CurrentUi == AvailableUi.Go &&
+                                 name == MapViewModel.LoggedInUsername)
+                        {
+                            shouldUpdateVisuals = true;
+                            player.StartCalculateSnappedEdge();
+                        }
                     }
 
-                    if (!anyMoved)
+                    if (!shouldUpdateVisuals)
                         return; // If no one who is on screen moved, then don't update stuff.
                 }
                 else
@@ -657,12 +662,18 @@ public partial class MapView : UserControl
     public void Zoom(double deltaScale, Point origin)
     {
         var newScale = double.Clamp(MapViewModel.Scale + deltaScale, 0.1, 20.0);
-        
         var worldPrevPos = ToWorld(origin);
         MapViewModel.Scale = newScale;
-        var worldFutureIncorrectPos = ToWorld(origin);
-        var correction = worldFutureIncorrectPos - worldPrevPos;
-        MapViewModel.Pan -= correction;
+        if (MapViewModel.FollowMeEnabled || MapViewModel.CurrentUi == AvailableUi.Go)
+        {
+            UpdateFollowMeState();
+        }
+        else
+        {
+            var worldFutureIncorrectPos = ToWorld(origin);
+            var correction = worldFutureIncorrectPos - worldPrevPos;
+            MapViewModel.Pan -= correction;
+        }
     }
 
     public FlyoutBase? OpenFlyout(ViewModel viewModel)
