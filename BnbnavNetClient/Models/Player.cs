@@ -98,7 +98,7 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         var angleDifference = double.Ieee754Remainder(targetAngle - MarkerAngle, 360);
 
         Debug.Assert(angleDifference is >= -180 and <= 180);
-
+        
         if (double.Abs(angleDifference) < 0.1)
         {
             Moved = false;
@@ -114,7 +114,6 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         Debug.Assert(MarkerAngle is >= 0 and < 360);
 
         Moved = true;
-        PlayerUpdateEvent?.Invoke(this, EventArgs.Empty);
     }
 
     public void GeneratePlayerText(FontFamily fontFamily)
@@ -165,6 +164,7 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         }
 
         World = evt.World;
+        PlayerUpdateEvent?.Invoke(this, EventArgs.Empty);
     }
 
     public void StartCalculateSnappedEdge()

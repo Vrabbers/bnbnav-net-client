@@ -85,7 +85,6 @@ public sealed class MapService : ReactiveObject
     List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = [];
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
     public Interaction<(string, string, bool), Unit> ErrorMessageInteraction { get; } = new();
-    public Interaction<Unit, Unit> PlayerUpdateInteraction { get; } = new();
     
     [Reactive]
     public CalculatedRoute? CurrentRoute { get; set; }
@@ -573,10 +572,6 @@ public sealed class MapService : ReactiveObject
                     else
                     {
                         var p = new Player(player.Id!, this);
-                        p.PlayerUpdateEvent += (_, _) =>
-                        {
-                            PlayerUpdateInteraction.Handle(Unit.Default);
-                        };
                         p.HandlePlayerMovedEvent(player);
                         _players.Add(player.Id!, p);
                     }

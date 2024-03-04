@@ -278,12 +278,6 @@ public partial class MapView : UserControl
         MapViewModel.WhenPropertyChanged(x => x.ChosenWorld)
             .Subscribe(Observer.Create<PropertyValue<MapViewModel, string>>(_ => UpdateDrawnItems()));
 
-        MapViewModel.MapService.PlayerUpdateInteraction.RegisterHandler(interaction =>
-        {
-            interaction.SetOutput(Unit.Default);
-            InvalidateVisual();
-        });
-
         MapViewModel.WhenAnyValue(x => x.SelectedLandmark).Subscribe(Observer.Create<ISearchable?>(_ =>
         {
             if (MapViewModel.SelectedLandmark is not null) PanTo(MapViewModel.SelectedLandmark.Location.Point);
