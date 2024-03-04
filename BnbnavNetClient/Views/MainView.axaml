@@ -24,13 +24,13 @@
         <Grid Name="MainUiGrid" RowDefinitions="* Auto Auto Auto" Classes="">
             <Grid.Styles>
                 <Style Selector="Grid.blur">
-                    <Setter Property="Effect" Value="blur(5)"/>
+                    <Setter Property="Effect" Value="blur(10)"/>
                 </Style>
             </Grid.Styles>
             <!-- Map -->
             <ProgressBar IsIndeterminate="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}"
                          IsVisible="{Binding MapViewModel, Converter={x:Static ObjectConverters.IsNull}}" Width="0" />
-            <Panel Grid.Row="0" Name="MapPanel" />
+            <Panel Grid.Row="0" Name="MapPanel" Margin="-10 -10 -10 0" />
             <ContentControl Grid.Row="0" Content="{Binding CornerViewModel}" Margin="12 12 12 12" Width="350"
                             HorizontalAlignment="Left" />
 

@@ -5,6 +5,7 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.EditControllers;
 
+[Flags]
 public enum PointerPressed
 {
     None = 0,
