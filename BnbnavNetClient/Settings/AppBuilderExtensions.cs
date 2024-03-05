@@ -1,11 +1,12 @@
 ﻿using Avalonia;
+using Splat;
 
 namespace BnbnavNetClient.Settings;
 public static class AppBuilderExtensions
 {
     public static AppBuilder UseSettings(this AppBuilder appBuilder, ISettingsManager impl)
     {
-        appBuilder.With(impl);
+        Locator.CurrentMutable.RegisterConstant(impl);
         return appBuilder;
     }
 }

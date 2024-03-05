@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Platform;
@@ -24,11 +22,10 @@ public static class DrawingContextExtensions
         }
         else
         {
-            var assetLoader = AvaloniaLocator.Current.GetService<IAssetLoader>()!;
             var uri = new Uri(url);
-            if (assetLoader.Exists(uri))
+            if (AssetLoader.Exists(uri))
             {
-                var asset = assetLoader.Open(uri);
+                var asset = AssetLoader.Open(uri);
 
                 svg = new SKSvg();
                 svg.Load(asset);
@@ -48,7 +45,7 @@ public static class DrawingContextExtensions
         var translateMatrix = Matrix.CreateTranslation(
             rect.X * sourceSize.Width / rect.Width,
             rect.Y * sourceSize.Height / rect.Height);
-        var rotateMatrix = Matrix.CreateRotation(MathHelper.ToRad(angle));
+        var rotateMatrix = Matrix.CreateRotation(double.DegreesToRadians(angle));
         var preRotateMatrix = Matrix.CreateTranslation(-sourceSize.Width / 2, -sourceSize.Width / 2);
 
         using (context.PushClip(rect))

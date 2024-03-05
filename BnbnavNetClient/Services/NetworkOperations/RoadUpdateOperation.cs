@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Avalonia.Media;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Views;
@@ -14,7 +10,7 @@ public class RoadUpdateOperation : NetworkOperation
     readonly Road _road;
     readonly string _newName;
     readonly RoadType _newRoadType;
-    readonly List<Edge> _affectedEdges = new();
+    readonly List<Edge> _affectedEdges = [];
 
     public RoadUpdateOperation(MapEditorService editorService, Road road, string newName, RoadType newRoadType)
     {

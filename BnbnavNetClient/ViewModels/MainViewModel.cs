@@ -1,15 +1,15 @@
 ﻿using BnbnavNetClient.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
+using Avalonia.Collections;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.I18Next.Services;
-using Avalonia;
 using Avalonia.Controls;
+using BnbnavNetClient.Extensions;
 using BnbnavNetClient.Settings;
+using Splat;
 
 namespace BnbnavNetClient.ViewModels;
 
@@ -25,10 +25,11 @@ public sealed class MainViewModel : ViewModel
     [Reactive]
     public bool FollowMeEnabled { get; set; }
 
-    [Reactive] public string ChosenWorld { get; set; } = null!;
-    
+    [Reactive] 
+    public string ChosenWorld { get; set; } = null!;
+
     [ObservableAsProperty]
-    public IEnumerable<string> AvailableWorlds { get; } = Enumerable.Empty<string>();
+    public AvaloniaList<string> AvailableWorlds { get; } = [];
 
     [ObservableAsProperty]
     public string LoginText { get; }
@@ -83,13 +84,14 @@ public sealed class MainViewModel : ViewModel
     public bool MainBarVisible { get; set; } = true;
 
     public MapEditorService MapEditorService { get; set; }
-
+    
     public MainViewModel()
     {
         MapEditorService = new MapEditorService();
-        
-        _settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
-        _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+
+        //TODO: Splat has a source generator for this. use it
+        _settings = Locator.Current.GetSettingsManager();
+        _tr = Locator.Current.GetI18Next();
         var followMeText = this
             .WhenAnyValue(me => me.FollowMeEnabled, me => me.LoggedInUsername)
             .Select(x => x.Item1 ? _tr["FOLLOWING", ("user", x.Item2)] : _tr["FOLLOW_ME"]);
@@ -124,7 +126,11 @@ public sealed class MainViewModel : ViewModel
         
         this.WhenAnyValue(x => x.LoggedInUsername).ToPropertyEx(mapService, x => x.LoggedInUsername);
         mapService.WhenAnyValue(x => x.Worlds).ToPropertyEx(this, x => x.AvailableWorlds);
-
+        
+        // do this manually as the binding was set up after the object was initialised.
+        this.RaisePropertyChanged(nameof(AvailableWorlds));
+        this.RaisePropertyChanged(nameof(ChosenWorld));
+        
         MapViewModel = new MapViewModel(mapService, this);
         CornerViewModel = new CornerViewModel(mapService, this);
         
@@ -142,7 +148,7 @@ public sealed class MainViewModel : ViewModel
                 var token = await ShowAuthenticationPopup();
                 interaction.SetOutput(token);
             }
-            catch (Exception)
+            catch (OperationCanceledException)
             {
                 interaction.SetOutput(null);
             }
@@ -200,31 +206,26 @@ public sealed class MainViewModel : ViewModel
         Popup = languagePopup;
     }
 
-    Task<string> ShowAuthenticationPopup()
+    Task<string?> ShowAuthenticationPopup()
     {
-        var cs = new TaskCompletionSource<string>();
+        var cs = new TaskCompletionSource<string?>();
         var editModePopup = new EnterPopupViewModel(_tr["EDITNAV_PROMPT"], _tr["EDITNAV_WATERMARK"]);
         editModePopup.Ok.Subscribe(token =>
         {
-            EditModeToken = token;
-            MapEditorService.EditModeEnabled = true;
             cs.SetResult(token);
             Popup = null;
         });
         editModePopup.Cancel.Subscribe(_ =>
         {
-            EditModeToken = null;
-            MapEditorService.EditModeEnabled = false;
-            cs.SetException(new Exception());
+            cs.SetCanceled();
             Popup = null;
         });
         Popup = editModePopup;
         return cs.Task;
     }
 
-    public void EditModePressed()
+    public async Task EditModePressed()
     {
-        //MapEditorService.EditModeEnabled = !MapEditorService.EditModeEnabled;
         if (!MapEditorService.EditModeEnabled)
         {
             if (EditModeToken is not null)
@@ -232,7 +233,19 @@ public sealed class MainViewModel : ViewModel
                 MapEditorService.EditModeEnabled = true;
                 return;
             }
-            ShowAuthenticationPopup();
+
+            try
+            {
+                var auth = await ShowAuthenticationPopup();
+                EditModeToken = auth;
+                MapEditorService.EditModeEnabled = true;
+            }
+            catch (OperationCanceledException)
+            {
+                EditModeToken = null;
+                MapEditorService.EditModeEnabled = false;
+            }
+            this.RaisePropertyChanged(nameof(EditModeEnabled));
         }
         else
         {

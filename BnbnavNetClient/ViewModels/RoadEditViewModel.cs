@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Reactive;
 using Avalonia.Collections;
 using Avalonia.Controls.Primitives;
@@ -17,7 +15,7 @@ public class RoadEditViewModel : ViewModel, IOpenableAsFlyout
     readonly Road _road;
 
     [Reactive]
-    public AvaloniaList<RoadTypeHelper> RoadTypes { get; set; } = new();
+    public AvaloniaList<RoadTypeHelper> RoadTypes { get; set; } = [];
 
     [Reactive]
     public RoadTypeHelper? SelectedRoadType { get; set; }

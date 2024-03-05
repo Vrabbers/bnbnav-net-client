@@ -1,4 +1,3 @@
-using System.Linq;
 using Avalonia;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -8,22 +7,16 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.EditControllers;
 
-public class SelectEditController : EditController
+public class SelectEditController(MapEditorService mapEditorService) : EditController
 {
-    readonly MapEditorService _mapEditorService;
     Point _initialPointerPosition;
 
-    public SelectEditController(MapEditorService mapEditorService)
-    {
-        _mapEditorService = mapEditorService;
-    }
-    
-    public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
+    public override PointerPressed PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
         var pointerPos = args.GetPosition(mapView);
         _initialPointerPosition = pointerPos;
 
-        return PointerPressedFlags.None;
+        return EditControllers.PointerPressed.None;
     }
 
     public override void PointerMoved(MapView mapView, PointerEventArgs args)
@@ -41,11 +34,11 @@ public class SelectEditController : EditController
         switch (item)
         {
             case Edge edge:
-                mapView.OpenFlyout(new RoadEditViewModel(_mapEditorService, edge.Road));
+                mapView.OpenFlyout(new RoadEditViewModel(mapEditorService, edge.Road));
                 break;
             case Node node:
-                if (_mapEditorService.MapService!.Landmarks.Values.Any(x => x.Node == node))
-                    mapView.OpenFlyout(new LandmarkFlyoutViewModel(_mapEditorService, node));
+                if (mapEditorService.MapService!.Landmarks.Values.Any(x => x.Node == node))
+                    mapView.OpenFlyout(new LandmarkFlyoutViewModel(mapEditorService, node));
 
                 break;
         }

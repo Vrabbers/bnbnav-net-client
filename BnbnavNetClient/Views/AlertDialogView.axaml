@@ -9,7 +9,7 @@
              x:CompileBindings="True">
   <StackPanel VerticalAlignment="Center" Margin="15">
     <TextBlock Text="{Binding Title}" FontWeight="Bold"/>
-    <TextBlock Text="{Binding Message}"/>
+    <TextBlock Text="{Binding Message}" TextWrapping="Wrap"/>
     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
       <Button Classes="accent" Command="{Binding Ok}" IsDefault="True">OK</Button>
     </StackPanel>

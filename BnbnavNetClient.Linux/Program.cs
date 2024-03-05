@@ -1,8 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.ReactiveUI;
-using Avalonia.Svg.Skia;
 using BnbnavNetClient.I18Next;
 using BnbnavNetClient.Linux.TextToSpeech;
 using BnbnavNetClient.Services.TextToSpeech;
@@ -10,24 +7,22 @@ using BnbnavNetClient.Settings;
 
 namespace BnbnavNetClient.Linux;
 
-internal class Program
+internal static class Program
 {
     public static void Main(string[] args)
     {
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
-    static AppBuilder BuildAvaloniaApp()
+    public static AppBuilder BuildAvaloniaApp()
     {
-        GC.KeepAlive(typeof(SvgImageExtension).Assembly);
-        GC.KeepAlive(typeof(Avalonia.Svg.Skia.Svg).Assembly);
-
         return AppBuilder.Configure<App>()
             .UsePlatformDetect()
+            .WithInterFont()
             .LogToTrace()
             .UseReactiveUI()
             .UseI18NextLocalization()
-            .With<ITextToSpeechProvider>(new SpdTextToSpeechProvider())
+            .UseTextToSpeechProvider(new SpdTextToSpeechProvider())
             .UseSettings(new SettingsManagerJsonFile());
     }
 }

@@ -2,6 +2,9 @@
 using System.Reflection;
 
 namespace BnbnavNetClient.I18Next.Services;
+
+
+//consider using singleton class since this is only ever used as the instance
 public interface IAvaloniaI18Next
 {    
     string this[string key, Dictionary<string, object?>? arguments] { get; }

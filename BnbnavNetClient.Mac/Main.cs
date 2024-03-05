@@ -9,10 +9,11 @@ using BnbnavNetClient.Settings;
 AppBuilder BuildAvaloniaApp()
     => AppBuilder.Configure<App>()
         .UsePlatformDetect()
+        .WithInterFont()
         .LogToTrace()
         .UseReactiveUI()
         .UseI18NextLocalization()
-        .With<ITextToSpeechProvider>(new MacTextToSpeechProvider())
+        .UseTextToSpeechProvider(new MacTextToSpeechProvider())
         .UseSettings(new SettingsManagerJsonFile());
         
 BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);

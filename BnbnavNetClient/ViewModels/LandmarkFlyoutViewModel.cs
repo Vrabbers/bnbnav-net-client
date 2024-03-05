@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Reactive;
 using Avalonia.Collections;
 using Avalonia.Controls.Primitives;
@@ -11,14 +9,9 @@ using ReactiveUI.Fody.Helpers;
 
 namespace BnbnavNetClient.ViewModels;
 
-public class LandmarkTypeHelper
+public class LandmarkTypeHelper(LandmarkType landmarkType)
 {
-    public LandmarkType LandmarkType { get; }
-
-    public LandmarkTypeHelper(LandmarkType landmarkType)
-    {
-        LandmarkType = landmarkType;
-    }
+    public LandmarkType LandmarkType { get; } = landmarkType;
 
     public string HumanReadableName => LandmarkType.HumanReadableName();
 }
@@ -43,7 +36,7 @@ public class LandmarkFlyoutViewModel : ViewModel, IOpenableAsFlyout
     public string LandmarkName { get; set; } = "";
     
     [Reactive]
-    public AvaloniaList<LandmarkTypeHelper> LandmarkTypes { get; set; } = new();
+    public AvaloniaList<LandmarkTypeHelper> LandmarkTypes { get; set; } = [];
 
     [Reactive]
     public LandmarkTypeHelper? SelectedLandmarkType { get; set; }
@@ -52,7 +45,7 @@ public class LandmarkFlyoutViewModel : ViewModel, IOpenableAsFlyout
     public string LabelName { get; set; } = "";
     
     [Reactive]
-    public AvaloniaList<LandmarkTypeHelper> LabelTypes { get; set; } = new();
+    public AvaloniaList<LandmarkTypeHelper> LabelTypes { get; set; } = [];
 
     [Reactive]
     public LandmarkTypeHelper? SelectedLabelType { get; set; }

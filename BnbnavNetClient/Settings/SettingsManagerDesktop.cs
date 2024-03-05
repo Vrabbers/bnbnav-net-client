@@ -1,14 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 
 namespace BnbnavNetClient.Settings;
 public sealed class SettingsManagerJsonFile : ISettingsManager
 {
     static string SettingsFilePath =>
-    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "bnbnav", "settings.json");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "bnbnav", "settings.json");
 
     public SettingsObject Settings { get; private set; } = null!;
 

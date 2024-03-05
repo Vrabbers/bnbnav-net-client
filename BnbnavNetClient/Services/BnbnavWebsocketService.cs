@@ -1,16 +1,13 @@
-﻿using System;
-using System.Buffers;
-using System.Collections.Generic;
+﻿using System.Buffers;
+using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace BnbnavNetClient.Services;
 
-internal sealed class BnbnavWebsocketService
+internal sealed class BnbnavWebsocketService : IDisposable
 {
     ClientWebSocket _ws = null!;
 
@@ -28,7 +25,7 @@ internal sealed class BnbnavWebsocketService
                     {
                         "http" => Uri.UriSchemeWs,
                         "https" => Uri.UriSchemeWss,
-                        _ => throw new ArgumentException()
+                        _ => throw new UnreachableException()
                     },
                     Path = "ws"
                 };
@@ -74,6 +71,10 @@ internal sealed class BnbnavWebsocketService
         return writer.WrittenMemory;
     }
 
+    public void Dispose()
+    {
+        _ws.Dispose();
+    }
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type", IgnoreUnrecognizedTypeDiscriminators = true)]
@@ -102,8 +103,6 @@ internal abstract record NodeMessage : BnbnavMessage
     public required int Y { get; init; }
     public required int Z { get; init; }
     public required string World { get; init; }
-
-    public required string Player { get; init; }
 }
 
 internal sealed record NodeCreated : NodeMessage;

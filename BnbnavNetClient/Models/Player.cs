@@ -1,30 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media;
-using BnbnavNetClient.I18Next.Services;
+using Avalonia.Threading;
+using BnbnavNetClient.Extensions;
 using BnbnavNetClient.Services;
-using Timer = System.Timers.Timer;
+using Splat;
 
 namespace BnbnavNetClient.Models;
 
 public sealed class Player : IDisposable, ISearchable, ILocatable
 {
     readonly MapService _mapService;
-    readonly Timer _timer;
-    readonly Mutex _lastSnapMutex = new();
-    
+    readonly DispatcherTimer _timer;
+    readonly object _snapMutex = new();
+
     public string Name { get; }
 
     public string HumanReadableType
     {
         get
         {
-            var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+            var t = Locator.Current.GetI18Next();
             return t["PLAYER"];
         }
     }
@@ -36,18 +33,23 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
     public double Yd { get; private set; }
     public double Zd { get; private set; }
 
+    public bool Moved { get; private set; } = true;
+
     public Edge? SnappedEdge { get; private set; }
 
     public double MarkerAngle { get; private set; }
 
     public FormattedText? PlayerText { get; set; }
+    
+    public event EventHandler<EventArgs>? PlayerUpdateEvent;
 
-    public Point MarkerCoordinates 
+
+    public Point MarkerCoordinates
     {
         get
         {
             if (SnappedEdge is null) return new Point(Xd, Zd);
-            
+
             //Find the intersection point
             var playerLine = new ExtendedLine()
             {
@@ -60,12 +62,15 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         }
     }
 
-    public List<(DateTime, Point)> PosHistory { get; set; } = new();
+    const int PosHistorySize = 12;
+    readonly Point[] _posHistory = new Point[PosHistorySize];
+    int _posHistoryIx;
+    DateTime _lastPosTime = DateTime.MinValue;
 
-    public ExtendedLine Velocity => new()
+    ExtendedLine Velocity => new()
     {
-        Point1 = PosHistory.Last().Item2,
-        Point2 = PosHistory.First().Item2
+        Point1 = _posHistory[(_posHistoryIx + 1) % PosHistorySize],
+        Point2 = _posHistory[_posHistoryIx % PosHistorySize]
     };
 
     public Player(string name, MapService mapService)
@@ -73,44 +78,48 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         _mapService = mapService;
         Name = name;
 
-        _timer = new Timer(50);
-        _timer.Elapsed += (_, _) =>
+        _timer = new DispatcherTimer(DispatcherPriority.Background)
         {
-            var targetAngle = SnappedEdge is null ? Velocity.Angle : SnappedEdge.Line.Angle;
-
-            var unitLine = new ExtendedLine()
-            {
-                Point1 = new Point(0, 0),
-                Point2 = new Point(1, 0)
-            };
-            var line1 = unitLine.SetAngle(MarkerAngle);
-            var line2 = unitLine.SetAngle(targetAngle);
-
-            var angleDifference = line1.AngleTo(line2);
-            if (angleDifference < 0) angleDifference += 360;
-            
-            switch (angleDifference)
-            {
-                case < 1 or > 359:
-                    MarkerAngle = targetAngle;
-                    break;
-                case >= 180:
-                    MarkerAngle -= (360 - angleDifference) * 0.1;
-                    break;
-                case < 180:
-                    MarkerAngle += angleDifference * 0.1;
-                    break;
-            }
-            
-            PlayerUpdateEvent?.Invoke(this, EventArgs.Empty);
+            Interval = TimeSpan.FromSeconds(1.0/20.0)
         };
-        _timer.Enabled = true;
+        _timer.Tick += TimerOnTick;
+        _timer.Start();
+    }
+
+    void TimerOnTick(object? o, EventArgs eventArgs)
+    {
+        var targetAngle = SnappedEdge is null ? Velocity.Angle : SnappedEdge.Line.Angle;
+        if (targetAngle < 0)
+            targetAngle += 360;
+        
+        Debug.Assert(MarkerAngle is >= 0 and < 360);
+        Debug.Assert(targetAngle is >= 0 and < 360);
+
+        var angleDifference = double.Ieee754Remainder(targetAngle - MarkerAngle, 360);
+
+        Debug.Assert(angleDifference is >= -180 and <= 180);
+        
+        if (double.Abs(angleDifference) < 0.1)
+        {
+            Moved = false;
+            return;
+        }
+
+        var newAngle = double.Ieee754Remainder(MarkerAngle + angleDifference * 0.2, 360);
+        if (newAngle < 0)
+            newAngle += 360;
+
+        MarkerAngle = newAngle;
+
+        Debug.Assert(MarkerAngle is >= 0 and < 360);
+
+        Moved = true;
     }
 
     public void GeneratePlayerText(FontFamily fontFamily)
     {
         PlayerText = new FormattedText(Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-            new Typeface(fontFamily), 20, null);
+            new Typeface(fontFamily), 16, null);
     }
 
     public void HandlePlayerMovedEvent(PlayerMoved evt)
@@ -120,60 +129,111 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
         var newZ = evt.Z;
 
         // ReSharper disable CompareOfFloatsByEqualityOperator
-        if (Xd == newX && Yd == newY && Zd == newZ) return;
+        if (Xd == newX && Yd == newY && Zd == newZ)
+            return;
         // ReSharper restore CompareOfFloatsByEqualityOperator
+
+        Moved = true;
 
         Xd = newX;
         Yd = newY;
         Zd = newZ;
-        
-        PosHistory.Insert(0, (DateTime.UtcNow, new Point(Xd, Zd)));
-        PosHistory = PosHistory.Where((x, i) => i <= 10 || DateTime.UtcNow - x.Item1 < TimeSpan.FromMilliseconds(500)).ToList();
 
-        if (SnappedEdge is not null)
+        var newPoint = new Point(newX, newZ);
+
+        if (DateTime.Now - _lastPosTime > TimeSpan.FromMilliseconds(500))
+        {
+            for (var i = 0; i < PosHistorySize; i++)
+            {
+                _posHistory[i] = newPoint;
+                _posHistoryIx = 0;
+            }
+        }
+        else
+        {
+            _posHistoryIx = (_posHistoryIx + 1) % PosHistorySize;
+            _posHistory[_posHistoryIx] = newPoint;
+        }
+
+        _lastPosTime = DateTime.Now;
+
+        if (SnappedEdge is not null && !CanSnapToEdge(SnappedEdge))
         {
             //Ensure the snapped edge is still valid
-            if (!CanSnapToEdge(SnappedEdge))
-            {
-                SnappedEdge = null;
-            }
+            SnappedEdge = null;
         }
 
         World = evt.World;
+        PlayerUpdateEvent?.Invoke(this, EventArgs.Empty);
+    }
 
-        Task.Run(() =>
+    public void StartCalculateSnappedEdge()
+    {
+        Task.Factory.StartNew(CalculateSnappedEdge, this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+    }
+
+    static void CalculateSnappedEdge(object? obj)
+    {
+        var self = (Player)obj!;
+
+        // if the lock is already taken, finish
+        if (!Monitor.TryEnter(self._snapMutex))
+            return;
+
+        try
         {
-            if (!_lastSnapMutex.WaitOne(0)) return;
+            var shouldChangeEdge = self.SnappedEdge is null || (!self._mapService.CurrentRoute?.Edges.Contains(self.SnappedEdge) ?? false);
 
-            try
+            if (!shouldChangeEdge)
+                return;
+
+            Edge? snapEdge = null;
+            if (self.SnappedEdge is not null && self.CanSnapToEdge(self.SnappedEdge))
             {
-                var currentEdges = _mapService.AllEdges.Reverse().ToList();
-                var shouldChangeEdge = SnappedEdge is null || (!_mapService.CurrentRoute?.Edges.Contains(SnappedEdge) ?? false);
-                //TODO: Also change edge if the current route contains the edge to change to or if the current route does not contain the currently snapped edge
-                if (shouldChangeEdge)
+                // stay snapped!
+                return;
+            }
+            else if (self._mapService.CurrentRoute is not null)
+            {
+                // If we're in a route, try finding edges in the route only.
+                snapEdge = self._mapService.CurrentRoute.Edges.FirstOrDefault(self.CanSnapToEdge);
+            }
+            else if (snapEdge is null)
+            {
+                // this is the more common and longer path (outside go mode) so avoid LINQ here
+                foreach (var edge in self._mapService.Edges)
                 {
-                    SnappedEdge = currentEdges.FirstOrDefault(CanSnapToEdge);
+                    if (!self.CanSnapToEdge(edge.Value))
+                        continue;
+
+                    snapEdge = edge.Value;
+                    break;
                 }
             }
-            finally
-            {
-                _lastSnapMutex.ReleaseMutex();
-            }
-        });
+
+            self.SnappedEdge = snapEdge;
+        }
+        finally
+        {
+            Monitor.Exit(self._snapMutex);
+        }
     }
 
     bool CanSnapToEdge(Edge edge)
     {
-        if (!edge.CanSnapTo) return false;
-        
+        if (!edge.CanSnapTo)
+            return false;
+
         // Make sure this edge is in the correct world
-        if (edge.From.World != World && edge.To.World != World) return false;
-        
+        if (edge.From.World != World && edge.To.World != World)
+            return false;
+
         // TODO: Get the road thickness from resources somehow
         // We are not using GeoHelper because that takes into account the extra space at the end of a road
         if (edge.Line.SetLength(10).NormalLine().MoveCenter(new Point(Xd, Zd)).TryIntersect(edge.Line, out _) !=
-            ExtendedLine.IntersectionType.Intersects) return false;
-        
+            ExtendedLine.IntersectionType.Intersects)
+            return false;
+
         var angle = edge.Line.AngleTo(Velocity);
         if (angle > 180) angle = -360 + angle;
         return double.Abs(angle) < 45;
@@ -181,15 +241,14 @@ public sealed class Player : IDisposable, ISearchable, ILocatable
 
     public void HandlePlayerGoneEvent()
     {
-        _timer.Enabled = false;
+        Moved = true;
+        PlayerUpdateEvent?.Invoke(this, EventArgs.Empty);
+        _timer.Stop();
     }
-
-    public event EventHandler<EventArgs>? PlayerUpdateEvent;
-
+    
     public void Dispose()
     {
-        _timer.Dispose();
-        _lastSnapMutex.Dispose();
+        _timer.Stop();
     }
 
     public int X => (int)double.Round(Xd);

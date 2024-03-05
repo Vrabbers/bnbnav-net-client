@@ -10,7 +10,7 @@
              xmlns:viewModels="clr-namespace:BnbnavNetClient.ViewModels">
 
   <StackPanel>
-    <TextBlock Text="{str:Tr Key=EDIT_LANDMARK}" />
+    <TextBlock Text="{str:Tr Key=EDIT_LANDMARK}" Classes="title" />
     <TabControl SelectedIndex="{Binding CurrentTabIndex}">
       <TabItem Header="{str:Tr Key=LANDMARK}">
         <StackPanel>

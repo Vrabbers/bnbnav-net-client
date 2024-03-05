@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace BnbnavNetClient.Settings;
+﻿namespace BnbnavNetClient.Settings;
 public interface ISettingsManager
 {
     SettingsObject Settings { get; }

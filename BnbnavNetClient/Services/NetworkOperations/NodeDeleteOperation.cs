@@ -1,5 +1,3 @@
-using System.Net.Http;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Media;
 using BnbnavNetClient.Models;
@@ -7,24 +5,15 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.NetworkOperations;
 
-public class NodeDeleteOperation : NetworkOperation
+public class NodeDeleteOperation(MapEditorService editorService, Node node) : NetworkOperation
 {
-    readonly MapEditorService _editorService;
-    readonly Node _node;
-
-    public NodeDeleteOperation(MapEditorService editorService, Node node)
-    {
-        _editorService = editorService;
-        _node = node;
-    }
-    
     public override async Task PerformOperation()
     {
-        ItemsNotToRender.Add(_node);
+        ItemsNotToRender.Add(node);
         
         try
         {
-            (await _editorService.MapService!.Delete($"/nodes/{_node.Id}")).AssertSuccess();
+            (await editorService.MapService!.Delete($"/nodes/{node.Id}")).AssertSuccess();
         }
         catch (HttpRequestException)
         {
@@ -36,10 +25,10 @@ public class NodeDeleteOperation : NetworkOperation
 
     public override void Render(MapView mapView, DrawingContext context)
     {
-        var nodeBorder = (Pen)mapView.FindResource("NodeBorder")!;
-        var nodeBrush = (Brush)mapView.FindResource("NodeFill")!;
-        var rect = _node.BoundingRect(mapView);
-        using (context.PushOpacity(0.5, rect))
+        var nodeBorder = (Pen)mapView.ThemeDict["NodeBorder"]!;
+        var nodeBrush = (Brush)mapView.ThemeDict["NodeFill"]!;
+        var rect = node.BoundingRect(mapView);
+        using (context.PushOpacity(0.5))
             context.DrawRectangle(nodeBrush, nodeBorder, rect);
     }
 }

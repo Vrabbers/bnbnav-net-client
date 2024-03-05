@@ -1,14 +1,12 @@
-﻿using Avalonia;
-using BnbnavNetClient.I18Next.Services;
-using BnbnavNetClient.Settings;
+﻿using BnbnavNetClient.I18Next.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using BnbnavNetClient.Extensions;
 using JetBrains.Annotations;
+using Splat;
 
 namespace BnbnavNetClient.ViewModels;
 public sealed class LanguageSelectViewModel : ViewModel
@@ -29,9 +27,9 @@ public sealed class LanguageSelectViewModel : ViewModel
 
     public LanguageSelectViewModel()
     {
-        var settings = AvaloniaLocator.Current.GetRequiredService<ISettingsManager>();
+        var settings = Locator.Current.GetSettingsManager();
         var presentLanguage = new CultureInfo(settings.Settings.Language);
-        _tr = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        _tr = Locator.Current.GetI18Next();
         ChosenLanguage = new LanguageSelection(presentLanguage);
         Ok = ReactiveCommand.Create(() => ChosenLanguage.Info);
         this.WhenAnyValue(me => me.ChosenLanguage)

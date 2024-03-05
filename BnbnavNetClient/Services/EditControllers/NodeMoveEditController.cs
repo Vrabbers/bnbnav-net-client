@@ -1,4 +1,3 @@
-using System.Linq;
 using Avalonia.Input;
 using Avalonia.Media;
 using BnbnavNetClient.Models;
@@ -7,18 +6,12 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Services.EditControllers;
 
-public class NodeMoveEditController : EditController
+public class NodeMoveEditController(MapEditorService editorService) : EditController
 {
-    readonly MapEditorService _editorService;
     Node? _movingNode;
     Node? _movedNode;
 
-    public NodeMoveEditController(MapEditorService editorService)
-    {
-        _editorService = editorService;
-    }
-
-    public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
+    public override PointerPressed PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
         var pointerPos = args.GetPosition(mapView);
         
@@ -26,10 +19,10 @@ public class NodeMoveEditController : EditController
         {
             _movingNode = node;
             _movedNode = new Node("temp", node.X, node.Y, node.Z, node.World);
-            return PointerPressedFlags.DoNotPan;
+            return EditControllers.PointerPressed.DoNotPan;
         }
 
-        return PointerPressedFlags.None;
+        return EditControllers.PointerPressed.None;
     }
 
     public override void PointerMoved(MapView mapView, PointerEventArgs args)
@@ -48,7 +41,7 @@ public class NodeMoveEditController : EditController
     {
         if (_movingNode is not null && _movedNode is not null)
         {
-            _editorService.TrackNetworkOperation(new NodeMoveOperation(_editorService, _movingNode, _movedNode));
+            editorService.TrackNetworkOperation(new NodeMoveOperation(editorService, _movingNode, _movedNode));
         }
         
         _movingNode = null;

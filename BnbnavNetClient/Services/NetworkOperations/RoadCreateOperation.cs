@@ -1,7 +1,4 @@
-using System;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Avalonia.Media;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Views;
@@ -9,38 +6,28 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace BnbnavNetClient.Services.NetworkOperations;
 
-public class RoadCreateOperation : NetworkOperation
+public class RoadCreateOperation(MapEditorService editorService, string name, RoadType type) : NetworkOperation
 {
-    readonly MapEditorService _editorService;
-    readonly string _name;
-    readonly RoadType _type;
-    
-    public PendingRoad PendingRoad { get; }
+    public PendingRoad PendingRoad { get; } = new("", name, type.ServerName());
 
-    public RoadCreateOperation(MapEditorService editorService, string name, RoadType type)
-    {
-        _editorService = editorService;
-        _name = name;
-        _type = type;
 
-        PendingRoad = new PendingRoad("", name, type.ServerName());
-    }
-    
+    static readonly JsonSerializerOptions RoadResponseSerializerOptions =
+        new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+        };
     public override async Task PerformOperation()
     {
         try
         {
-            var response = (await _editorService.MapService!.Submit($"/roads/add", new
+            var response = (await editorService.MapService!.Submit($"/roads/add", new
             {
-                Name = _name,
-                Type = _type.ServerName()
+                Name = name,
+                Type = type.ServerName()
             })).AssertSuccess();
 
-            var roadResponse = await JsonSerializer.DeserializeAsync<RoadResponse>(response.Stream, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
-            });
+            var roadResponse = await JsonSerializer.DeserializeAsync<RoadResponse>(response.Stream, RoadResponseSerializerOptions);
             PendingRoad.ProvideId(roadResponse!.Id);
         }
         catch (HttpRequestException e)
@@ -63,7 +50,7 @@ public class RoadCreateOperation : NetworkOperation
         //No need to render anything for a road creation
     }
 
-    class RoadResponse
+    sealed class RoadResponse
     {
         public required string Id { get; set; }
     }

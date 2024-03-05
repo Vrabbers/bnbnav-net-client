@@ -1,4 +1,3 @@
-using System;
 using System.Numerics;
 using System.Reactive;
 using Avalonia;
@@ -39,7 +38,7 @@ public class InstructionImageControl : TemplatedControl
             {
                 var innerCircleBounds = bounds.Deflate(3 * bounds.Width / 10);
                 var angle = _instruction.From.Line.FlipDirection().AngleTo(_instruction.RoundaboutExit.Line) - 90;
-                var complex = Complex.FromPolarCoordinates(innerCircleBounds.Width / 2, MathHelper.ToRad(angle + 180));
+                var complex = Complex.FromPolarCoordinates(innerCircleBounds.Width / 2, double.DegreesToRadians(angle + 180));
                 var arcEnd = new Point(-complex.Real, complex.Imaginary) + innerCircleBounds.Center;
                 var arrowEnd = new ExtendedLine(arcEnd, new Point(arcEnd.X + bounds.Width / 5, arcEnd.Y)).SetAngle(angle).Point2;
 
@@ -116,7 +115,7 @@ public class InstructionImageControl : TemplatedControl
                     CalculatedRoute.Instruction.InstructionTypes.Merge => "merge",
                     CalculatedRoute.Instruction.InstructionTypes.EnterRoundabout => "enter-roundabout",
                     CalculatedRoute.Instruction.InstructionTypes.LeaveRoundabout => "leave-roundabout",
-                    _ => throw new ArgumentOutOfRangeException()
+                    _ => throw new InvalidOperationException(nameof(_instruction) + " was out of range")
                 };
 
                 context.DrawSvgUrl($"avares://BnbnavNetClient/Assets/Instructions/{instructionFile}.svg", bounds);

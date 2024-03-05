@@ -1,9 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Avalonia;
-using BnbnavNetClient.I18Next.Services;
+using BnbnavNetClient.Extensions;
 using BnbnavNetClient.Views;
+using Splat;
 
 namespace BnbnavNetClient.Models;
 
@@ -80,7 +79,7 @@ public static class LandmarkTypeExtensions
 
     public static string HumanReadableName(this LandmarkType type)
     {
-        var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        var t = Locator.Current.GetI18Next();
         return type switch
         {
             LandmarkType.Unknown => "",
@@ -120,25 +119,18 @@ public static class LandmarkTypeExtensions
     public static string IconUrl(this LandmarkType type) => $"avares://BnbnavNetClient/Assets/Landmarks/{type.ServerName()}.svg";
 
     public static bool IsLandmark(this LandmarkType type) => type != LandmarkType.Unknown && type != LandmarkType.InternalTemporary && !type.IsLabel();
-    public static bool IsLabel(this LandmarkType type) => type.ServerName().StartsWith("label-");
+    public static bool IsLabel(this LandmarkType type) => type.ServerName().StartsWith("label-", StringComparison.InvariantCulture);
 }
 
-public class Landmark : MapItem, ISearchable
+public class Landmark(string id, Node node, string name, string type)
+    : MapItem, ISearchable
 {
-    static readonly double LandmarkSize = 10;
-    
-    public Landmark(string id, Node node, string name, string type)
-    {
-        this.Id = id;
-        this.Node = node;
-        this.Name = name;
-        this.Type = type;
-    }
+    const double LandmarkSize = 10;
 
-    public string Id { get; init; }
-    public Node Node { get; init; }
-    public string Name { get; init; }
-    public string Type { get; init; }
+    public string Id { get; init; } = id;
+    public Node Node { get; init; } = node;
+    public string Name { get; init; } = name;
+    public string Type { get; init; } = type;
 
     public LandmarkType LandmarkType => Enum.GetValues<LandmarkType>().FirstOrDefault(x => x.ServerName() == Type);
     public string? IconUrl => LandmarkType.IconUrl();
@@ -166,26 +158,25 @@ public class Landmark : MapItem, ISearchable
     }
 }
 
-public partial class TemporaryLandmark : Landmark
+public partial class TemporaryLandmark(string id, Node node, string name)
+    : Landmark(id, node, name, "internal-temporary")
 {
     [GeneratedRegex(@"^\(?(?<x>-?\d+), ?(?<z>-?\d+)\)?$", RegexOptions.CultureInvariant)]
     private static partial Regex CoordinateSearchRegex();
 
-    public TemporaryLandmark(string id, Node node, string name) : base(id, node, name, "internal-temporary")
-    {
-    }
-
     public static TemporaryLandmark? ParseCoordinateString(string coordinateString, string world)
     {
+        //TODO: this will probably fail if anyone tries using , as thousands separators
+
         var coordinateSearch = CoordinateSearchRegex().Match(coordinateString);
         if (!coordinateSearch.Success)
         {
             return null;
         }
-
-        var t = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
-        var x = Convert.ToInt32(coordinateSearch.Groups["x"].Value);
-        var z = Convert.ToInt32(coordinateSearch.Groups["z"].Value);
-        return new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z, world), t["DROPPED_PIN", ("x", x.ToString()), ("z", z.ToString())]);
+        
+        var t = Locator.Current.GetI18Next();
+        var x = int.Parse(coordinateSearch.Groups["x"].Value, t.CurrentLanguage.NumberFormat);
+        var z = int.Parse(coordinateSearch.Groups["z"].Value, t.CurrentLanguage.NumberFormat);
+        return new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z, world), t["DROPPED_PIN", ("x", x.ToString(t.CurrentLanguage.NumberFormat)), ("z", z.ToString(t.CurrentLanguage.NumberFormat))]);
     }
 }

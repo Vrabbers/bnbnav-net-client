@@ -1,8 +1,14 @@
 ﻿using Avalonia;
 namespace BnbnavNetClient.Helpers;
 
-internal static class GeoHelper
+internal static class GeometryHelper
 {
+    public static Rect SquareCenteredOn(Point point, double sideLength)
+    {
+        var offset = sideLength / 2;
+        return new Rect(point.X - offset, point.Y - offset, sideLength, sideLength);
+    }
+
     public static bool LineIntersects(Point from, Point to, Rect bounds)
     {
         if (bounds.Contains(from) || bounds.Contains(to))

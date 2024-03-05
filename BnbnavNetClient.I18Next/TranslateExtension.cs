@@ -1,7 +1,6 @@
-
-using Avalonia;
 using Avalonia.Markup.Xaml;
 using BnbnavNetClient.I18Next.Services;
+using Splat;
 
 namespace BnbnavNetClient.I18Next;
 
@@ -11,6 +10,6 @@ public sealed class Tr : MarkupExtension
     
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
-        return AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>()[Key];
+        return Locator.Current.GetService<IAvaloniaI18Next>()![Key];
     }
 }

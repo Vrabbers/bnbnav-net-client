@@ -10,28 +10,22 @@ using DynamicData.Kernel;
 
 namespace BnbnavNetClient.Services.EditControllers;
 
-public class NodeJoinEditController : EditController
+public class NodeJoinEditController(MapEditorService editorService) : EditController
 {
-    readonly MapEditorService _editorService;
     bool _mouseDown;
-    readonly List<Node> _roadGhosts = new();
+    readonly List<Node> _roadGhosts = [];
     bool _lockRoadGhosts;
     Point _pointerPrevPosition;
     Node? _firstNode;
     Node? _hoveredNode;
     bool _nodeSet = true;
 
-    public NodeJoinEditController(MapEditorService editorService)
-    {
-        _editorService = editorService;
-    }
-
     bool AppendRoadGhost(Node node)
     {
         var lastNode = _roadGhosts.Last();
 
         //TODO: Make sure we can't loop back on ourselves: we also need to check RoadGhosts for duplicates
-        if (node.Id == lastNode.Id || _editorService.MapService!.Edges.Any(x =>
+        if (node.Id == lastNode.Id || editorService.MapService!.Edges.Any(x =>
                 x.Value.From == lastNode && x.Value.To == node))
         {
             return false;
@@ -42,7 +36,7 @@ public class NodeJoinEditController : EditController
 
     }
     
-    public override PointerPressedFlags PointerPressed(MapView mapView, PointerPressedEventArgs args)
+    public override PointerPressed PointerPressed(MapView mapView, PointerPressedEventArgs args)
     {
         var pointerPos = args.GetPosition(mapView);
         
@@ -55,7 +49,7 @@ public class NodeJoinEditController : EditController
             // Attempt to join two nodes
             if (pointerNode is null)
             {
-                return PointerPressedFlags.None;
+                return EditControllers.PointerPressed.None;
             }
 
             if (pointerNode == _firstNode)
@@ -63,12 +57,12 @@ public class NodeJoinEditController : EditController
                 _firstNode = null;
                 _nodeSet = false;
                 _roadGhosts.Clear();
-                return PointerPressedFlags.DoNotPan;
+                return EditControllers.PointerPressed.DoNotPan;
             }
 
             if (!AppendRoadGhost(pointerNode))
             {
-                return PointerPressedFlags.DoNotPan;
+                return EditControllers.PointerPressed.DoNotPan;
             }
             
             _firstNode = null;
@@ -77,7 +71,7 @@ public class NodeJoinEditController : EditController
             mapView.InvalidateVisual();
             
             _lockRoadGhosts = true;
-            var flyout = mapView.OpenFlyout(new NewEdgeFlyoutViewModel(_editorService, _roadGhosts));
+            var flyout = mapView.OpenFlyout(new NewEdgeFlyoutViewModel(editorService, _roadGhosts));
 
             if (flyout is not null)
             {
@@ -89,7 +83,7 @@ public class NodeJoinEditController : EditController
                 };
             }
             
-            return PointerPressedFlags.DoNotPan;
+            return EditControllers.PointerPressed.DoNotPan;
         }
         
         if (pointerNode is not null)
@@ -98,15 +92,15 @@ public class NodeJoinEditController : EditController
             _firstNode = pointerNode;
             _roadGhosts.Add(pointerNode);
             mapView.InvalidateVisual();
-            return PointerPressedFlags.DoNotPan;
+            return EditControllers.PointerPressed.DoNotPan;
         }
 
-        return PointerPressedFlags.None;
+        return EditControllers.PointerPressed.None;
     }
 
     public override void PointerMoved(MapView mapView, PointerEventArgs args)
     {
-        if (_editorService.MapService is null) return;
+        if (editorService.MapService is null) return;
         
         var pointerPos = args.GetPosition(mapView);
         
@@ -136,7 +130,7 @@ public class NodeJoinEditController : EditController
 
     public override void PointerReleased(MapView mapView, PointerReleasedEventArgs args)
     {
-        if (_editorService.MapService is null) return;
+        if (editorService.MapService is null) return;
 
         var pointerPos = args.GetPosition(mapView);
         _mouseDown = false;
@@ -145,7 +139,7 @@ public class NodeJoinEditController : EditController
         if (_roadGhosts.Count > 1)
         {
             _lockRoadGhosts = true;
-            var flyout = mapView.OpenFlyout(new NewEdgeFlyoutViewModel(_editorService, _roadGhosts));
+            var flyout = mapView.OpenFlyout(new NewEdgeFlyoutViewModel(editorService, _roadGhosts));
 
             if (flyout is not null)
             {
@@ -196,12 +190,12 @@ public class NodeJoinEditController : EditController
             //Make the shape into a circle
             if (geo.Points.Count == 1) geo.Points.Add(geo.Points.First());
 
-            var pen = (Pen)mapView.FindResource("RoadGhostPen")!;
+            var pen = (Pen)mapView.ThemeDict["RoadGhostPen"]!;
             pen.Thickness = mapView.ThicknessForRoadType(RoadType.Local) * mapView.MapViewModel.Scale;
             context.DrawGeometry(null, pen, geo);
         }
-        var nodeBorder = (Pen)mapView.FindResource("NodeBorder")!;
-        var selNodeBrush = (Brush)mapView.FindResource("SelectedNodeFill")!;
+        var nodeBorder = (Pen)mapView.ThemeDict["NodeBorder"]!;
+        var selNodeBrush = (Brush)mapView.ThemeDict["SelectedNodeFill"]!;
         foreach (var (rect, _) in mapView.DrawnNodes.Where(x => ghosts.Contains(x.Item2)))
         {
             context.DrawRectangle(selNodeBrush, nodeBorder, rect);

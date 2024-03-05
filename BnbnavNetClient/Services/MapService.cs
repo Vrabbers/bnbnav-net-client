@@ -1,24 +1,20 @@
 ﻿using BnbnavNetClient.Models;
 using ReactiveUI;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
+using System.Globalization;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Avalonia;
+using Avalonia.Collections;
+using BnbnavNetClient.Extensions;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.NetworkOperations;
 using DynamicData.Binding;
 using ReactiveUI.Fody.Helpers;
+using Splat;
 
 namespace BnbnavNetClient.Services;
 
@@ -61,7 +57,7 @@ public sealed class MapService : ReactiveObject
         DefaultRequestHeaders =
         {
             { "User-Agent", new ProductInfoHeaderValue("bnbnav-dotnet", "1.0").ToString() },
-            { "X-Bnbnav-Api-Version", ServerApiVersion.ToString() }
+            { "X-Bnbnav-Api-Version", ServerApiVersion.ToString(CultureInfo.InvariantCulture) }
         }
     };
 
@@ -81,13 +77,14 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Road> Roads { get; }
     public ReadOnlyDictionary<string, Landmark> Landmarks { get; }
     public ReadOnlyDictionary<string, Player> Players { get; }
+    public bool PlayerGone { get; set; }
 
-    [Reactive] public IEnumerable<string> Worlds { get; private set; } = Enumerable.Empty<string>();
+    [Reactive] 
+    public AvaloniaList<string> Worlds { get; private set; } = [];
 
-    List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = new();
+    List<(string, object?, TaskCompletionSource<ServerResponse>)> PendingRequests { get; } = [];
     public Interaction<Unit, string?> AuthTokenInteraction { get; } = new();
     public Interaction<(string, string, bool), Unit> ErrorMessageInteraction { get; } = new();
-    public Interaction<Unit, Unit> PlayerUpdateInteraction { get; } = new();
     
     [Reactive]
     public CalculatedRoute? CurrentRoute { get; set; }
@@ -126,7 +123,7 @@ public sealed class MapService : ReactiveObject
         _players = new Dictionary<string, Player>();
         Players = _players.AsReadOnly();
         _websocketService = websocketService;
-        _i18N = AvaloniaLocator.Current.GetRequiredService<IAvaloniaI18Next>();
+        _i18N = Locator.Current.GetI18Next();
 
 
         this.WhenAnyValue(x => x.LoggedInUsername).Subscribe(Observer.Create<string?>(_ => UpdateLoggedInPlayer()));
@@ -143,10 +140,10 @@ public sealed class MapService : ReactiveObject
             return;
         }
 
-        LoggedInPlayer = Players.TryGetValue(LoggedInUsername, out var player) ? player : null;
+        LoggedInPlayer = Players.GetValueOrDefault(LoggedInUsername);
     }
 
-    public Edge? OppositeEdge(Edge edge, IEnumerable<Edge> list)
+    public static Edge? OppositeEdge(Edge edge, IEnumerable<Edge> list)
     {
         var filter = list.Where(x => x.To == edge.From && x.From == edge.To).ToList();
         try
@@ -238,7 +235,7 @@ public sealed class MapService : ReactiveObject
     async Task<ServerResponse> HandleUnauthorizedResponse(string path, object? json)
     {
         var completionSource = new TaskCompletionSource<ServerResponse>();
-        var showDialog = !PendingRequests.Any();
+        var showDialog = PendingRequests.Count == 0;
         PendingRequests.Add((path, json, completionSource));
         
         if (showDialog)
@@ -309,13 +306,15 @@ public sealed class MapService : ReactiveObject
         }));
     }
 
-    void UpdateWorlds()
+    void SetupWorlds()
     {
-        var newWorlds = Nodes.Values.Select(node => node.World)
-            .Union(Players.Values.Select(player => player.World)).Distinct().ToList();
+        var newWorlds = Nodes.Values.Select(node => node.World).Distinct().ToList();
         
         // Only set if different in order to avoid flickering in UI
-        Worlds = newWorlds;
+        if (!newWorlds.All(Worlds.Contains))
+        {
+            Worlds = new AvaloniaList<string>(newWorlds);
+        }
     }
 
     public async Task<CalculatedRoute> ObtainCalculatedRoute(ISearchable from, ISearchable to, RouteOptions routeOptions, CancellationToken ct)
@@ -375,7 +374,7 @@ public sealed class MapService : ReactiveObject
             //Execute the shortest path algorithm to locate the shortest path between the starting node and the ending node
             var queue = new Dictionary<Node, (Node node, int distance, Edge? via)> { { startingNode, (startingNode, 0, null) } };
             var backtrack = new List<(Node node, int distance, Edge? via)>();
-            while (queue.Any())
+            while (queue.Count != 0)
             {
                 ct.ThrowIfCancellationRequested();
                 var processingNode = queue.MinBy(x => x.Value.distance).Value;
@@ -428,7 +427,7 @@ public sealed class MapService : ReactiveObject
         using var jsonDom = JsonDocument.Parse(content);
 
         if (jsonDom is null)
-            throw new NullReferenceException(nameof(jsonDom));
+            throw new InvalidOperationException("Error in JSON document.");
 
         //TODO: Gracefully fail if there is no such property - this might be a new server w/o landmarks, nodes, etc.
         
@@ -494,7 +493,7 @@ public sealed class MapService : ReactiveObject
         await ws.ConnectAsync(CancellationToken.None);
         var service = new MapService(nodes.Values, edges, roads.Values, landmarks, annotations, ws);
         _ = service.ProcessChangesAsync();
-        service.UpdateWorlds();
+        service.SetupWorlds();
         return service;
     }
 
@@ -502,14 +501,16 @@ public sealed class MapService : ReactiveObject
     {
         await foreach (var message in _websocketService.GetMessages(CancellationToken.None))
         {
-            string id = message.Id!;
-            string type = "";
+            var id = message.Id!;
+            var type = "";
+            Player? value;
             switch (message)
             {
                 case NodeCreated node:
                     type = nameof(Nodes);
                     _nodes.Add(id, new Node(id, node.X, node.Y, node.Z, node.World));
-                    UpdateWorlds();
+                    if (!Worlds.Contains(node.World, StringComparer.InvariantCulture))
+                        Worlds.Add(node.World);
                     break;
 
                 case UpdatedNode node:
@@ -517,13 +518,13 @@ public sealed class MapService : ReactiveObject
                     _nodes[id].X = node.X;
                     _nodes[id].Y = node.Y;
                     _nodes[id].Z = node.Z;
-                    UpdateWorlds();
+                    if (!Worlds.Contains(node.World, StringComparer.InvariantCulture))
+                        Worlds.Add(node.World);                    
                     break;
 
                 case NodeRemoved:
                     type = nameof(Nodes);
                     _nodes.Remove(id);
-                    UpdateWorlds();
                     break;
 
                 case RoadCreated road:
@@ -564,31 +565,27 @@ public sealed class MapService : ReactiveObject
                 
                 case PlayerMoved player:
                     type = nameof(Players);
-                    if (_players.ContainsKey(player.Id!))
+                    if (_players.TryGetValue(player.Id!, out value))
                     {
-                        _players[player.Id!].HandlePlayerMovedEvent(player);
+                        value.HandlePlayerMovedEvent(player);
                     }
                     else
                     {
                         var p = new Player(player.Id!, this);
-                        p.PlayerUpdateEvent += (_, _) =>
-                        {
-                            PlayerUpdateInteraction.Handle(Unit.Default);
-                        };
                         p.HandlePlayerMovedEvent(player);
                         _players.Add(player.Id!, p);
                     }
-                    UpdateWorlds();
 
                     break;
                 case PlayerLeft player:
                     type = nameof(Players);
-                    if (_players.ContainsKey(player.Id!))
+                    if (_players.TryGetValue(player.Id!, out value))
                     {
-                        _players[player.Id!].HandlePlayerGoneEvent();
+                        value.HandlePlayerGoneEvent();
+                        PlayerGone = true;
                         _players.Remove(player.Id!);
                     }
-                    UpdateWorlds();
+                    this.RaisePropertyChanged(nameof(Players));
                     break;
             }
 

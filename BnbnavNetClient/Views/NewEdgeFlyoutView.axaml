@@ -10,7 +10,7 @@
              xmlns:str="using:BnbnavNetClient.I18Next"
              >
   <StackPanel>
-    <TextBlock Text="{str:Tr Key=NEW_EDGE}" />
+    <TextBlock Text="{str:Tr Key=NEW_EDGE}" Classes="title"/>
     <CheckBox IsChecked="{Binding Bidirectional}" Content="{str:Tr Key=MAKE_BIDIRECTIONAL}" />
     <TabControl SelectedIndex="{Binding CurrentTabIndex}">
       <TabItem Header="{str:Tr Key=NEW}">
@@ -38,7 +38,7 @@
             </ComboBox.ItemTemplate>
           </ComboBox>
           <DockPanel HorizontalAlignment="Stretch" LastChildFill="True">
-            <Button DockPanel.Dock="Right" Grid.Column="1" MinWidth="0" Command="{Binding ActivateRoadSyringe}" IsVisible="False">
+            <Button DockPanel.Dock="Right" MinWidth="0"  IsVisible="False"> <!-- Command="{Binding ActivateRoadSyringe}" -->
               [pick]
             </Button>
             <StackPanel Orientation="Horizontal" IsVisible="False">

@@ -3,24 +3,16 @@ using BnbnavNetClient.Views;
 
 namespace BnbnavNetClient.Models;
 
-public class Node : MapItem, ILocatable
+public class Node(string id, int x, int y, int z, string world)
+    : MapItem, ILocatable
 {
     static readonly double NodeSize = 14;
 
-    public Node(string id, int x, int y, int z, string world)
-    {
-        this.Id = id;
-        this.X = x;
-        this.Y = y;
-        this.Z = z;
-        World = world;
-    }
-
-    public string Id { get; init; }
-    public int X { get; set; }
-    public int Y { get; set; }
-    public int Z { get; set; }
-    public string World { get; set; }
+    public string Id { get; init; } = id;
+    public int X { get; set; } = x;
+    public int Y { get; set; } = y;
+    public int Z { get; set; } = z;
+    public string World { get; set; } = world;
 
     public Rect BoundingRect(MapView mapView)
     {
