@@ -10,7 +10,7 @@
              xmlns:str="using:BnbnavNetClient.I18Next"
              >
   <StackPanel>
-    <TextBlock Text="{str:Tr Key=NEW_EDGE}" />
+    <TextBlock Text="{str:Tr Key=NEW_EDGE}" Classes="title"/>
     <CheckBox IsChecked="{Binding Bidirectional}" Content="{str:Tr Key=MAKE_BIDIRECTIONAL}" />
     <TabControl SelectedIndex="{Binding CurrentTabIndex}">
       <TabItem Header="{str:Tr Key=NEW}">

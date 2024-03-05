@@ -41,13 +41,17 @@ public partial class MainView : UserControl
         WorldSelectComboBox.IsVisible = true;
         vm.RaisePropertyChanged(nameof(MainViewModel.PanText));
 
-        vm.WhenAnyValue<MainViewModel, ViewModel?>(x => x.Popup).Subscribe(p =>
+        // c.f. issue #32 for why we disable the blur effect on windows
+        if (!OperatingSystem.IsWindows())
         {
-            if (p is null)
-                MainUiGrid.Classes.Clear();
-            else
-                MainUiGrid.Classes.Add("blur");
-        });
+            vm.WhenAnyValue<MainViewModel, ViewModel?>(x => x.Popup).Subscribe(p =>
+            {
+                if (p is null)
+                    MainUiGrid.Classes.Clear();
+                else
+                    MainUiGrid.Classes.Add("blur");
+            });
+        }
     }
 
     public async void ColorModeSwitch(object? _, RoutedEventArgs? __)

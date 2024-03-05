@@ -24,7 +24,7 @@
         <Grid Name="MainUiGrid" RowDefinitions="* Auto Auto Auto" Classes="">
             <Grid.Styles>
                 <Style Selector="Grid.blur">
-                    <Setter Property="Effect" Value="blur(10)"/>
+                    <Setter Property="Width" Value="blur(10)"/>
                 </Style>
             </Grid.Styles>
             <!-- Map -->

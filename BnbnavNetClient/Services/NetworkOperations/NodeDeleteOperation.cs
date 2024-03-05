@@ -25,8 +25,8 @@ public class NodeDeleteOperation(MapEditorService editorService, Node node) : Ne
 
     public override void Render(MapView mapView, DrawingContext context)
     {
-        var nodeBorder = (Pen)mapView.FindResource("NodeBorder")!;
-        var nodeBrush = (Brush)mapView.FindResource("NodeFill")!;
+        var nodeBorder = (Pen)mapView.ThemeDict["NodeBorder"]!;
+        var nodeBrush = (Brush)mapView.ThemeDict["NodeFill"]!;
         var rect = node.BoundingRect(mapView);
         using (context.PushOpacity(0.5))
             context.DrawRectangle(nodeBrush, nodeBorder, rect);

@@ -103,8 +103,6 @@ internal abstract record NodeMessage : BnbnavMessage
     public required int Y { get; init; }
     public required int Z { get; init; }
     public required string World { get; init; }
-
-    public required string Player { get; init; }
 }
 
 internal sealed record NodeCreated : NodeMessage;

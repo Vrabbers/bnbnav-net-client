@@ -34,8 +34,8 @@ public class NodeMoveOperation(MapEditorService? editorService, Node toUpdate, N
 
     public override void Render(MapView mapView, DrawingContext context)
     {
-        var nodeBorder = (Pen)mapView.FindResource("NodeBorder")!;
-        var selNodeBrush = (Brush)mapView.FindResource("SelectedNodeFill")!;
+        var nodeBorder = (Pen)mapView.ThemeDict["NodeBorder"]!;
+        var selNodeBrush = (Brush)mapView.ThemeDict["SelectedNodeFill"]!;
 
         var movingRect = toUpdate.BoundingRect(mapView);
         var movedRect = updateTo.BoundingRect(mapView);
@@ -53,7 +53,7 @@ public class NodeMoveOperation(MapEditorService? editorService, Node toUpdate, N
         geo.Points.Add(arrowhead1.Point1);
         geo.Points.Add(arrowhead2.Point2);
 
-        var pen = (Pen)mapView.FindResource("EditMovePen")!;
+        var pen = (Pen)mapView.ThemeDict["EditMovePen"]!;
         context.DrawLine(pen, lineBetween.Point1, lineBetween.Point2);
         context.DrawGeometry(null, pen, geo);
 

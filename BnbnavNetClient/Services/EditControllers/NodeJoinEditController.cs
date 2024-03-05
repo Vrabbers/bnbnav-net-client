@@ -190,12 +190,12 @@ public class NodeJoinEditController(MapEditorService editorService) : EditContro
             //Make the shape into a circle
             if (geo.Points.Count == 1) geo.Points.Add(geo.Points.First());
 
-            var pen = (Pen)mapView.FindResource("RoadGhostPen")!;
+            var pen = (Pen)mapView.ThemeDict["RoadGhostPen"]!;
             pen.Thickness = mapView.ThicknessForRoadType(RoadType.Local) * mapView.MapViewModel.Scale;
             context.DrawGeometry(null, pen, geo);
         }
-        var nodeBorder = (Pen)mapView.FindResource("NodeBorder")!;
-        var selNodeBrush = (Brush)mapView.FindResource("SelectedNodeFill")!;
+        var nodeBorder = (Pen)mapView.ThemeDict["NodeBorder"]!;
+        var selNodeBrush = (Brush)mapView.ThemeDict["SelectedNodeFill"]!;
         foreach (var (rect, _) in mapView.DrawnNodes.Where(x => ghosts.Contains(x.Item2)))
         {
             context.DrawRectangle(selNodeBrush, nodeBorder, rect);

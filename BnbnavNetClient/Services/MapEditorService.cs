@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Services.EditControllers;
 using BnbnavNetClient.Services.NetworkOperations;
@@ -8,10 +9,11 @@ namespace BnbnavNetClient.Services;
 
 public class MapEditorService : ReactiveObject
 {
-    List<NetworkOperation> _networkOperations = [];
+    readonly List<NetworkOperation> _networkOperations = [];
     
     public MapEditorService()
     {
+        OngoingNetworkOperations = _networkOperations.AsReadOnly();
         EditController = new SelectEditController(this);
         this.ObservableForProperty(x => x.CurrentEditMode).Subscribe(x =>
         {
@@ -29,10 +31,18 @@ public class MapEditorService : ReactiveObject
 
     public void TrackNetworkOperation(NetworkOperation operation)
     {
-        _networkOperations.Add(operation);
+        lock (OngoingNetworkOperationsMutex)
+        {
+            _networkOperations.Add(operation);
+        }
+
         operation.PerformOperation().ContinueWith(_ =>
         {
-            _networkOperations.Remove(operation);
+            lock (OngoingNetworkOperationsMutex)
+            {
+                _networkOperations.Remove(operation);
+            }
+
             this.RaisePropertyChanged(nameof(OngoingNetworkOperations));
         });
         this.RaisePropertyChanged(nameof(OngoingNetworkOperations));
@@ -48,5 +58,6 @@ public class MapEditorService : ReactiveObject
     
     public MapService? MapService { get; set; }
 
-    public IReadOnlyList<NetworkOperation> OngoingNetworkOperations => _networkOperations.AsReadOnly();
+    public object OngoingNetworkOperationsMutex { get; } = new();
+    public ReadOnlyCollection<NetworkOperation> OngoingNetworkOperations { get; }
 }

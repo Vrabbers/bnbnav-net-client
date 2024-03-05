@@ -3,7 +3,8 @@
              xmlns:local="using:BnbnavNetClient"
              xmlns:controls="clr-namespace:BnbnavNetClient.Controls"
              x:Class="BnbnavNetClient.App"
-             Name="bnbnav">
+             Name="bnbnav"
+             RequestedThemeVariant="Light">
   <NativeMenu.Menu>
     <NativeMenu>
       <NativeMenuItem Header="About bnbnav"></NativeMenuItem>
@@ -81,6 +82,13 @@
     </Style>
     <Style Selector="TextBlock.roadname">
       <Setter Property="FontSize" Value="25"/>
+    </Style>
+    <Style Selector="TextBlock.title">
+      <Setter Property="FontSize" Value="16"/>
+    </Style>
+    <Style Selector="TabControl TabItem">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontWeight" Value="Normal"/>
     </Style>
     <StyleInclude Source="/Controls/DayNightButton.axaml"/>
     <StyleInclude Source="/Controls/LandmarkSearchControl.axaml" />

@@ -30,7 +30,7 @@ public partial class MapView : UserControl
 
     // For some reason, using the proper method, (i.e. ResourceDictionary.ThemeDictionaries) does not seem to work here.
     // This is a pretty crap solution, so if we find a better way it would probably be worthwhile implementing it
-    IResourceDictionary _themeDict = default!;
+    public IResourceDictionary ThemeDict { get; private set; }= default!;
     
     Matrix _toScreenMtx = Matrix.Identity;
     Matrix _toWorldMtx = Matrix.Identity;
@@ -230,9 +230,8 @@ public partial class MapView : UserControl
                 {
                     foreach (var (name, player) in prop.Value)
                     {
-                        if (((MapViewModel.FollowMeEnabled) && name == MapViewModel.LoggedInUsername) ||
-                            (player.World == MapViewModel.ChosenWorld &&
-                             Bounds.Intersects(GeometryHelper.SquareCenteredOn(ToScreen(player.Point), PlayerSize))))
+                        if (player.World == MapViewModel.ChosenWorld &&
+                            Bounds.Intersects(GeometryHelper.SquareCenteredOn(ToScreen(player.Point), PlayerSize)))
                         {
                             if (!player.Moved)
                                 continue;
@@ -240,7 +239,7 @@ public partial class MapView : UserControl
                             shouldUpdateVisuals = true;
                             player.StartCalculateSnappedEdge(); // only do so if the player is on screen!
                         }
-                        else if (MapViewModel.CurrentUi == AvailableUi.Go &&
+                        else if ((MapViewModel.CurrentUi == AvailableUi.Go || MapViewModel.FollowMeEnabled) &&
                                  name == MapViewModel.LoggedInUsername)
                         {
                             shouldUpdateVisuals = true;
@@ -466,20 +465,20 @@ public partial class MapView : UserControl
 
     Pen PenForRoadType(RoadType type) => (Pen)(type switch
     {
-        RoadType.Local => _themeDict["LocalRoadPen"]!,
-        RoadType.Main => _themeDict["MainRoadPen"]!,
-        RoadType.Highway => _themeDict["HighwayRoadPen"]!,
-        RoadType.Expressway => _themeDict["ExpresswayRoadPen"]!,
-        RoadType.Motorway => _themeDict["MotorwayRoadPen"]!,
-        RoadType.Footpath => _themeDict["FootpathRoadPen"]!,
-        RoadType.Waterway => _themeDict["WaterwayRoadPen"]!,
-        RoadType.Private => _themeDict["PrivateRoadPen"]!,
-        RoadType.Roundabout => _themeDict["RoundaboutRoadPen"]!,
-        RoadType.DuongWarp => _themeDict["DuongWarpRoadPen"]!,
-        _ => _themeDict["UnknownRoadPen"]!,
+        RoadType.Local => ThemeDict["LocalRoadPen"]!,
+        RoadType.Main => ThemeDict["MainRoadPen"]!,
+        RoadType.Highway => ThemeDict["HighwayRoadPen"]!,
+        RoadType.Expressway => ThemeDict["ExpresswayRoadPen"]!,
+        RoadType.Motorway => ThemeDict["MotorwayRoadPen"]!,
+        RoadType.Footpath => ThemeDict["FootpathRoadPen"]!,
+        RoadType.Waterway => ThemeDict["WaterwayRoadPen"]!,
+        RoadType.Private => ThemeDict["PrivateRoadPen"]!,
+        RoadType.Roundabout => ThemeDict["RoundaboutRoadPen"]!,
+        RoadType.DuongWarp => ThemeDict["DuongWarpRoadPen"]!,
+        _ => ThemeDict["UnknownRoadPen"]!,
     });
 
-    public double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? _themeDict["MotorwayThickness"]! : _themeDict["RoadThickness"]!);
+    public double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? ThemeDict["MotorwayThickness"]! : ThemeDict["RoadThickness"]!);
 
     public void DrawEdge(DrawingContext context, RoadType roadType, Point from, Point to, bool drawGhost = false, bool drawRoute = false)
     {
@@ -521,7 +520,7 @@ public partial class MapView : UserControl
             if (scale < lowerScaleBound || scale > higherScaleBound) return;
 
             var text = new FormattedText(landmark.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                new Typeface(FontFamily), size * scale, (Brush)_themeDict["ForegroundBrush"]!);
+                new Typeface(FontFamily), size * scale, (Brush)ThemeDict["ForegroundBrush"]!);
 
             context.DrawText(text, rect.Center - new Point(text.Width / 2, text.Height / 2));
             return;
@@ -538,16 +537,30 @@ public partial class MapView : UserControl
     
     public override void Render(DrawingContext context)
     {
-        _themeDict = (IResourceDictionary)this.FindResource(ActualThemeVariant.ToString())!;
+        ThemeDict = (IResourceDictionary)this.FindResource(ActualThemeVariant.ToString())!;
         
-        context.FillRectangle((Brush)_themeDict["BackgroundBrush"]!, Bounds);
+        context.FillRectangle((Brush)ThemeDict["BackgroundBrush"]!, Bounds);
 
         var noRender = new List<MapItem>();
         noRender.AddRange(MapViewModel.MapEditorService.EditController.ItemsNotToRender);
-        foreach (var operation in MapViewModel.MapEditorService.OngoingNetworkOperations)
+
+        try
         {
-            noRender.AddRange(operation.ItemsNotToRender);
+            if (Monitor.TryEnter(MapViewModel.MapEditorService.OngoingNetworkOperationsMutex))
+            {
+                foreach (var operation in MapViewModel.MapEditorService.OngoingNetworkOperations)
+                {
+                    noRender.AddRange(operation.ItemsNotToRender);
+                    operation.Render(this, context);
+                }
+            }
         }
+        finally
+        {
+            if (Monitor.IsEntered(MapViewModel.MapEditorService.OngoingNetworkOperationsMutex))
+                Monitor.Exit(MapViewModel.MapEditorService.OngoingNetworkOperationsMutex);
+        }
+
 
         foreach (var (from, to, edge) in DrawnEdges)
         {
@@ -584,10 +597,10 @@ public partial class MapView : UserControl
 
         if (MapViewModel.IsInEditMode)
         {
-            var nodeBorder = (Pen)_themeDict["NodeBorder"]!;
-            var nodeBrush = (Brush)_themeDict["NodeFill"]!;
-            var spiedBorder = (Pen)_themeDict["SpiedNodeBorder"]!;
-            var spiedBrush = (Brush)_themeDict["SpiedNodeFill"]!;
+            var nodeBorder = (Pen)ThemeDict["NodeBorder"]!;
+            var nodeBrush = (Brush)ThemeDict["NodeFill"]!;
+            var spiedBorder = (Pen)ThemeDict["SpiedNodeBorder"]!;
+            var spiedBrush = (Brush)ThemeDict["SpiedNodeFill"]!;
             foreach (var (rect, node) in DrawnNodes)
             {
                 if (noRender.Contains(node)) continue;
@@ -605,11 +618,6 @@ public partial class MapView : UserControl
             MapViewModel.MapEditorService.EditController.Render(this, context);
         }
 
-        foreach (var operation in MapViewModel.MapEditorService.OngoingNetworkOperations)
-        {
-            operation.Render(this, context);
-        }
-
         foreach (var player in MapViewModel.MapService.Players.Values
                      .Where(player => player.World == MapViewModel.ChosenWorld && Bounds.Contains(ToScreen(player.Point))))
         {
@@ -618,7 +626,7 @@ public partial class MapView : UserControl
             context.DrawSvgUrl(uriString, rect, -player.MarkerAngle + MapViewModel.Rotation);
 
             //Draw the player name
-            var textBrush = (Brush)_themeDict["ForegroundBrush"]!;
+            var textBrush = (Brush)ThemeDict["ForegroundBrush"]!;
 
             if (player.PlayerText is null)
             {
