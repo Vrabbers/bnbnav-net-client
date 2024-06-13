@@ -78,7 +78,7 @@ public sealed class MapBins
         }
     }
 
-    public void Query(IntRect rect, ref List<Node> nodes, ref List<Edge> edges)
+    public void Query(IntRect rect, List<Node> nodes, List<Edge> edges)
     {
         var startX = (rect.Left - Bounds.Left - BinSideLength / 2) / BinSideLength;
         var startY = (rect.Top - Bounds.Top - BinSideLength / 2) / BinSideLength;

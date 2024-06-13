@@ -448,7 +448,7 @@ public partial class MapView : UserControl
         var intBounds = new IntRect((int)double.Floor(worldTl.X), (int)double.Floor(worldTl.Y),
             (int)double.Ceiling(worldBr.X), (int)double.Ceiling(worldBr.Y));
 
-        mapService.MapBins.Query(intBounds, ref _drawnNodes, ref _drawnEdges);
+        mapService.MapBins.Query(intBounds, _drawnNodes, _drawnEdges);
 
         DrawnLandmarks = mapService.Landmarks.Values.Where(landmark => landmark.Node.World == MapViewModel.ChosenWorld).Select(landmark => (landmark.BoundingRect(this), landmark))
             .Where(landmark => bounds.Intersects(landmark.Item1)).ToList();
