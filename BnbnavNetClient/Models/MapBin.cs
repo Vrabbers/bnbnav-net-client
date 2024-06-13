@@ -61,11 +61,11 @@ public sealed class MapBins
         var maxX = int.Max(edge.From.X, edge.To.X);
         var maxY = int.Max(edge.From.Z, edge.To.Z);
         var edgeBounds = new IntRect(minX, minY, maxX, maxY);
-        var expandedBounds = edgeBounds.Expand(5);
-        var startX = (expandedBounds.Left - Bounds.Left) / BinSideLength;
-        var startY = (expandedBounds.Top - Bounds.Top) / BinSideLength;
-        var endX = (expandedBounds.Right - Bounds.Left) / BinSideLength;
-        var endY = (expandedBounds.Top - Bounds.Top) / BinSideLength;
+        var expanded = edgeBounds.Expand(5);
+        var startX = (expanded.Left - Bounds.Left - BinSideLength / 2) / BinSideLength;
+        var startY = (expanded.Top - Bounds.Top - BinSideLength / 2) / BinSideLength;
+        var endX = (expanded.Right - Bounds.Left + BinSideLength / 2) / BinSideLength;
+        var endY = (expanded.Bottom - Bounds.Top + BinSideLength / 2) / BinSideLength;
 
         for (var i = startX; i <= endX; i++)
         {

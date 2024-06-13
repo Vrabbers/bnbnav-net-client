@@ -154,7 +154,7 @@ public partial class MapView : UserControl
 
             var hitTestResultsE = HitTest(eventArgs.GetPosition(this));
             var hitTestResults = hitTestResultsE as MapItem[] ?? hitTestResultsE.ToArray();
-
+    
             _pointerVelocities.Clear(); // Make sure we're not using velocities from previous pan.
             
             if (!MapViewModel.IsInEditMode)
