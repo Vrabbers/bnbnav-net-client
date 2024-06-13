@@ -79,6 +79,8 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Player> Players { get; }
     public bool PlayerGone { get; set; }
 
+    public MapBins MapBins { get; }
+
     [Reactive] 
     public AvaloniaList<string> Worlds { get; private set; } = [];
 
@@ -108,7 +110,7 @@ public sealed class MapService : ReactiveObject
         }
     }
 
-    MapService(IEnumerable<Node> nodes, IEnumerable<Edge> edges, IEnumerable<Road> roads, IEnumerable<Landmark> landmarks, IEnumerable<Annotation> annotations, BnbnavWebsocketService websocketService)
+    MapService(IEnumerable<Node> nodes, IEnumerable<Edge> edges, IEnumerable<Road> roads, IEnumerable<Landmark> landmarks, IEnumerable<Annotation> annotations, BnbnavWebsocketService websocketService, MapBins bins)
     {
 
         _nodes = new Dictionary<string, Node>(nodes.ToDictionary(n => n.Id));
@@ -125,6 +127,7 @@ public sealed class MapService : ReactiveObject
         _websocketService = websocketService;
         _i18N = Locator.Current.GetI18Next();
 
+        MapBins = bins;
 
         this.WhenAnyValue(x => x.LoggedInUsername).Subscribe(Observer.Create<string?>(_ => UpdateLoggedInPlayer()));
         this.WhenPropertyChanged(x => x.Players)
@@ -423,17 +426,18 @@ public sealed class MapService : ReactiveObject
 
     public static async Task<MapService> DownloadInitialMapAsync()
     {
-        var content = await HttpClient.GetStringAsync("/api/data");
-        using var jsonDom = JsonDocument.Parse(content);
-
-        if (jsonDom is null)
-            throw new InvalidOperationException("Error in JSON document.");
+        var stream = await HttpClient.GetStreamAsync("/api/data");
+        using var jsonDom = await JsonDocument.ParseAsync(stream);
 
         //TODO: Gracefully fail if there is no such property - this might be a new server w/o landmarks, nodes, etc.
-        
+
         var root = jsonDom.RootElement;
         var jsonNodes = root.GetProperty("nodes"u8);
         var nodes = new Dictionary<string, Node>();
+        var minX = int.MaxValue;
+        var minY = int.MaxValue;
+        var maxX = int.MinValue;
+        var maxY = int.MinValue;
         foreach (var jsonNode in jsonNodes.EnumerateObject())
         {
             var id = jsonNode.Name;
@@ -443,6 +447,10 @@ public sealed class MapService : ReactiveObject
             var z = obj.GetProperty("z"u8).GetInt32();
             var world = obj.GetProperty("world"u8).GetString()!;
             nodes.Add(id, new Node(id, x, y, z, world));
+            minX = int.Min(minX, x);
+            minY = int.Min(minY, z);
+            maxX = int.Max(maxX, x);
+            maxY = int.Max(maxY, z);
         }
 
         var jsonLandmarks = root.GetProperty("landmarks"u8);
@@ -488,10 +496,13 @@ public sealed class MapService : ReactiveObject
             var obj = jsonAnnotation.Value;
             annotations.Add(new Annotation(id, obj.Clone()));
         }
-        
+
+        var bounds = new IntRect(minX, minY, maxX, maxY);
+        var bins = new MapBins(bounds, nodes.Values, edges);
+
         var ws = new BnbnavWebsocketService();
         await ws.ConnectAsync(CancellationToken.None);
-        var service = new MapService(nodes.Values, edges, roads.Values, landmarks, annotations, ws);
+        var service = new MapService(nodes.Values, edges, roads.Values, landmarks, annotations, ws, bins);
         _ = service.ProcessChangesAsync();
         service.SetupWorlds();
         return service;

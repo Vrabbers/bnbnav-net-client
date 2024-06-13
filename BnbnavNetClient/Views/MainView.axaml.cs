@@ -42,16 +42,14 @@ public partial class MainView : UserControl
         vm.RaisePropertyChanged(nameof(MainViewModel.PanText));
 
         // c.f. issue #32 for why we disable the blur effect on windows
-        if (!OperatingSystem.IsWindows())
+        vm.WhenAnyValue<MainViewModel, ViewModel?>(x => x.Popup).Subscribe(p =>
         {
-            vm.WhenAnyValue<MainViewModel, ViewModel?>(x => x.Popup).Subscribe(p =>
-            {
-                if (p is null)
-                    MainUiGrid.Classes.Clear();
-                else
-                    MainUiGrid.Classes.Add("blur");
-            });
-        }
+            if (p is null)
+                MainUiGrid.Classes.Clear();
+            else
+                MainUiGrid.Classes.Add("blur");
+        });
+        
     }
 
     public async void ColorModeSwitch(object? _, RoutedEventArgs? __)

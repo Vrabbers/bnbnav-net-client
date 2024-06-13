@@ -366,11 +366,16 @@ public partial class MapView : UserControl
 
     }
 
-    readonly IAvaloniaI18Next _i18N;
+    private readonly IAvaloniaI18Next _i18N;
+    private List<Edge> _drawnEdges = [];
+    private List<Node> _drawnNodes = [];
 
-    List<(Point, Point, Edge)> DrawnEdges { get; set; } = [];
-    List<(Rect, Landmark)> DrawnLandmarks { get; set; } = [];
-    public List<(Rect, Node)> DrawnNodes { get; set; } = [];
+    private List<Edge> DrawnEdges => _drawnEdges;
+
+    private List<(Rect, Landmark)> DrawnLandmarks { get; set; } = [];
+
+    public List<Node> DrawnNodes => _drawnNodes;
+
     public List<Node> SpiedNodes { get; set; } = [];
 
     void UpdateFollowMeState()
@@ -402,13 +407,16 @@ public partial class MapView : UserControl
             if (rect.Contains(point)) yield return landmark;
         }
         
-        foreach (var (rect, node) in DrawnNodes)
+        foreach (var node in DrawnNodes)
         {
-            if (rect.Contains(point)) yield return node;
+            var rect = node.BoundingRect(this);
+            if (rect.Contains(point)) 
+                yield return node;
         }
 
-        foreach (var (a, b, edge) in DrawnEdges)
+        foreach (var edge in DrawnEdges)
         {
+            var (a, b) = edge.Extents(this);
             if (GeometryHelper.LineSegmentToPointDistance(a, b, point) <= ThicknessForRoadType(edge.Road.RoadType) * MapViewModel.Scale / 2)
                 yield return edge;
         }
@@ -430,34 +438,24 @@ public partial class MapView : UserControl
         }
 
         var bounds = boundsRect ?? Bounds;
+        
+        _drawnEdges.Clear();
+        _drawnNodes.Clear();
 
-        var drawnEdgesEnumerable = mapService.AllEdges
-            .Where(edge => edge.From.World == edge.To.World && edge.To.World == MapViewModel.ChosenWorld).Select(edge =>
-            {
-                var (from, to) = edge.Extents(this);
-                return (from, to, edge);
-            }).Where(edge => GeometryHelper.LineIntersects(edge.from, edge.to, bounds));
+        var worldTl = ToWorld(bounds.TopLeft);
+        var worldBr = ToWorld(bounds.BottomRight);
         
-        // This avoids re-allocating the whole entire drawn edge list, instead using the same one as before.
-        DrawnEdges.Clear();
-        foreach (var edge in drawnEdgesEnumerable)
-        {
-            DrawnEdges.Add(edge);
-        }
-        
+        var intBounds = new IntRect((int)double.Floor(worldTl.X), (int)double.Floor(worldTl.Y),
+            (int)double.Ceiling(worldBr.X), (int)double.Ceiling(worldBr.Y));
+
+        mapService.MapBins.Query(intBounds, ref _drawnNodes, ref _drawnEdges);
+
         DrawnLandmarks = mapService.Landmarks.Values.Where(landmark => landmark.Node.World == MapViewModel.ChosenWorld).Select(landmark => (landmark.BoundingRect(this), landmark))
             .Where(landmark => bounds.Intersects(landmark.Item1)).ToList();
-
-        DrawnNodes = mapService.Nodes.Values.Where(node => node.World == MapViewModel.ChosenWorld).Select(node => (node.BoundingRect(this), node))
-            .Where(node => bounds.Intersects(node.Item1)).ToList();
-
-        SpiedNodes = DrawnNodes.Select(nodeInfo => nodeInfo.Item2).Where(node =>
+        
+        SpiedNodes = DrawnNodes.Where(node =>
         {
-            if (MapViewModel.HighlightInterWorldNodesEnabled)
-            {
-                return mapService.AllEdges.Where(edge => edge.From.Id == node.Id || edge.To.Id == node.Id).Any(edge => edge.From.World != edge.To.World);
-            }
-            return false;
+            return MapViewModel.HighlightInterWorldNodesEnabled && mapService.AllEdges.Where(edge => edge.From.Id == node.Id || edge.To.Id == node.Id).Any(edge => edge.From.World != edge.To.World);
         }).ToList();
         
         InvalidateVisual();
@@ -562,9 +560,11 @@ public partial class MapView : UserControl
         }
 
 
-        foreach (var (from, to, edge) in DrawnEdges)
+        foreach (var edge in DrawnEdges)
         {
-            if (noRender.Contains(edge)) continue;
+            if (noRender.Contains(edge)) 
+                continue;
+            var (from, to) = edge.Extents(this);
             DrawEdge(context, edge.Road.RoadType, from, to, drawRoute: MapViewModel.MapService.CurrentRoute?.Edges.Contains(edge) ?? false);
         }
 
@@ -601,8 +601,9 @@ public partial class MapView : UserControl
             var nodeBrush = (Brush)ThemeDict["NodeFill"]!;
             var spiedBorder = (Pen)ThemeDict["SpiedNodeBorder"]!;
             var spiedBrush = (Brush)ThemeDict["SpiedNodeFill"]!;
-            foreach (var (rect, node) in DrawnNodes)
+            foreach (var node in DrawnNodes)
             {
+                var rect = node.BoundingRect(this);
                 if (noRender.Contains(node)) continue;
 
                 if (SpiedNodes.Any(spied => spied.Id == node.Id))
