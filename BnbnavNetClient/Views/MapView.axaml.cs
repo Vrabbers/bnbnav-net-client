@@ -11,6 +11,7 @@ using System.Globalization;
 using BnbnavNetClient.Models;
 using BnbnavNetClient.Helpers;
 using Avalonia.Controls.Primitives;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.NetworkOperations;
@@ -31,11 +32,13 @@ public partial class MapView : UserControl
 
     // For some reason, using the proper method, (i.e. ResourceDictionary.ThemeDictionaries) does not seem to work here.
     // This is a pretty crap solution, so if we find a better way it would probably be worthwhile implementing it
-    public IResourceDictionary ThemeDict { get; private set; }= default!;
+    public IResourceDictionary ThemeDict { get; private set; } = default!;
 
     private Matrix _toScreenMtx = Matrix.Identity;
     private Matrix _toWorldMtx = Matrix.Identity;
 
+    private Queue<MapBin.Bin> _queuedRedraws = []; 
+    
     public MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
     private const int PlayerSize = 48;
@@ -153,14 +156,15 @@ public partial class MapView : UserControl
             if (MapViewModel.IsInEditMode) 
                 MapViewModel.MapEditorService.EditController.PointerReleased(this, eventArgs);
 
-            var hitTestResultsE = HitTest(eventArgs.GetPosition(this));
-            var hitTestResults = hitTestResultsE as MapItem[] ?? hitTestResultsE.ToArray();
+            var hitTestResults = HitTest(eventArgs.GetPosition(this));
     
             _pointerVelocities.Clear(); // Make sure we're not using velocities from previous pan.
             
             if (!MapViewModel.IsInEditMode)
             {
-                if (hitTestResults.LastOrDefault(x => x is Landmark) is Landmark landmark)
+                var lm = hitTestResults.FirstOrDefault(x =>
+                    x is Landmark lm && lm.Node.World == MapViewModel.ChosenWorld);
+                if (lm is Landmark landmark)
                 {
                     MapViewModel.SelectedLandmark = landmark;
                 }
@@ -208,9 +212,11 @@ public partial class MapView : UserControl
 
                 UpdateDrawnItems();
             }));
+        
         MapViewModel
             .WhenAnyPropertyChanged()
             .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
+        
         MapViewModel.WhenPropertyChanged(x => x.HighlightInterWorldNodesEnabled)
             .Subscribe(Observer.Create<PropertyValue<MapViewModel, bool>>(_ => UpdateDrawnItems()));
         
@@ -280,7 +286,8 @@ public partial class MapView : UserControl
 
         MapViewModel.WhenAnyValue(x => x.SelectedLandmark).Subscribe(Observer.Create<ISearchable?>(_ =>
         {
-            if (MapViewModel.SelectedLandmark is not null) PanTo(MapViewModel.SelectedLandmark.Location.Point);
+            if (MapViewModel.SelectedLandmark is not null) 
+                PanTo(MapViewModel.SelectedLandmark.Location.Point);
         }));
     }
 
@@ -368,14 +375,12 @@ public partial class MapView : UserControl
     }
 
     private readonly IAvaloniaI18Next _i18N;
-    private List<Edge> _drawnEdges = [];
-    private List<Node> _drawnNodes = [];
 
-    private List<Edge> DrawnEdges => _drawnEdges;
+    private List<Edge> DrawnEdges { get; } = [];
 
     private List<(Rect, Landmark)> DrawnLandmarks { get; set; } = [];
 
-    public List<Node> DrawnNodes => _drawnNodes;
+    public List<Node> DrawnNodes { get; } = [];
 
     public List<Node> SpiedNodes { get; set; } = [];
 
@@ -440,13 +445,22 @@ public partial class MapView : UserControl
 
         var bounds = boundsRect ?? Bounds;
         
-        _drawnEdges.Clear();
-        _drawnNodes.Clear();
+        DrawnEdges.Clear();
+        DrawnNodes.Clear();
 
+        var worldBin = mapService.MapBins[MapViewModel.ChosenWorld];
+        
         var intBounds = ToWorldIntBounds(bounds);
 
-        mapService.MapBins.Query(intBounds, _drawnNodes, _drawnEdges);
-
+        worldBin.QueryDrawn(intBounds, DrawnNodes, DrawnEdges);
+        foreach (var bin in worldBin.QueryBins(intBounds))
+        {
+            if (bin is null)
+                continue;
+            if (bin.RenderTarget is null)
+                _queuedRedraws.Enqueue(bin);
+        }
+        
         DrawnLandmarks = mapService.Landmarks.Values.Where(landmark => landmark.Node.World == MapViewModel.ChosenWorld).Select(landmark => (landmark.BoundingRect(this), landmark))
             .Where(landmark => bounds.Intersects(landmark.Item1)).ToList();
         
@@ -470,8 +484,8 @@ public partial class MapView : UserControl
     
     private Rect ToScreenBounds(IntRect bounds)
     {
-        var tl = ToScreen(new Point(bounds.Top, bounds.Left));
-        var br = ToScreen(new Point(bounds.Bottom, bounds.Right));
+        var tl = ToScreen(new Point(bounds.Left, bounds.Top));
+        var br = ToScreen(new Point(bounds.Right, bounds.Bottom));
         
         return new Rect(tl, br);
     }
@@ -493,18 +507,23 @@ public partial class MapView : UserControl
 
     public double ThicknessForRoadType(RoadType type) => (double)(type == RoadType.Motorway ? ThemeDict["MotorwayThickness"]! : ThemeDict["RoadThickness"]!);
 
-    public void DrawEdge(DrawingContext context, RoadType roadType, Point from, Point to, bool drawGhost = false, bool drawRoute = false)
+    public void DrawEdge(DrawingContext context, RoadType roadType, Point from, Point to, bool drawGhost = false, bool drawRoute = false, bool useScale = true)
     {
         var pen = drawRoute ? new Pen(new SolidColorBrush(new Color(255, 0, 150, 255)), lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round) : PenForRoadType(roadType);
 
-        var length = double.Sqrt(double.Pow(from.X - to.X, 2) + double.Pow(from.Y - to.Y, 2));
+        var x = from.X - to.X;
+        var y = from.Y - to.Y;
+        var length = double.Sqrt(x * x + y * y);
         var diffPoint = to - from;
         var angle = double.Atan2(diffPoint.Y, diffPoint.X);
 
         var matrix = Matrix.CreateRotation(angle) *
                      Matrix.CreateTranslation(from);
 
-        pen.Thickness = ThicknessForRoadType(roadType) * MapViewModel.Scale;
+        if (useScale)
+            pen.Thickness = ThicknessForRoadType(roadType) * MapViewModel.Scale;
+        else
+            pen.Thickness = ThicknessForRoadType(roadType);
         if (pen.Brush is LinearGradientBrush gradBrush)
         {
             gradBrush.StartPoint = new RelativePoint(0, -pen.Thickness / 2, RelativeUnit.Absolute);
@@ -573,15 +592,34 @@ public partial class MapView : UserControl
                 Monitor.Exit(MapViewModel.MapEditorService.OngoingNetworkOperationsMutex);
         }
 
-
-        foreach (var edge in DrawnEdges)
+        while (_queuedRedraws.TryDequeue(out var queuedBin))
         {
-            if (noRender.Contains(edge)) 
-                continue;
-            var (from, to) = edge.Extents(this);
-            DrawEdge(context, edge.Road.RoadType, from, to, drawRoute: MapViewModel.MapService.CurrentRoute?.Edges.Contains(edge) ?? false);
-        }
+            var scale = MapViewModel.Scale;
+            var size = new Size(MapBin.BinSideLength, MapBin.BinSideLength) * scale; 
+            var r = new RenderTargetBitmap(new PixelSize((int) size.Width, (int) size.Height));
+            using var rctx = r.CreateDrawingContext();
+            foreach (var edge in queuedBin.Edges)
+            {
+                var topLeft = new Point(queuedBin.Bounds.Left, queuedBin.Bounds.Top);
+                DrawEdge(rctx, edge.Road.RoadType, (edge.From.Point - topLeft) * scale, (edge.To.Point - topLeft) * scale);
+            }
 
+            queuedBin.RenderTarget = new BinAttachedRenderTarget(r);
+        }
+        
+        var bins = MapViewModel.MapService.MapBins[MapViewModel.ChosenWorld].QueryBins(ToWorldIntBounds(Bounds));
+
+        foreach (var bin in bins)
+        {
+            if (bin?.RenderTarget is null)
+                continue;
+
+            var where = ToScreenBounds(bin.Bounds);
+            context.DrawRectangle(null, new Pen(Brushes.Magenta, 2), where);
+            context.DrawImage(bin.RenderTarget.Bitmap, where);
+        }
+        
+        
         foreach (var (rect, landmark) in DrawnLandmarks)
         {
             if (noRender.Contains(landmark)) continue;

@@ -1,10 +1,12 @@
 ﻿using CommunityToolkit.HighPerformance;
 using System.Collections;
+using System.Diagnostics;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 
 namespace BnbnavNetClient.Models;
 
-public sealed class MapBins
+public sealed class MapBin
 {
     public class Bin
     {
@@ -16,7 +18,7 @@ public sealed class MapBins
         
         public BinAttachedRenderTarget? RenderTarget { get; set; } 
     }
-    public const int BinSideLength = 256;
+    public const int BinSideLength = 1024;
 
     private readonly Bin?[,] _bins;
     
@@ -25,7 +27,7 @@ public sealed class MapBins
 
     public IntRect Bounds { get; private set; }
  
-    public MapBins(IntRect bounds, IEnumerable<Node> nodes, IEnumerable<Edge> edges)
+    public MapBin(IntRect bounds, IEnumerable<Node> nodes, IEnumerable<Edge> edges)
     {
         Bounds = bounds.Expand(5);
         var xLength = Bounds.Right - Bounds.Left;
@@ -41,7 +43,7 @@ public sealed class MapBins
 
         foreach (var edge in edges)
         {
-            Insert(edge);
+            InsertEdge(edge);
         }
     }
 
@@ -58,7 +60,7 @@ public sealed class MapBins
     {
         if (!Bounds.Contains(node.X, node.Z))
             throw new NotImplementedException();
-
+        
         var x = node.X - Bounds.Left;
         var y = node.Z - Bounds.Top;
         var binX = x / BinSideLength;
@@ -69,7 +71,7 @@ public sealed class MapBins
         bin.Nodes.Add(node);
     }
     
-    public void Insert(Edge edge)
+    public void InsertEdge(Edge edge)
     {
         var minX = int.Min(edge.From.X, edge.To.X);
         var minY = int.Min(edge.From.Z, edge.To.Z);
@@ -77,10 +79,10 @@ public sealed class MapBins
         var maxY = int.Max(edge.From.Z, edge.To.Z);
         var edgeBounds = new IntRect(minX, minY, maxX, maxY);
         var expanded = edgeBounds.Expand(5);
-        var startX = (expanded.Left - Bounds.Left - BinSideLength / 2) / BinSideLength;
-        var startY = (expanded.Top - Bounds.Top - BinSideLength / 2) / BinSideLength;
-        var endX = (expanded.Right - Bounds.Left + BinSideLength / 2) / BinSideLength;
-        var endY = (expanded.Bottom - Bounds.Top + BinSideLength / 2) / BinSideLength;
+        var startX = (expanded.Left - Bounds.Left) / BinSideLength;
+        var startY = (expanded.Top - Bounds.Top) / BinSideLength;
+        var endX = (expanded.Right - Bounds.Left) / BinSideLength;
+        var endY = (expanded.Bottom - Bounds.Top) / BinSideLength;
 
         for (var j = startY; j <= endY; j++)
         {
@@ -94,22 +96,23 @@ public sealed class MapBins
         }
     }
 
-    public Span2D<Bin?> Query(IntRect queryRect)
+    public Span2D<Bin?> QueryBins(IntRect queryRect)
     {
-        var startX = (queryRect.Left - Bounds.Left - BinSideLength / 2) / BinSideLength;
-        var startY = (queryRect.Top - Bounds.Top - BinSideLength / 2) / BinSideLength;
-        var endX = (queryRect.Right - Bounds.Left + BinSideLength / 2) / BinSideLength;
-        var endY = (queryRect.Bottom - Bounds.Top + BinSideLength / 2) / BinSideLength;
-
-        return new Span2D<Bin?>(_bins, startY, startX, endY - startY, endX - startX);
+        queryRect = queryRect.Intersect(Bounds);
+        var startX = (queryRect.Left - Bounds.Left) / BinSideLength;
+        var startY = (queryRect.Top - Bounds.Top ) / BinSideLength;
+        var endX = (queryRect.Right - Bounds.Left) / BinSideLength;
+        var endY = (queryRect.Bottom - Bounds.Top) / BinSideLength;
+        return new Span2D<Bin?>(_bins, startY, startX, endY - startY + 1, endX - startX + 1);
     }
     
-    public void Query(IntRect queryRect, List<Node> nodes, List<Edge> edges)
+    public void QueryDrawn(IntRect queryRect, List<Node> nodes, List<Edge> edges)
     {
-        var startX = (queryRect.Left - Bounds.Left - BinSideLength / 2) / BinSideLength;
-        var startY = (queryRect.Top - Bounds.Top - BinSideLength / 2) / BinSideLength;
-        var endX = (queryRect.Right - Bounds.Left + BinSideLength / 2) / BinSideLength;
-        var endY = (queryRect.Bottom - Bounds.Top + BinSideLength / 2) / BinSideLength;
+        queryRect = queryRect.Intersect(Bounds);
+        var startX = (queryRect.Left - Bounds.Left) / BinSideLength;
+        var startY = (queryRect.Top - Bounds.Top) / BinSideLength;
+        var endX = (queryRect.Right - Bounds.Left) / BinSideLength;
+        var endY = (queryRect.Bottom - Bounds.Top) / BinSideLength;
 
         for (var j = startY; j <= endY; j++)
         {
@@ -135,4 +138,4 @@ public sealed class MapBins
     }
 }
 
-public record BinAttachedRenderTarget(IRenderTarget RenderTarget);
+public record BinAttachedRenderTarget(RenderTargetBitmap Bitmap);

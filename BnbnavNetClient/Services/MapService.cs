@@ -8,6 +8,7 @@ using System.Net.Http.Json;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Text.Json;
+using Avalonia;
 using Avalonia.Collections;
 using BnbnavNetClient.Extensions;
 using BnbnavNetClient.I18Next.Services;
@@ -79,7 +80,7 @@ public sealed class MapService : ReactiveObject
     public ReadOnlyDictionary<string, Player> Players { get; }
     public bool PlayerGone { get; set; }
 
-    public MapBins MapBins { get; }
+    public Dictionary<string, MapBin> MapBins { get; }
 
     [Reactive] 
     public AvaloniaList<string> Worlds { get; private set; } = [];
@@ -110,7 +111,7 @@ public sealed class MapService : ReactiveObject
         }
     }
 
-    MapService(IEnumerable<Node> nodes, IEnumerable<Edge> edges, IEnumerable<Road> roads, IEnumerable<Landmark> landmarks, IEnumerable<Annotation> annotations, BnbnavWebsocketService websocketService, MapBins bins)
+    MapService(IEnumerable<Node> nodes, IEnumerable<Edge> edges, IEnumerable<Road> roads, IEnumerable<Landmark> landmarks, IEnumerable<Annotation> annotations, BnbnavWebsocketService websocketService, Dictionary<string, MapBin> bins)
     {
 
         _nodes = new Dictionary<string, Node>(nodes.ToDictionary(n => n.Id));
@@ -128,7 +129,7 @@ public sealed class MapService : ReactiveObject
         _i18N = Locator.Current.GetI18Next();
 
         MapBins = bins;
-
+        
         this.WhenAnyValue(x => x.LoggedInUsername).Subscribe(Observer.Create<string?>(_ => UpdateLoggedInPlayer()));
         this.WhenPropertyChanged(x => x.Players)
             .Subscribe(Observer.Create<PropertyValue<MapService, ReadOnlyDictionary<string, Player>>>(_ =>
@@ -434,10 +435,7 @@ public sealed class MapService : ReactiveObject
         var root = jsonDom.RootElement;
         var jsonNodes = root.GetProperty("nodes"u8);
         var nodes = new Dictionary<string, Node>();
-        var minX = int.MaxValue;
-        var minY = int.MaxValue;
-        var maxX = int.MinValue;
-        var maxY = int.MinValue;
+        var worldsSet = new Dictionary<string, IntRect>();
         foreach (var jsonNode in jsonNodes.EnumerateObject())
         {
             var id = jsonNode.Name;
@@ -447,10 +445,10 @@ public sealed class MapService : ReactiveObject
             var z = obj.GetProperty("z"u8).GetInt32();
             var world = obj.GetProperty("world"u8).GetString()!;
             nodes.Add(id, new Node(id, x, y, z, world));
-            minX = int.Min(minX, x);
-            minY = int.Min(minY, z);
-            maxX = int.Max(maxX, x);
-            maxY = int.Max(maxY, z);
+            if (worldsSet.TryGetValue(world, out var rect))
+                worldsSet[world] = rect.ExpandToFit(x, z);
+            else
+                worldsSet.Add(world, new IntRect(x, z, x, z));
         }
 
         var jsonLandmarks = root.GetProperty("landmarks"u8);
@@ -497,8 +495,12 @@ public sealed class MapService : ReactiveObject
             annotations.Add(new Annotation(id, obj.Clone()));
         }
 
-        var bounds = new IntRect(minX, minY, maxX, maxY);
-        var bins = new MapBins(bounds, nodes.Values, edges);
+        var bins = new Dictionary<string, MapBin>();
+
+        foreach (var (world, bounds) in worldsSet)
+            bins.Add(world,
+                new MapBin(bounds, nodes.Values.Where(n => n.World == world),
+                    edges.Where(e => e.From.World == e.To.World && e.To.World == world)));
 
         var ws = new BnbnavWebsocketService();
         await ws.ConnectAsync(CancellationToken.None);
