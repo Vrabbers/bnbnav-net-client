@@ -7,4 +7,7 @@ public readonly record struct IntRect(int Left, int Top, int Right, int Bottom)
 
     public IntRect Expand(int amt) => 
         new(Left - amt, Top - amt, Right + amt, Bottom + amt);
+
+    public (int Left, int Top) IntersectTopLeft(IntRect rect) => 
+        (int.Max(Left, rect.Left), int.Max(Top, rect.Top));
 }

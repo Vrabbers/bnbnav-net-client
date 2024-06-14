@@ -20,24 +20,25 @@ namespace BnbnavNetClient.Views;
 
 public partial class MapView : UserControl
 {
-    bool _pointerPressing;
-    bool _disablePan;
-    Point _pointerPrevPosition;
-    Point _currentPointerPosition;
-    Vector _viewVelocity = Vector.Zero;
-    readonly List<Point> _pointerVelocities = [];
+    private bool _pointerPressing;
+    private bool _disablePan;
+    private Point _pointerPrevPosition;
+    private Point _currentPointerPosition;
+    private Vector _viewVelocity = Vector.Zero;
+
+    private readonly List<Point> _pointerVelocities = [];
     // This list is averaged to get smooth panning.
 
     // For some reason, using the proper method, (i.e. ResourceDictionary.ThemeDictionaries) does not seem to work here.
     // This is a pretty crap solution, so if we find a better way it would probably be worthwhile implementing it
     public IResourceDictionary ThemeDict { get; private set; }= default!;
-    
-    Matrix _toScreenMtx = Matrix.Identity;
-    Matrix _toWorldMtx = Matrix.Identity;
+
+    private Matrix _toScreenMtx = Matrix.Identity;
+    private Matrix _toWorldMtx = Matrix.Identity;
 
     public MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
-    const int PlayerSize = 48;
+    private const int PlayerSize = 48;
     
     public MapView()
     {
@@ -283,7 +284,7 @@ public partial class MapView : UserControl
         }));
     }
 
-    void InertialPan(TimeSpan time)
+    private void InertialPan(TimeSpan time)
     {
         if (_viewVelocity.Length < 0.1) 
             return;
@@ -291,8 +292,8 @@ public partial class MapView : UserControl
         _viewVelocity /= 1.1;
         TopLevel.GetTopLevel(this)?.RequestAnimationFrame(InertialPan);
     }
-    
-    void UpdateContextMenuItems()
+
+    private void UpdateContextMenuItems()
     {
         var seenEdges = new List<Edge>();
         MapViewModel.ContextMenuItems.Clear();
@@ -378,7 +379,7 @@ public partial class MapView : UserControl
 
     public List<Node> SpiedNodes { get; set; } = [];
 
-    void UpdateFollowMeState()
+    private void UpdateFollowMeState()
     {
         var loggedInPlayer = MapViewModel.MapService.LoggedInPlayer;
         if (loggedInPlayer is null) return;
@@ -397,7 +398,7 @@ public partial class MapView : UserControl
         }
     }
 
-    void PanTo(Point worldCoords, double xOffset = 0.5, double yOffset = 0.5) => 
+    private void PanTo(Point worldCoords, double xOffset = 0.5, double yOffset = 0.5) => 
         MapViewModel.Pan = worldCoords - new Point(Bounds.Size.Width * xOffset, Bounds.Size.Height * yOffset) / MapViewModel.Scale;
 
     public IEnumerable<MapItem> HitTest(Point point)
@@ -428,7 +429,7 @@ public partial class MapView : UserControl
         return base.ArrangeOverride(finalSize);
     }
 
-    void UpdateDrawnItems(Rect? boundsRect = null)
+    private void UpdateDrawnItems(Rect? boundsRect = null)
     {
         var mapService = MapViewModel.MapService;
 
@@ -442,11 +443,7 @@ public partial class MapView : UserControl
         _drawnEdges.Clear();
         _drawnNodes.Clear();
 
-        var worldTl = ToWorld(bounds.TopLeft);
-        var worldBr = ToWorld(bounds.BottomRight);
-        
-        var intBounds = new IntRect((int)double.Floor(worldTl.X), (int)double.Floor(worldTl.Y),
-            (int)double.Ceiling(worldBr.X), (int)double.Ceiling(worldBr.Y));
+        var intBounds = ToWorldIntBounds(bounds);
 
         mapService.MapBins.Query(intBounds, _drawnNodes, _drawnEdges);
 
@@ -461,7 +458,25 @@ public partial class MapView : UserControl
         InvalidateVisual();
     }
 
-    Pen PenForRoadType(RoadType type) => (Pen)(type switch
+    private IntRect ToWorldIntBounds(Rect bounds)
+    {
+        var worldTl = ToWorld(bounds.TopLeft);
+        var worldBr = ToWorld(bounds.BottomRight);
+        
+        var intBounds = new IntRect((int)double.Floor(worldTl.X), (int)double.Floor(worldTl.Y),
+            (int)double.Ceiling(worldBr.X), (int)double.Ceiling(worldBr.Y));
+        return intBounds;
+    }
+    
+    private Rect ToScreenBounds(IntRect bounds)
+    {
+        var tl = ToScreen(new Point(bounds.Top, bounds.Left));
+        var br = ToScreen(new Point(bounds.Bottom, bounds.Right));
+        
+        return new Rect(tl, br);
+    }
+
+    private Pen PenForRoadType(RoadType type) => (Pen)(type switch
     {
         RoadType.Local => ThemeDict["LocalRoadPen"]!,
         RoadType.Main => ThemeDict["MainRoadPen"]!,
@@ -486,8 +501,7 @@ public partial class MapView : UserControl
         var diffPoint = to - from;
         var angle = double.Atan2(diffPoint.Y, diffPoint.X);
 
-        var matrix = Matrix.Identity *
-                     Matrix.CreateRotation(angle) *
+        var matrix = Matrix.CreateRotation(angle) *
                      Matrix.CreateTranslation(from);
 
         pen.Thickness = ThicknessForRoadType(roadType) * MapViewModel.Scale;
