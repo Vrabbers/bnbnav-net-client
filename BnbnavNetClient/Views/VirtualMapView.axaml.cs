@@ -39,6 +39,7 @@ internal partial class VirtualMapView : VirtualSurfaceControl
         {
             Pan += (previousPointerPosition - currentPosition.Position) / Scale;
             MapViewModel.Pan = Pan;
+            InvalidateVisual();
         }
 
         previousPointerPosition = currentPosition.Position;
@@ -58,8 +59,6 @@ internal partial class VirtualMapView : VirtualSurfaceControl
     protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
     {
         base.OnPointerWheelChanged(e);
-
-        var currentPosition = e.GetPosition(this);
 
         var deltaScale = e.Delta.Y * Scale / 10.0;
         Zoom(deltaScale, e.GetPosition(this));
@@ -124,7 +123,7 @@ internal partial class VirtualMapView : VirtualSurfaceControl
 
         var canvas = surface.Canvas;
 
-        canvas.DrawColor(new SKColor((uint)Random.Shared.Next()));
+        canvas.Clear();
 
         var noRender = new List<MapItem>();
         noRender.AddRange(MapViewModel.MapEditorService.EditController.ItemsNotToRender);
