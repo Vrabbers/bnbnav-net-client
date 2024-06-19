@@ -23,6 +23,7 @@
         <entry key="BnbnavNetClient/Views/NewEdgeFlyoutView.axaml" value="BnbnavNetClient.Linux/BnbnavNetClient.Linux.csproj" />
         <entry key="BnbnavNetClient/Views/RoadEditView.axaml" value="BnbnavNetClient.Linux/BnbnavNetClient.Linux.csproj" />
         <entry key="BnbnavNetClient/Views/UserDetailsFlyoutView.axaml" value="BnbnavNetClient.Desktop/BnbnavNetClient.Desktop.csproj" />
+        <entry key="BnbnavNetClient/Views/VirtualMapView.axaml" value="BnbnavNetClient.Linux/BnbnavNetClient.Linux.csproj" />
       </map>
     </option>
   </component>

@@ -80,6 +80,7 @@ public sealed class MapBins
 
     public void Query(IntRect rect, List<Node> nodes, List<Edge> edges)
     {
+        rect = rect.Intersect(Bounds);
         var startX = (rect.Left - Bounds.Left - BinSideLength / 2) / BinSideLength;
         var startY = (rect.Top - Bounds.Top - BinSideLength / 2) / BinSideLength;
         var endX = (rect.Right - Bounds.Left + BinSideLength / 2) / BinSideLength;
@@ -89,7 +90,7 @@ public sealed class MapBins
         {
             for (var j = startY; j <= endY; j++)
             {
-                ref var bin = ref _bins[i, j];
+                var bin = _bins[i, j];
                 if (bin is null)
                     continue;
                 foreach (var node in bin.Nodes)

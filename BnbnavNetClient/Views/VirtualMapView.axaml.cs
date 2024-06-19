@@ -37,7 +37,7 @@ internal partial class VirtualMapView : VirtualSurfaceControl
 
         if (currentPosition.Properties.IsLeftButtonPressed)
         {
-            Pan += (previousPointerPosition - currentPosition.Position);
+            Pan += (previousPointerPosition - currentPosition.Position) / Scale;
             MapViewModel.Pan = Pan;
         }
 
@@ -61,7 +61,7 @@ internal partial class VirtualMapView : VirtualSurfaceControl
 
         var currentPosition = e.GetPosition(this);
 
-        var deltaScale = e.Delta.Y * scale / 10.0;
+        var deltaScale = e.Delta.Y * Scale / 10.0;
         Zoom(deltaScale, e.GetPosition(this));
     }
 
@@ -76,17 +76,16 @@ internal partial class VirtualMapView : VirtualSurfaceControl
 
     public void Zoom(double deltaScale, Point origin)
     {
-        var clampedScale = double.Clamp(scale + deltaScale, 0.1, 20.0);
+        var clampedScale = double.Clamp(Scale + deltaScale, 0.1, 20.0);
 
         var worldPrevPos = ToWorld(origin);
 
-        scale = clampedScale;
+        Scale = clampedScale;
 
         var worldFutureIncorrectPos = ToWorld(origin);
 
-        WrongPoint = worldFutureIncorrectPos;
         var correction = worldFutureIncorrectPos - worldPrevPos;
-        Pan -= correction * scale;
+        Pan -= correction;
         MapViewModel.Pan = Pan;
 
         InvalidateTiles();
@@ -94,9 +93,7 @@ internal partial class VirtualMapView : VirtualSurfaceControl
 
     private Point ToWorld(Point viewportPoint)
     {
-        var mtx = Matrix.CreateScale(scale, scale) * Matrix.CreateTranslation(-Pan);
-
-        return mtx.Invert().Transform(viewportPoint);
+        return (viewportPoint / Scale) + Pan;
     }
 
     private MapViewResources resources = new()
@@ -123,13 +120,7 @@ internal partial class VirtualMapView : VirtualSurfaceControl
 
     public override void DrawTile(TileSurface surface, Rect worldCoordinates)
     {
-        SKPoint ToTile(Point point)
-        {
-            return point.ToSKPoint() - new SKPoint(tile.TopLeft.X, tile.TopLeft.Y);
-        }
-
-        Debug.WriteLine($"Rendering tile {tile.TopLeft} with scale " + scale);
-
+        Debug.WriteLine($"Rendering tile {worldCoordinates.TopLeft} with scale " + Scale);
 
         var canvas = surface.Canvas;
 
@@ -164,31 +155,23 @@ internal partial class VirtualMapView : VirtualSurfaceControl
         // {
         //     return MapViewModel.HighlightInterWorldNodesEnabled && mapService.AllEdges.Where(edge => edge.From.Id == node.Id || edge.To.Id == node.Id).Any(edge => edge.From.World != edge.To.World);
         // }).ToList();
-
-        // canvas.Scale((float)scale, (float)scale, -tile.X, -tile.Y);
-
+        
         var map = MapViewModel.MapService;
 
         var nodes = new List<Node>();
         var edges = new List<Edge>();
 
-        var scaled = SKMatrix.CreateScale((float)scale, (float)scale).MapRect(new SKRect(tile.X, tile.Y, tile.Right, tile.Bottom));
+        var queryRegion = new IntRect((int)worldCoordinates.Left, (int)worldCoordinates.Top, (int)worldCoordinates.Right, (int)worldCoordinates.Bottom);
 
-
-        //var queryRegion = new IntRect((int)scaled.Left, (int)scaled.Top, (int)scaled.Right, (int)scaled.Bottom);
-
-        //map.MapBins.Query(queryRegion, nodes, edges);
-
-        edges = map.Edges.Values.ToList();
-
+        map.MapBins.Query(queryRegion, nodes, edges);
 
         foreach (var edge in edges)
         {
             //if (noRender.Contains(edge))
             //    continue;
 
-            var from = ToTile(edge.From.Point);
-            var to = ToTile(edge.To.Point);
+            var from = edge.From.Point.ToSKPoint();
+            var to = edge.To.Point.ToSKPoint();
 
             DrawEdge(canvas, edge.Road.RoadType, from, to, drawRoute: false);
         }
