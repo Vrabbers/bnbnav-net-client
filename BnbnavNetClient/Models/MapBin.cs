@@ -62,10 +62,10 @@ public sealed class MapBins
         var maxY = int.Max(edge.From.Z, edge.To.Z);
         var edgeBounds = new IntRect(minX, minY, maxX, maxY);
         var expanded = edgeBounds.Expand(5);
-        var startX = (expanded.Left - Bounds.Left - BinSideLength / 2) / BinSideLength;
-        var startY = (expanded.Top - Bounds.Top - BinSideLength / 2) / BinSideLength;
-        var endX = (expanded.Right - Bounds.Left + BinSideLength / 2) / BinSideLength;
-        var endY = (expanded.Bottom - Bounds.Top + BinSideLength / 2) / BinSideLength;
+        var startX = (expanded.Left - Bounds.Left) / BinSideLength;
+        var startY = (expanded.Top - Bounds.Top) / BinSideLength;
+        var endX = (expanded.Right - Bounds.Left) / BinSideLength;
+        var endY = (expanded.Bottom - Bounds.Top) / BinSideLength;
 
         for (var i = startX; i <= endX; i++)
         {
@@ -81,10 +81,10 @@ public sealed class MapBins
     public void Query(IntRect rect, List<Node> nodes, List<Edge> edges)
     {
         rect = rect.Intersect(Bounds);
-        var startX = (rect.Left - Bounds.Left - BinSideLength / 2) / BinSideLength;
-        var startY = (rect.Top - Bounds.Top - BinSideLength / 2) / BinSideLength;
-        var endX = (rect.Right - Bounds.Left + BinSideLength / 2) / BinSideLength;
-        var endY = (rect.Bottom - Bounds.Top + BinSideLength / 2) / BinSideLength;
+        var startX = (rect.Left - Bounds.Left) / BinSideLength;
+        var startY = (rect.Top - Bounds.Top) / BinSideLength;
+        var endX = (rect.Right - Bounds.Left) / BinSideLength;
+        var endY = (rect.Bottom - Bounds.Top) / BinSideLength;
 
         for (var i = startX; i <= endX; i++)
         {
