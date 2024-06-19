@@ -1,93 +1,43 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:s="using:System">
-  <SolidColorBrush x:Key="BackgroundBrush" Color="WhiteSmoke"/>
-  <SolidColorBrush x:Key="NodeFill" Color="White"/>
-  <SolidColorBrush x:Key="SelectedNodeFill" Color="DeepSkyBlue"/>
-  <SolidColorBrush x:Key="SpiedNodeFill" Color="#3EFF51"/>
-  <SolidColorBrush x:Key="ForegroundBrush" Color="Black"/>
-  <Pen x:Key="NodeBorder" Thickness="2">
-    <Pen.Brush>
-      <SolidColorBrush Color="Black"/>
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="SpiedNodeBorder" Thickness="2">
-    <Pen.Brush>
-      <SolidColorBrush Color="Black"/>
-    </Pen.Brush>
-  </Pen>
+                    xmlns:s="using:System"
+                    xmlns:skia="using:SkiaSharp"
+                    xmlns:local="using:BnbnavNetClient.Resources">
+    <local:SKColor x:Key="BackgroundBrush">
+        <x:Arguments>WhiteSmoke</x:Arguments>
+    </local:SKColor>
+    <local:SKColor x:Key="NodeFill">
+        <x:Arguments>White</x:Arguments>
+    </local:SKColor>
+    <local:SKColor x:Key="SelectedNodeFill">
+        <x:Arguments>DeepSkyBlue</x:Arguments>
+    </local:SKColor>
+    <local:SKColor x:Key="SpiedNodeFill">
+        <x:Arguments>#3EFF51</x:Arguments>
+    </local:SKColor>
+  <local:SKColor x:Key="ForegroundBrush">
+      <x:Arguments>Black</x:Arguments>
+  </local:SKColor>
+    
+  <skia:SKPaint x:Key="NodeBorder" IsAntialias="True" StrokeWidth="2" Color="{local:SKColor Black}" />
+  <skia:SKPaint x:Key="SpiedNodeBorder" IsAntialias="True" StrokeWidth="2" Color="{local:SKColor Black}" />
   <s:Double x:Key="RoadThickness">5</s:Double>
   <s:Double x:Key="MotorwayThickness">10</s:Double>
-  <Pen x:Key="UnknownRoadPen" Thickness="5" LineCap="Round">
-    <Pen.Brush>
-      <SolidColorBrush Color="DarkBlue"/>	
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="LocalRoadPen" Thickness="5" LineCap="Round">
-    <Pen.Brush>
-      <SolidColorBrush Color="Black"/>
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="MainRoadPen" Thickness="5" LineCap="Round">
-    <Pen.Brush>
-      <SolidColorBrush Color="#f5b342"/>
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="HighwayRoadPen" Thickness="5" LineCap="Round">
-    <Pen.Brush>
-      <SolidColorBrush Color="#ad1909"/>
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="ExpresswayRoadPen" Thickness="5" LineCap="Round">
-    <Pen.Brush>
-      <SolidColorBrush Color="#194211"/>
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="MotorwayRoadPen" Thickness="10" LineCap="Round">
-    <Pen.Brush>
-      <LinearGradientBrush StartPoint="-100%,0%" EndPoint="100%, 0%">
-        <GradientStop Color="#640000" Offset="0"/>
-        <GradientStop Color="#640000" Offset="0.3"/>
-        <GradientStop Color="#c8c800" Offset="0.3001"/>
-        <GradientStop Color="#c8c800" Offset="0.6999"/>
-        <GradientStop Color="#640000" Offset="0.7"/>
-        <GradientStop Color="#640000" Offset="1"/>
-      </LinearGradientBrush>    
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="FootpathRoadPen" Thickness="5" LineCap="Round">
-    <Pen.Brush>
-      <SolidColorBrush Color="#969696"/>
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="WaterwayRoadPen" Thickness="5" LineCap="Round">
-    <Pen.Brush>
-      <SolidColorBrush Color="#006e96"/>
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="PrivateRoadPen" Thickness="5" LineCap="Round">
-    <Pen.Brush>
-      <SolidColorBrush Color="#646464"/>
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="RoundaboutRoadPen" Thickness="5" LineCap="Round">
-    <Pen.Brush>
-      <SolidColorBrush Color="Black"/>
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="DuongWarpRoadPen" Thickness="5" LineCap="Round">
-    <Pen.Brush>
-      <SolidColorBrush Color="Transparent"/>
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="RoadGhostPen" Thickness="5" LineCap="Round">
-    <Pen.Brush>
-      <SolidColorBrush Color="#7f3f3fff"/>
-    </Pen.Brush>
-  </Pen>
-  <Pen x:Key="EditMovePen" Thickness="2" LineCap="Round">
-    <Pen.Brush>
-      <SolidColorBrush Color="#ffff0000"/>
-    </Pen.Brush>
-  </Pen>
+    
+  <skia:SKPaint x:Key="UnknownRoadPen" IsAntialias="True" StrokeWidth="5" StrokeCap="Round" Color="{local:SKColor DarkBlue}" />
+  <skia:SKPaint x:Key="LocalRoadPen" IsAntialias="True" StrokeWidth="5" StrokeCap="Round" Color="{local:SKColor Black}" />
+  <skia:SKPaint x:Key="MainRoadPen" IsAntialias="True" StrokeWidth="5" StrokeCap="Round" Color="{local:SKColor #f5b342}" />
+  <skia:SKPaint x:Key="HighwayRoadPen" IsAntialias="True" StrokeWidth="5" StrokeCap="Round" Color="{local:SKColor #ad1909}"/>
+  <skia:SKPaint x:Key="ExpresswayRoadPen" IsAntialias="True" StrokeWidth="5" StrokeCap="Round" Color="{local:SKColor #194211}" />
+
+<!--   Gradient initialized in MainView -->
+  <skia:SKPaint x:Key="MotorwayRoadPen" IsAntialias="True" StrokeWidth="10" StrokeCap="Round" />
+        
+  <skia:SKPaint x:Key="FootpathRoadPen" IsAntialias="True" StrokeWidth="5" StrokeCap="Round" Color="{local:SKColor #969696}" />
+  <skia:SKPaint x:Key="WaterwayRoadPen" IsAntialias="True" StrokeWidth="5" StrokeCap="Round" Color="{local:SKColor #006e96}" />
+  <skia:SKPaint x:Key="PrivateRoadPen" IsAntialias="True" StrokeWidth="5" StrokeCap="Round" Color="{local:SKColor #646464}" />
+  <skia:SKPaint x:Key="RoundaboutRoadPen" IsAntialias="True" StrokeWidth="5" StrokeCap="Round" Color="{local:SKColor Black}" />
+  <skia:SKPaint x:Key="DuongWarpRoadPen" IsAntialias="True" StrokeWidth="5" StrokeCap="Round" Color="{local:SKColor Transparent}" />
+  <skia:SKPaint x:Key="RoadGhostPen" IsAntialias="True" StrokeWidth="5" StrokeCap="Round" Color="{local:SKColor #7f3f3fff}" />
+  <skia:SKPaint x:Key="EditMovePen" IsAntialias="True" StrokeWidth="2" StrokeCap="Round" Color="{local:SKColor #ffff0000}" />
 </ResourceDictionary>

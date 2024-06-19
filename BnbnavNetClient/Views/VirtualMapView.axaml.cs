@@ -1,5 +1,7 @@
 ﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Skia;
 
 using BnbnavNetClient.Controls;
@@ -10,6 +12,7 @@ using SkiaSharp;
 
 using System;
 using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 
 namespace BnbnavNetClient.Views;
 
@@ -25,6 +28,16 @@ internal partial class VirtualMapView : VirtualSurfaceControl
     protected override void OnInitialized()
     {
         base.OnInitialized();
+
+        //<LinearGradientBrush StartPoint="-100%,0%" EndPoint="100%, 0%">
+        //    <GradientStop Color="#640000" Offset="0"/>
+        //    <GradientStop Color="#640000" Offset="0.3"/>
+        //    <GradientStop Color="#c8c800" Offset="0.3001"/>
+        //    <GradientStop Color="#c8c800" Offset="0.6999"/>
+        //    <GradientStop Color="#640000" Offset="0.7"/>
+        //    <GradientStop Color="#640000" Offset="1"/>
+        //  </LinearGradientBrush>
+
 
         var pinchRecognizer = new PinchGestureRecognizer();
         GestureRecognizers.Add(pinchRecognizer);
@@ -95,34 +108,13 @@ internal partial class VirtualMapView : VirtualSurfaceControl
         return (viewportPoint / Scale) + Pan;
     }
 
-    private MapViewResources resources = new()
-    {
-        BackgroundColor = SKColors.White,
-        RoutePen = new SKPaint { Color = SKColors.Green },
-        LocalRoadPen = new SKPaint { Color = SKColors.CornflowerBlue },
-        MainRoadPen       = new SKPaint { Color = SKColors.CornflowerBlue },
-        HighwayRoadPen    = new SKPaint { Color = SKColors.CornflowerBlue },
-        ExpresswayRoadPen = new SKPaint { Color = SKColors.CornflowerBlue },
-        MotorwayRoadPen   = new SKPaint { Color = SKColors.CornflowerBlue },
-        FootpathRoadPen   = new SKPaint { Color = SKColors.CornflowerBlue },
-        WaterwayRoadPen   = new SKPaint { Color = SKColors.CornflowerBlue },
-        PrivateRoadPen    = new SKPaint { Color = SKColors.CornflowerBlue },
-        RoundaboutRoadPen = new SKPaint { Color = SKColors.CornflowerBlue },
-        DuongWarpRoadPen  = new SKPaint { Color = SKColors.CornflowerBlue },
-        UnknownRoadPen    = new SKPaint { Color = SKColors.CornflowerBlue },
-
-        MotorwayThickness = 10,
-        RoadThickness = 5,
-    };
-
     public MapViewModel MapViewModel { get; set; }
 
     public override void DrawTile(TileSurface surface, Rect worldCoordinates)
     {
-        Debug.WriteLine($"Rendering tile {worldCoordinates.TopLeft} with scale " + Scale);
+        ThemeResources = (IResourceDictionary)this.FindResource(ActualThemeVariant.ToString())!;
 
         var canvas = surface.Canvas;
-
         canvas.Clear();
 
         var noRender = new List<MapItem>();
@@ -166,9 +158,6 @@ internal partial class VirtualMapView : VirtualSurfaceControl
 
         foreach (var edge in edges)
         {
-            //if (noRender.Contains(edge))
-            //    continue;
-
             var from = edge.From.Point.ToSKPoint();
             var to = edge.To.Point.ToSKPoint();
 
@@ -262,12 +251,12 @@ internal partial class VirtualMapView : VirtualSurfaceControl
 
         //}
 
+
     }
 
     private void DrawEdge(SKCanvas canvas, RoadType roadType, SKPoint from, SKPoint to, bool drawGhost = false, bool drawRoute = false)
     {
-        var pen = drawRoute ? resources.RoutePen : resources.PaintForRoadType(roadType);
-        //new Pen(new SolidColorBrush(new Color(255, 0, 150, 255)), lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round) : PenForRoadType(roadType);
+        var pen = drawRoute ? Get<SKPaint>("RoutePen") : PaintForRoadType(roadType);
 
         var length = SKPoint.Distance(from, to);
         var diffPoint = to - from;
@@ -276,52 +265,38 @@ internal partial class VirtualMapView : VirtualSurfaceControl
         var matrix = SKMatrix.CreateRotation(angle)
             .PostConcat(SKMatrix.CreateTranslation(from.X, from.Y));
 
-        pen.StrokeWidth = (float)resources.ThicknessForRoadType(roadType);
+        pen.StrokeWidth = (float)ThicknessForRoadType(roadType);
 
         canvas.DrawLine(matrix.MapPoint(new(0, 0)), matrix.MapPoint(new(length, 0)), pen);
     }
 
-}
-
-
-public sealed class MapViewResources
-{
-    public required SKColor BackgroundColor { get; init; }
-
-    public required SKPaint RoutePen { get; init; }
-
-    public required SKPaint LocalRoadPen { get; init; }
-    public required SKPaint MainRoadPen { get; init; }
-    public required SKPaint HighwayRoadPen { get; init; }
-    public required SKPaint ExpresswayRoadPen { get; init; }
-    public required SKPaint MotorwayRoadPen { get; init; }
-    public required SKPaint FootpathRoadPen { get; init; }
-    public required SKPaint WaterwayRoadPen { get; init; }
-    public required SKPaint PrivateRoadPen { get; init; }
-    public required SKPaint RoundaboutRoadPen { get; init; }
-    public required SKPaint DuongWarpRoadPen { get; init; }
-    public required SKPaint UnknownRoadPen { get; init; }
-
-
-    public SKPaint PaintForRoadType(RoadType type) => type switch
+    private SKPaint PaintForRoadType(RoadType type) => type switch
     {
-        RoadType.Local => LocalRoadPen,
-        RoadType.Main => MainRoadPen,
-        RoadType.Highway => HighwayRoadPen,
-        RoadType.Expressway => ExpresswayRoadPen,
-        RoadType.Motorway => MotorwayRoadPen,
-        RoadType.Footpath => FootpathRoadPen,
-        RoadType.Waterway => WaterwayRoadPen,
-        RoadType.Private => PrivateRoadPen,
-        RoadType.Roundabout => RoundaboutRoadPen,
-        RoadType.DuongWarp => DuongWarpRoadPen,
-        _ => UnknownRoadPen,
+        RoadType.Local => Get<SKPaint>("LocalRoadPen"),
+        RoadType.Main => Get<SKPaint>("MainRoadPen"),
+        RoadType.Highway => Get<SKPaint>("HighwayRoadPen"),
+        RoadType.Expressway => Get<SKPaint>("ExpresswayRoadPen"),
+        RoadType.Motorway => Get<SKPaint>("MotorwayRoadPen"),
+        RoadType.Footpath => Get<SKPaint>("FootpathRoadPen"),
+        RoadType.Waterway => Get<SKPaint>("WaterwayRoadPen"),
+        RoadType.Private => Get<SKPaint>("PrivateRoadPen"),
+        RoadType.Roundabout => Get<SKPaint>("RoundaboutRoadPen"),
+        RoadType.DuongWarp => Get<SKPaint>("DuongWarpRoadPen"),
+        _ => Get<SKPaint>("UnknownRoadPen"),
     };
 
-    public required double MotorwayThickness { get; init; }
+    private double ThicknessForRoadType(RoadType type) => type switch
+    {
+        RoadType.Motorway => Get<double>("MotorwayThickness"),
+        _ => Get<double>("RoadThickness")
+    };
 
-    public required double RoadThickness { get; init; }
+    private IResourceDictionary ThemeResources;
 
-    public double ThicknessForRoadType(RoadType type) => type == RoadType.Motorway ? MotorwayThickness : RoadThickness;
+    private T Get<T>(string resourceKey)
+    {
+        return (T)ThemeResources[resourceKey]!;
+    }
+
 
 }
