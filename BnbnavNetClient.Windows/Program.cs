@@ -24,6 +24,10 @@ internal static class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace()
+            .With(new Win32PlatformOptions
+            {
+                RenderingMode = [Win32RenderingMode.Wgl]
+            })
             .UseReactiveUI()
             .UseI18NextLocalization()
             .UseTextToSpeechProvider(new WindowsTextToSpeechProvider())

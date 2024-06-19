@@ -149,7 +149,7 @@ public class Landmark(string id, Node node, string name, string type)
 
     public Rect BoundingRect(MapView mapView)
     {
-        var pos = mapView.ToScreen(new Point(Node.X, Node.Z));
+        var pos = (new Point(Node.X, Node.Z));
         var rect = new Rect(
             pos.X - LandmarkSize * mapView.MapViewModel.Scale / 2,
             pos.Y - LandmarkSize * mapView.MapViewModel.Scale / 2,

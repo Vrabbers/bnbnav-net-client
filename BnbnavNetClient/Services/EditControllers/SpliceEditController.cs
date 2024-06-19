@@ -86,7 +86,7 @@ public class SpliceEditController(MapEditorService editorService) : EditControll
             var tempNode = _splicingAt;
             if (tempNode is null)
             {
-                var coords = mapView.ToWorld(_pointerPrevPosition);
+                var coords = (_pointerPrevPosition);
                 tempNode = new Node("temp", (int)double.Round(coords.X), _splicingEdge.From.Y, (int)double.Round(coords.Y), _splicingEdge.From.World);
             }
 

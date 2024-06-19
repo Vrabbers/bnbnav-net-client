@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data.Core;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Styling;
@@ -15,6 +16,7 @@ public partial class MainView : UserControl
 {
     readonly ISettingsManager _settings;
 
+    
     public MainView()
     {
         FlowDirection = Locator.Current.GetI18Next().IsRightToLeft ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
@@ -37,7 +39,7 @@ public partial class MainView : UserControl
         
         await vm.InitMapService();
 
-        MapPanel.Children.Add(new MapView { DataContext = vm.MapViewModel });
+        MapPanel.Children.Add(new VirtualMapView { MapViewModel = vm.MapViewModel! });
         WorldSelectComboBox.IsVisible = true;
         vm.RaisePropertyChanged(nameof(MainViewModel.PanText));
 

@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <ImplicitUsings>true</ImplicitUsings>
     <AnalysisMode>Recommended</AnalysisMode>
   </PropertyGroup>
@@ -15,6 +14,7 @@
     <None Remove="Assets\logo.svg" />
     <None Remove="locales\pt\translation.json" />
     <None Remove="locales\ur\translation.json" />
+    <None Remove="Views\VirtualMapView.axamlcs" />
     <TrimmerRootDescriptor Include="Roots.xml" />
   </ItemGroup>
 
@@ -36,5 +36,11 @@
   
   <ItemGroup>
     <ProjectReference Include="..\BnbnavNetClient.I18Next\BnbnavNetClient.I18Next.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Update="Views\VirtualMapView.axaml.cs">
+      <DependentUpon>VirtualMapView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

@@ -15,6 +15,7 @@ using Avalonia.Threading;
 using BnbnavNetClient.I18Next.Services;
 using BnbnavNetClient.Services.NetworkOperations;
 using Splat;
+using Avalonia.Rendering.Composition;
 
 namespace BnbnavNetClient.Views;
 
@@ -32,9 +33,6 @@ public partial class MapView : UserControl
     // This is a pretty crap solution, so if we find a better way it would probably be worthwhile implementing it
     public IResourceDictionary ThemeDict { get; private set; }= default!;
     
-    Matrix _toScreenMtx = Matrix.Identity;
-    Matrix _toWorldMtx = Matrix.Identity;
-
     public MapViewModel MapViewModel => (MapViewModel)DataContext!;
 
     const int PlayerSize = 48;
@@ -54,7 +52,7 @@ public partial class MapView : UserControl
         {
             InvalidateVisual();
         };
-        
+
         PointerPressed += (_, eventArgs) =>
         {
             //Disable all click events in Go Mode
@@ -201,18 +199,27 @@ public partial class MapView : UserControl
                         Matrix.CreateRotation(double.DegreesToRadians(rotate)) * 
                         Matrix.CreateTranslation(centerOfBounds);
                 }
-
-                _toScreenMtx = matrix;
-                _toWorldMtx = matrix.Invert();
-
-                UpdateDrawnItems();
             }));
-        MapViewModel
-            .WhenAnyPropertyChanged()
-            .Subscribe(Observer.Create<MapViewModel?>(_ => { InvalidateVisual(); }));
+
         MapViewModel.WhenPropertyChanged(x => x.HighlightInterWorldNodesEnabled)
             .Subscribe(Observer.Create<PropertyValue<MapViewModel, bool>>(_ => UpdateDrawnItems()));
-        
+
+        MapViewModel.WhenPropertyChanged(x => x.Pan)
+            .Subscribe(Observer.Create<PropertyValue<MapViewModel, Point>>(p =>
+            {
+                var v = p.Value;
+                if (ElementComposition.GetElementVisual(this) is { } visual)
+                    visual.Offset = new(v.X, v.Y, 0);
+            }));
+
+        MapViewModel.WhenPropertyChanged(x => x.Scale)
+            .Subscribe(Observer.Create<PropertyValue<MapViewModel, double>>(p =>
+            {
+                var v = p.Value;
+                if (ElementComposition.GetElementVisual(this) is { } visual)
+                    visual.Scale = new(v, v, 0);
+            }));
+
         MapViewModel.MapEditorService
             .WhenAnyValue(x => x.OngoingNetworkOperations)
             .Subscribe(Observer.Create<IReadOnlyList<NetworkOperation>?>(_ => Dispatcher.UIThread.Post(InvalidateVisual)));
@@ -231,7 +238,7 @@ public partial class MapView : UserControl
                     foreach (var (name, player) in prop.Value)
                     {
                         if (player.World == MapViewModel.ChosenWorld &&
-                            Bounds.Intersects(GeometryHelper.SquareCenteredOn(ToScreen(player.Point), PlayerSize)))
+                            Bounds.Intersects(GeometryHelper.SquareCenteredOn((player.Point), PlayerSize)))
                         {
                             if (!player.Moved)
                                 continue;
@@ -253,7 +260,7 @@ public partial class MapView : UserControl
                 else
                 {
                     MapViewModel.MapService.PlayerGone = false; // reset value
-                }
+               }
 
                 InvalidateVisual();
                 UpdateFollowMeState();
@@ -285,11 +292,11 @@ public partial class MapView : UserControl
 
     void InertialPan(TimeSpan time)
     {
-        if (_viewVelocity.Length < 0.1) 
-            return;
-        MapViewModel.Pan += _viewVelocity / MapViewModel.Scale;
-        _viewVelocity /= 1.1;
-        TopLevel.GetTopLevel(this)?.RequestAnimationFrame(InertialPan);
+        //if (_viewVelocity.Length < 0.1) 
+        //    return;
+        //MapViewModel.Pan += _viewVelocity / MapViewModel.Scale;
+        //_viewVelocity /= 1.1;
+        //TopLevel.GetTopLevel(this)?.RequestAnimationFrame(InertialPan);
     }
     
     void UpdateContextMenuItems()
@@ -336,13 +343,13 @@ public partial class MapView : UserControl
         }
         else
         {
-            ToWorld(_currentPointerPosition).Deconstruct(out var xd, out var zd);
+            var (xd, zd) = (RenderTransform?.Value ?? Matrix.Identity).Transform(_currentPointerPosition);
             var x = (int)xd;
             var z = (int)zd;
             var landmark = new TemporaryLandmark($"temp@{x},{z}", new TemporaryNode(x, 0, z, MapViewModel.ChosenWorld), _i18N["DROPPED_PIN", ("x", x.ToString(_i18N.CurrentLanguage.NumberFormat)), ("z", z.ToString(_i18N.CurrentLanguage.NumberFormat))]);
 
-            MapViewModel.ContextMenuItems.AddRange(new MenuItem[]
-            {
+            MapViewModel.ContextMenuItems.AddRange(
+            [
                 new()
                 {
                     Header = _i18N["DIRECTIONS_TO_HERE"],
@@ -361,7 +368,7 @@ public partial class MapView : UserControl
                         MapViewModel.CurrentUi = AvailableUi.Prepare;
                     })
                 }
-            });
+            ]);
         }
 
     }
@@ -441,14 +448,21 @@ public partial class MapView : UserControl
         
         _drawnEdges.Clear();
         _drawnNodes.Clear();
-
-        var worldTl = ToWorld(bounds.TopLeft);
-        var worldBr = ToWorld(bounds.BottomRight);
         
-        var intBounds = new IntRect((int)double.Floor(worldTl.X), (int)double.Floor(worldTl.Y),
-            (int)double.Ceiling(worldBr.X), (int)double.Ceiling(worldBr.Y));
+        var intBounds = new IntRect(int.MinValue, int.MinValue,
+            int.MaxValue, int.MaxValue);
 
-        mapService.MapBins.Query(intBounds, _drawnNodes, _drawnEdges);
+        // mapService.MapBins.Query(intBounds, _drawnNodes, _drawnEdges);
+        //foreach (var bin in mapService.MapBins._bins)
+        //{
+        //    if (bin != null)
+        //    {
+        //        foreach (var node in bin.Nodes)
+        //            _drawnNodes.Add(node);
+        //        foreach (var edge in bin.Edges)
+        //            _drawnEdges.Add(edge);
+        //    }
+        //}
 
         DrawnLandmarks = mapService.Landmarks.Values.Where(landmark => landmark.Node.World == MapViewModel.ChosenWorld).Select(landmark => (landmark.BoundingRect(this), landmark))
             .Where(landmark => bounds.Intersects(landmark.Item1)).ToList();
@@ -584,12 +598,12 @@ public partial class MapView : UserControl
                     PenForRoadType(RoadType.Local).Thickness, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
                 var poly = new PolylineGeometry(new[]
                 {
-                    ToScreen(instruction.From.Line.FlipDirection().SetLength(10).Point2),
-                    ToScreen(instruction.Node.Point),
-                    ToScreen(instruction.To.Line.SetLength(10).Point2),
-                    ToScreen(instruction.To.Line.SetLength(10).FlipDirection().NudgeAngle(-45).SetLength(5).Point2),
-                    ToScreen(instruction.To.Line.SetLength(10).Point2),
-                    ToScreen(instruction.To.Line.SetLength(10).FlipDirection().NudgeAngle(45).SetLength(5).Point2),
+                    (instruction.From.Line.FlipDirection().SetLength(10).Point2),
+                    (instruction.Node.Point),
+                    (instruction.To.Line.SetLength(10).Point2),
+                    (instruction.To.Line.SetLength(10).FlipDirection().NudgeAngle(-45).SetLength(5).Point2),
+                    (instruction.To.Line.SetLength(10).Point2),
+                    (instruction.To.Line.SetLength(10).FlipDirection().NudgeAngle(45).SetLength(5).Point2),
                 }, false);
                 context.DrawGeometry(null, pen, poly);
             }
@@ -620,9 +634,9 @@ public partial class MapView : UserControl
         }
 
         foreach (var player in MapViewModel.MapService.Players.Values
-                     .Where(player => player.World == MapViewModel.ChosenWorld && Bounds.Contains(ToScreen(player.Point))))
+                     .Where(player => player.World == MapViewModel.ChosenWorld))
         {
-            var rect = GeometryHelper.SquareCenteredOn(ToScreen(player.MarkerCoordinates), PlayerSize);
+            var rect = GeometryHelper.SquareCenteredOn((player.MarkerCoordinates), PlayerSize);
             const string? uriString = "avares://BnbnavNetClient/Assets/playermark.svg";
             context.DrawSvgUrl(uriString, rect, -player.MarkerAngle + MapViewModel.Rotation);
 
@@ -652,31 +666,23 @@ public partial class MapView : UserControl
                 backingRect.Height / 2, backingRect.Height / 2);
             context.DrawText(roadText, roadCenter - new Point(roadText.Width / 2, roadText.Height / 2));
         }
-
-        base.Render(context);
     }
-
-    public Point ToWorld(Point screenCoords) =>
-         _toWorldMtx.Transform(screenCoords);
-
-    public Point ToScreen(Point worldCoords) =>
-        _toScreenMtx.Transform(worldCoords);
 
     public void Zoom(double deltaScale, Point origin)
     {
-        var newScale = double.Clamp(MapViewModel.Scale + deltaScale, 0.1, 20.0);
-        var worldPrevPos = ToWorld(origin);
-        MapViewModel.Scale = newScale;
-        if (MapViewModel.FollowMeEnabled || MapViewModel.CurrentUi == AvailableUi.Go)
-        {
-            UpdateFollowMeState();
-        }
-        else
-        {
-            var worldFutureIncorrectPos = ToWorld(origin);
-            var correction = worldFutureIncorrectPos - worldPrevPos;
-            MapViewModel.Pan -= correction;
-        }
+        //var newScale = double.Clamp(MapViewModel.Scale + deltaScale, 0.1, 20.0);
+        //var worldPrevPos = ToWorld(origin);
+        //MapViewModel.Scale = newScale;
+        //if (MapViewModel.FollowMeEnabled || MapViewModel.CurrentUi == AvailableUi.Go)
+        //{
+        //    UpdateFollowMeState();
+        //}
+        //else
+        //{
+        //    var worldFutureIncorrectPos = ToWorld(origin);
+        //    var correction = worldFutureIncorrectPos - worldPrevPos;
+        //    MapViewModel.Pan -= correction;
+        //}
     }
 
     public FlyoutBase? OpenFlyout(ViewModel viewModel)

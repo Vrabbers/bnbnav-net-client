@@ -31,7 +31,7 @@ public class NodeMoveEditController(MapEditorService editorService) : EditContro
 
         if (_movingNode is not null && _movedNode is not null)
         {
-            var newCoords = mapView.ToWorld(pointerPos);
+            var newCoords = (pointerPos);
             _movedNode = new Node("temp", (int)double.Round(newCoords.X), _movingNode.Y, (int)double.Round(newCoords.Y), _movedNode.World);
             mapView.InvalidateVisual();
         }

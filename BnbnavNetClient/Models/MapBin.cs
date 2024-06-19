@@ -13,7 +13,7 @@ public sealed class MapBins
     public const int BinSideLength = 256;
 
     private readonly Bin?[,] _bins;
-    
+
     private int BinsXLength => _bins.GetLength(0);
     private int BinsYLength => _bins.GetLength(1);
 

@@ -16,7 +16,7 @@ public class Node(string id, int x, int y, int z, string world)
 
     public Rect BoundingRect(MapView mapView)
     {
-        var pos = mapView.ToScreen(new Point(X, Z));
+        var pos = (new Point(X, Z));
         var rect = new Rect(
             pos.X - NodeSize / 2, 
             pos.Y - NodeSize / 2,

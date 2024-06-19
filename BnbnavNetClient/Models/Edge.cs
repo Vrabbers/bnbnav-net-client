@@ -8,9 +8,9 @@ public class Edge(string id, Road road, Node from, Node to)
 {
     public (Point, Point) Extents(MapView mapView)
     {
-        var from = mapView.ToScreen(From.Point);
-        var to = mapView.ToScreen(To.Point);
-        return (from, to);
+        //var from = mapView.ToScreen(From.Point);
+        //var to = mapView.ToScreen(To.Point);
+        return (From.Point, To.Point);
     }
 
     public string Id { get; init; } = id;

@@ -52,8 +52,8 @@ public static class DrawingContextExtensions
         using (context.PushTransform(translateMatrix * scaleMatrix))
         using (context.PushTransform(Matrix.Identity))
         using (context.PushTransform(preRotateMatrix * rotateMatrix * preRotateMatrix.Invert()))
-        // using (context.PushPostTransform(rotateMatrix))
-        // using (context.PushPostTransform(preRotateMatrix.Invert()))
+        //using (context.PushPostTransform(rotateMatrix))
+        //using (context.PushPostTransform(preRotateMatrix.Invert()))
             context.Custom(new SvgCustomDrawOperation(rect, svg));
     }
 }

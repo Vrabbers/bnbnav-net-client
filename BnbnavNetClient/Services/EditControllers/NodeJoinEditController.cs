@@ -184,7 +184,7 @@ public class NodeJoinEditController(MapEditorService editorService) : EditContro
         if (ghosts.Count != 0)
         {
             PolylineGeometry geo = new();
-            geo.Points.AddRange(ghosts.Select(x => mapView.ToScreen(new Point(x.X, x.Z))));
+            geo.Points.AddRange(ghosts.Select(x => (new Point(x.X, x.Z))));
             if (_mouseDown) geo.Points.Add(_pointerPrevPosition);
                 
             //Make the shape into a circle
