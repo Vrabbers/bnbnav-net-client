@@ -10,10 +10,6 @@ using BnbnavNetClient.ViewModels;
 
 using SkiaSharp;
 
-using System;
-using System.Diagnostics;
-using System.Reflection.Metadata.Ecma335;
-
 namespace BnbnavNetClient.Views;
 
 internal partial class VirtualMapView : VirtualSurfaceControl
@@ -37,11 +33,6 @@ internal partial class VirtualMapView : VirtualSurfaceControl
         //    <GradientStop Color="#640000" Offset="0.7"/>
         //    <GradientStop Color="#640000" Offset="1"/>
         //  </LinearGradientBrush>
-
-
-        var pinchRecognizer = new PinchGestureRecognizer();
-        GestureRecognizers.Add(pinchRecognizer);
-        Gestures.AddPinchHandler(this, HandlePinchForZoom);
     }
 
     protected override void OnPointerMoved(PointerEventArgs e)
@@ -64,15 +55,8 @@ internal partial class VirtualMapView : VirtualSurfaceControl
         previousPointerPosition = currentPosition.Position;
     }
 
-    protected override void OnPointerReleased(PointerReleasedEventArgs e)
-    {
-        base.OnPointerReleased(e);
-    }
-
     protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
     {
-        base.OnPointerWheelChanged(e);
-
         var deltaScale = e.Delta.Y * Scale / 10.0;
         Zoom(deltaScale, e.GetPosition(this));
     }
@@ -84,7 +68,10 @@ internal partial class VirtualMapView : VirtualSurfaceControl
         previousPinchScale = e.Scale;
     }
 
-    // private double scale = 1;
+    public void HandlePinchEndedForZoom(object? sender, PinchEndedEventArgs e)
+    {
+        previousPinchScale = 1;
+    }
 
     public void Zoom(double deltaScale, Point origin)
     {

@@ -8,7 +8,12 @@
              xmlns:controls="using:BnbnavNetClient.Controls"
              x:CompileBindings="True"
              ClipToBounds="True"
-             FlowDirection="LeftToRight">
+             FlowDirection="LeftToRight"
+             Gestures.Pinch="HandlePinchForZoom"
+             Gestures.PinchEnded="HandlePinchEndedForZoom">
+    <controls:VirtualSurfaceControl.GestureRecognizers>
+        <PinchGestureRecognizer />
+    </controls:VirtualSurfaceControl.GestureRecognizers>
     
 <!--  <UserControl.ContextMenu> 
     <ContextMenu ItemsSource="{Binding ContextMenuItems}" />
