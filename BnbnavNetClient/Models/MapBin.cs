@@ -10,7 +10,7 @@ public sealed class MapBins
         public List<Node> Nodes { get; } = [];
         public List<Edge> Edges { get; } = [];
     }
-    public const int BinSideLength = 256;
+    public const int BinSideLength = 512;
 
     private readonly Bin?[,] _bins;
 

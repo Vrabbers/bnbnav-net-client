@@ -7,6 +7,7 @@ using Avalonia.Skia;
 
 using SkiaSharp;
 
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -14,15 +15,21 @@ namespace BnbnavNetClient.Controls;
 
 internal abstract class VirtualSurfaceControl : Control
 {
-    private struct Tile { public SKSurface Surface; public bool Dirty; }
+    private struct Tile { public SKSurface Surface; public bool Dirty; public long Timestamp; }
     private readonly record struct TileIndex(int X, int Y);
+    private readonly record struct TileRect(TileIndex TopLeft, TileIndex BottomRight)
+    {
+        public readonly bool Contains(TileIndex p)
+        {
+            return p.X >= TopLeft.X && p.X <= BottomRight.X
+                && p.Y >= TopLeft.Y && p.Y <= BottomRight.Y;
+        }
+    }
 
     private const int TileSideExponent = 9;
     private const int TileSide = 1 << TileSideExponent; // 512
 
     private readonly Dictionary<TileIndex, Tile> _tileMap = [];
-    
-    private uint _renderSequenceNumber;
 
     public double Scale { get; set; } = 1;
     public Point Pan { get; set; }
@@ -31,10 +38,10 @@ internal abstract class VirtualSurfaceControl : Control
 
     public void InvalidateTiles(Rect worldBounds)
     {
-        Interlocked.Increment(ref _renderSequenceNumber);
+        var visibleTiles = GetWorldExtends(worldBounds);
+        var (topLeftTile, bottomRightTile) = visibleTiles;
 
-        var (topLeftTile, bottomRightTile) = GetWorldExtends(worldBounds);
-
+        bool needsRedraw = false;
         for (var x = topLeftTile.X; x <= bottomRightTile.X; x++)
         {
             for (var y = topLeftTile.Y; y <= bottomRightTile.Y; y++)
@@ -45,17 +52,22 @@ internal abstract class VirtualSurfaceControl : Control
                 {
                     tile.Dirty = true;
                 }
+
+                if (visibleTiles.Contains(tileIndex))
+                {
+                    needsRedraw = true;
+                }
             }
         }
 
-        // TODO: Only invalidate visual if this would invalidate on-screen tiles
-        InvalidateVisual();
+        if (needsRedraw)
+        {
+            InvalidateVisual();
+        }
     }
 
     public void InvalidateTiles()
     {
-        Interlocked.Increment(ref _renderSequenceNumber);
-
         foreach (var tileIndex in _tileMap.Keys)
         {
             ref var tile = ref CollectionsMarshal.GetValueRefOrNullRef(_tileMap, tileIndex);
@@ -64,40 +76,49 @@ internal abstract class VirtualSurfaceControl : Control
 
         InvalidateVisual();
     }
-    
-    private static (TileIndex TopLeft, TileIndex BottomRight) GetExtents(PixelRect pixelBounds)
+
+    private double DpiScale()
     {
+        if (VisualRoot is TopLevel { RenderScaling: var dpiScale })
+        {
+            return dpiScale;
+        }
+
+        return 1;
+    }
+
+    private static TileRect GetTileExtents(Rect renderBounds, Point pan, double scale, double dpiScale)
+    {
+        var (panX, panY) = pan * scale * dpiScale;
+
+        var viewportRect = renderBounds * dpiScale;
+        var pixelBounds = new PixelRect((int)panX, (int)panY, (int)viewportRect.Width, (int)viewportRect.Height);
+
         var topLeft = new TileIndex(pixelBounds.X >> TileSideExponent, pixelBounds.Y >> TileSideExponent);
         var bottomRight = new TileIndex((pixelBounds.Right >> TileSideExponent) + 1, (pixelBounds.Bottom >> TileSideExponent) + 1);
 
-        return (topLeft, bottomRight);
+        return new(topLeft, bottomRight);
     }
 
-    private static (TileIndex TopLeft, TileIndex BottomRight) GetWorldExtends(Rect worldBounds)
+    // This function is wrong
+    private static TileRect GetWorldExtends(Rect worldBounds)
     {
         var top = (int)double.Floor(worldBounds.Bottom / TileSide);
         var left = (int)double.Floor(worldBounds.Left / TileSide);
         var bottom = (int)double.Ceiling(worldBounds.Bottom / TileSide);
         var right = (int)double.Ceiling(worldBounds.Right / TileSide);
 
-        return (new TileIndex(left, top), new TileIndex(right, bottom));
+        return new TileRect(new(left, top), new(right, bottom));
     }
     
     public override void Render(DrawingContext context)
     {
-        if (VisualRoot is not TopLevel { RenderScaling: var dpiScale })
-        {
-            return;
-        }
-
-        var (panX, panY) = Pan * Scale * dpiScale;
-
-        var viewportRect = Bounds * dpiScale;
-        var pixelBounds = new PixelRect((int)panX, (int)panY, (int)viewportRect.Width, (int)viewportRect.Height);
-
-        var (topLeftTile, bottomRightTile) = GetExtents(pixelBounds);
+        var dpiScale = DpiScale();
+        var (topLeftTile, bottomRightTile) = GetTileExtents(Bounds, Pan, Scale, dpiScale);
 
         var dirtyTiles = new Dictionary<TileIndex, SKPicture>();
+
+        var timestamp = Stopwatch.GetTimestamp();
 
         for (var x = topLeftTile.X; x <= bottomRightTile.X; x++)
         {
@@ -115,10 +136,10 @@ internal abstract class VirtualSurfaceControl : Control
 
                     surfaceCanvas.Scale((float)(Scale * dpiScale));
                     surfaceCanvas.Translate((-worldCoordinates.TopLeft).ToSKPoint());
-
                     DrawTile(new TileSurface { Canvas = surfaceCanvas, CanvasSize = new(TileSide, TileSide) }, worldCoordinates);
 
                     tile.Dirty = false;
+                    tile.Timestamp = timestamp;
 
                     dirtyTiles.Add(tileIndex, recorder.EndRecording());
                 }
@@ -127,7 +148,7 @@ internal abstract class VirtualSurfaceControl : Control
 
         context.Custom(new VirtualSurfaceRenderOperation(new Rect(0, 0, Bounds.Width, Bounds.Height), Pan, Scale, dpiScale, _tileMap, dirtyTiles));
     }
-    
+
     private class VirtualSurfaceRenderOperation(
         Rect renderBounds,
         Point pan,
@@ -138,7 +159,7 @@ internal abstract class VirtualSurfaceControl : Control
     {
         public Rect Bounds => renderBounds;
 
-        public bool HitTest(Point p) => true;
+        public bool HitTest(Point p) => renderBounds.Contains(p);
 
         public bool Equals(ICustomDrawOperation? other) => this == other;
 
@@ -158,22 +179,22 @@ internal abstract class VirtualSurfaceControl : Control
             var canvas = lease.SkCanvas;
 
             var (panX, panY) = pan * scale * dpiScale;
-
-            var viewportRect = renderBounds * dpiScale;
-            var pixelBounds = new PixelRect((int)panX, (int)panY, (int)viewportRect.Width, (int)viewportRect.Height);
-
-            var (topLeftTile, bottomRightTile) = GetExtents(pixelBounds);
+            var visibleTiles = GetTileExtents(Bounds, pan, scale, dpiScale);
 
             canvas.Save();
 
-            canvas.SetMatrix(canvas.TotalMatrix.PostConcat(SKMatrix.CreateScale((float)dpiScale, (float)dpiScale).Invert()));
+            var undoDpiScale = canvas.TotalMatrix.PostConcat(SKMatrix.CreateScale((float)dpiScale, (float)dpiScale).Invert());
+            canvas.SetMatrix(undoDpiScale);
 
+            var timestamp = Stopwatch.GetTimestamp();
+
+            var (topLeftTile, bottomRightTile) = visibleTiles;
             for (var x = topLeftTile.X; x <= bottomRightTile.X; x++)
             {
                 for (var y = topLeftTile.Y; y <= bottomRightTile.Y; y++)
                 {
                     var tileIndex = new TileIndex(x, y);
-                    ref var tile = ref CollectionsMarshal.GetValueRefOrAddDefault(tileMap, tileIndex, out _);
+                    ref var tile = ref CollectionsMarshal.GetValueRefOrNullRef(tileMap, tileIndex);
 
                     if (dirtyTiles.TryGetValue(tileIndex, out var dirtyTilePicture))
                     {
@@ -181,17 +202,54 @@ internal abstract class VirtualSurfaceControl : Control
                         var surfaceCanvas = surface.Canvas;
 
                         surfaceCanvas.Save();
-
                         surfaceCanvas.DrawPicture(dirtyTilePicture);
-
                         surfaceCanvas.Restore();
+
+                        dirtyTilePicture.Dispose();
                     }
 
+                    tile.Timestamp = timestamp;
                     canvas.DrawSurface(tile.Surface, new SKPoint((tileIndex.X << TileSideExponent) - (float)panX, (tileIndex.Y << TileSideExponent) - (float)panY));
                 }
             }
 
             canvas.Restore();
+
+            //var tilesToFree = new List<(TileIndex, SKSurface)>();
+            //var tilesStandbyList = new SortedDictionary<TimeSpan, (TileIndex, SKSurface)>(
+            //    Comparer<TimeSpan>.Create((l, r) => -l.CompareTo(r)));
+
+            //foreach (var (coord, surface) in tileMap)
+            //{
+            //    if (visibleTiles.Contains(coord))
+            //    {
+            //        continue;
+            //    }
+
+            //    var age = Stopwatch.GetElapsedTime(timestamp);
+            //    if (age.TotalSeconds > 2)
+            //    {
+            //        tilesToFree.Add((coord, surface.Surface));
+            //    }
+            //    else
+            //    {
+            //        tilesStandbyList.Add(age, (coord, surface.Surface));
+            //    }
+            //}
+
+            //foreach (var (coord, surface) in tilesToFree)
+            //{
+            //    surface.Dispose();
+            //    tileMap.Remove(coord);
+            //}
+
+            
+            //while (tilesStandbyList.Count > 16)
+            //{
+            //    var (coord, surface) = tilesStandbyList.Values.First();
+            //    surface.Dispose();
+            //    tileMap.Remove(coord);
+            //}
         }
     }
 }
