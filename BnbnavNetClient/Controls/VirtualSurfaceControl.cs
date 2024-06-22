@@ -7,6 +7,7 @@ using Avalonia.Skia;
 
 using SkiaSharp;
 
+using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -34,6 +35,14 @@ internal abstract class VirtualSurfaceControl : Control
 
     public double Scale { get; set; } = 1;
     public Point Pan { get; set; }
+
+    public VirtualSurfaceControl()
+    {
+        for (var i = 0; i < _tileStandbyLists.Length; i++)
+        {
+            _tileStandbyLists[i] = [];
+        }
+    }
 
     public abstract void DrawTile(TileSurface surface, Rect worldCoordinates);
 
@@ -112,7 +121,10 @@ internal abstract class VirtualSurfaceControl : Control
 
         return new TileRect(new(left, top), new(right, bottom));
     }
-    
+
+    private const int TileStandbyListsCount = 16;
+    private readonly List<TileIndex>[] _tileStandbyLists = new List<TileIndex>[TileStandbyListsCount];
+
     public override void Render(DrawingContext context)
     {
         var dirtyTiles = new Dictionary<TileIndex, SKPicture>();
@@ -149,66 +161,56 @@ internal abstract class VirtualSurfaceControl : Control
             }
         }
 
+        foreach (var list in _tileStandbyLists)
+        {
+            list.Clear();
+        }
 
         // Trim old tiles
         var agedTiles = new List<TileIndex>();
-        foreach (var (coord, surface) in _tileMap)
+        int agedTileCount = 0;
+        foreach (var (tile, surface) in _tileMap)
         {
-            if (visibleTiles.Contains(coord))
+            if (visibleTiles.Contains(tile))
             {
                 continue;
             }
 
-            var age = Stopwatch.GetElapsedTime(surface.Timestamp);
-            if (true || age.TotalSeconds > 2)
+            var age = Stopwatch.GetElapsedTime(surface.Timestamp, timestamp);
+            var ageBucket = (uint)age.TotalMilliseconds / 256;
+
+            if (ageBucket >= TileStandbyListsCount)
             {
-                agedTiles.Add(coord);
+                agedTiles.Add(tile);
             }
             else
             {
-                // tilesStandbyList.Add(age, (coord, surface.Surface));
+                _tileStandbyLists[ageBucket].Add(tile);
+                agedTileCount++;
             }
         }
 
+        for (int i = _tileStandbyLists.Length - 1; i >= 0; i--)
+        {
+            foreach (var tile in _tileStandbyLists[i])
+            {
+                if (agedTileCount >= 16)
+                {
+                    agedTiles.Add(tile);
+                    agedTileCount--;
+                }
+                else
+                {
+                    goto removedAll;
+                }
+            }
+        }
+
+        removedAll:
         foreach (var tile in CollectionsMarshal.AsSpan(agedTiles))
         {
             _tileMap.Remove(tile);
         }
-
-        //var tilesToFree = new List<(TileIndex, SKSurface)>();
-        //var tilesStandbyList = new SortedDictionary<TimeSpan, (TileIndex, SKSurface)>(
-        //    Comparer<TimeSpan>.Create((l, r) => -l.CompareTo(r)));
-
-        //foreach (var (coord, surface) in tileMap)
-        //{
-        //    if (visibleTiles.Contains(coord))
-        //    {
-        //        continue;
-        //    }
-
-        //    var age = Stopwatch.GetElapsedTime(timestamp);
-        //    if (age.TotalSeconds > 2)
-        //    {
-        //        tilesToFree.Add((coord, surface.Surface));
-        //    }
-        //    else
-        //    {
-        //        tilesStandbyList.Add(age, (coord, surface.Surface));
-        //    }
-        //}
-
-        //int count = tilesStandbyList.Count;
-        //foreach (var tile in tilesStandbyList)
-        //{
-        //    var (age, (coord, surface)) = tile;
-        //    surface?.Dispose();
-        //    tileMap.Remove(coord);
-
-        //    if (++count > 16)
-        //    {
-        //        break;
-        //    }
-        //}
 
         context.Custom(new VirtualSurfaceRenderOperation(Bounds, Pan, Scale, dpiScale, _surfaceMap, dirtyTiles, agedTiles));
     }
@@ -270,12 +272,10 @@ internal abstract class VirtualSurfaceControl : Control
 
                         dirtyTilePicture.Dispose();
                     }
-#if DEBUG
                     else
                     {
                         Debug.Assert(exists, "If a tile surface was just created, it must be dirty");
                     }
-#endif
 
                     canvas.DrawSurface(tile, new SKPoint((tileIndex.X << TileSideExponent) - (float)panX, (tileIndex.Y << TileSideExponent) - (float)panY));
                 }
