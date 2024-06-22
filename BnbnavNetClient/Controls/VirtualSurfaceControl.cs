@@ -151,16 +151,15 @@ internal abstract class VirtualSurfaceControl : Control
 
 
         // Trim old tiles
-
         var agedTiles = new List<TileIndex>();
         foreach (var (coord, surface) in _tileMap)
         {
             if (visibleTiles.Contains(coord))
             {
                 continue;
-    }
+            }
 
-            var age = Stopwatch.GetElapsedTime(timestamp);
+            var age = Stopwatch.GetElapsedTime(surface.Timestamp);
             if (true || age.TotalSeconds > 2)
             {
                 agedTiles.Add(coord);
@@ -171,7 +170,7 @@ internal abstract class VirtualSurfaceControl : Control
             }
         }
 
-        foreach (var tile in agedTiles)
+        foreach (var tile in CollectionsMarshal.AsSpan(agedTiles))
         {
             _tileMap.Remove(tile);
         }
@@ -211,9 +210,7 @@ internal abstract class VirtualSurfaceControl : Control
         //    }
         //}
 
-        var o = new VirtualSurfaceRenderOperation(Bounds, Pan, Scale, dpiScale, _surfaceMap, dirtyTiles, agedTiles);
-        Debug.WriteLine($"Creating render operation {o.GetHashCode()}");
-        context.Custom(o);
+        context.Custom(new VirtualSurfaceRenderOperation(Bounds, Pan, Scale, dpiScale, _surfaceMap, dirtyTiles, agedTiles));
     }
 
     private class VirtualSurfaceRenderOperation(
@@ -260,9 +257,9 @@ internal abstract class VirtualSurfaceControl : Control
                 for (var y = topLeftTile.Y; y <= bottomRightTile.Y; y++)
                 {
                     var tileIndex = new TileIndex(x, y);
-                    ref var tile = ref CollectionsMarshal.GetValueRefOrAddDefault(surfaceMap, tileIndex, out bool created);
+                    ref var tile = ref CollectionsMarshal.GetValueRefOrAddDefault(surfaceMap, tileIndex, out bool exists);
 
-                    if (dirtyTiles.TryGetValue(tileIndex, out var dirtyTilePicture))
+                    if (dirtyTiles.Remove(tileIndex, out var dirtyTilePicture))
                     {
                         var surface = tile ??= SKSurface.Create(lease.GrContext, false, new SKImageInfo(TileSide, TileSide));
                         var surfaceCanvas = surface.Canvas;
@@ -273,6 +270,12 @@ internal abstract class VirtualSurfaceControl : Control
 
                         dirtyTilePicture.Dispose();
                     }
+#if DEBUG
+                    else
+                    {
+                        Debug.Assert(exists, "If a tile surface was just created, it must be dirty");
+                    }
+#endif
 
                     canvas.DrawSurface(tile, new SKPoint((tileIndex.X << TileSideExponent) - (float)panX, (tileIndex.Y << TileSideExponent) - (float)panY));
                 }
@@ -280,15 +283,18 @@ internal abstract class VirtualSurfaceControl : Control
 
             canvas.Restore();
 
-            foreach (var tile in agedTiles)
-            {
-                if (surfaceMap.Remove(tile, out var surface))
-                {
-                    surface.Dispose();
-                }
+            Debug.Assert(dirtyTiles.Count == 0, "All dirty tiles should have been consumed");
 
-            //foreach (var (coord, surface) in tileMap)
+            foreach (var tile in CollectionsMarshal.AsSpan(agedTiles))
+            {
+                Debug.Assert(!visibleTiles.Contains(tile), "An aged tile should never be visible");
+
+                surfaceMap.Remove(tile, out var surface);
+                Debug.Assert(surface != null, "A tile marked for deletion should not already be deleted"); // surface != null iff Remove returned true
+                surface.Dispose();
             }
+
+            agedTiles.Clear();
         }
     }
 }
