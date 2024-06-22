@@ -15,7 +15,7 @@ namespace BnbnavNetClient.Controls;
 
 internal abstract class VirtualSurfaceControl : Control
 {
-    private struct Tile { public SKSurface Surface; public bool Dirty; public long Timestamp; }
+    private struct Tile { public bool Dirty; public long Timestamp; }
     private readonly record struct TileIndex(int X, int Y);
     private readonly record struct TileRect(TileIndex TopLeft, TileIndex BottomRight)
     {
@@ -30,6 +30,7 @@ internal abstract class VirtualSurfaceControl : Control
     private const int TileSide = 1 << TileSideExponent; // 512
 
     private readonly Dictionary<TileIndex, Tile> _tileMap = [];
+    private readonly Dictionary<TileIndex, SKSurface> _surfaceMap = [];
 
     public double Scale { get; set; } = 1;
     public Point Pan { get; set; }
@@ -47,6 +48,7 @@ internal abstract class VirtualSurfaceControl : Control
             for (var y = topLeftTile.Y; y <= bottomRightTile.Y; y++)
             {
                 var tileIndex = new TileIndex(x, y);
+
                 ref var tile = ref CollectionsMarshal.GetValueRefOrNullRef(_tileMap, tileIndex);
                 if (!Unsafe.IsNullRef(ref tile))
                 {
@@ -113,18 +115,19 @@ internal abstract class VirtualSurfaceControl : Control
     
     public override void Render(DrawingContext context)
     {
-        var dpiScale = DpiScale();
-        var (topLeftTile, bottomRightTile) = GetTileExtents(Bounds, Pan, Scale, dpiScale);
-
         var dirtyTiles = new Dictionary<TileIndex, SKPicture>();
-
         var timestamp = Stopwatch.GetTimestamp();
+
+        var dpiScale = DpiScale();
+        var visibleTiles = GetTileExtents(Bounds, Pan, Scale, dpiScale);
+        var (topLeftTile, bottomRightTile) = visibleTiles;
 
         for (var x = topLeftTile.X; x <= bottomRightTile.X; x++)
         {
             for (var y = topLeftTile.Y; y <= bottomRightTile.Y; y++)
             {
                 var tileIndex = new TileIndex(x, y);
+
                 ref var tile = ref CollectionsMarshal.GetValueRefOrAddDefault(_tileMap, tileIndex, out var exists);
 
                 if (!exists || tile.Dirty)
@@ -146,7 +149,71 @@ internal abstract class VirtualSurfaceControl : Control
             }
         }
 
-        context.Custom(new VirtualSurfaceRenderOperation(new Rect(0, 0, Bounds.Width, Bounds.Height), Pan, Scale, dpiScale, _tileMap, dirtyTiles));
+
+        // Trim old tiles
+
+        var agedTiles = new List<TileIndex>();
+        foreach (var (coord, surface) in _tileMap)
+        {
+            if (visibleTiles.Contains(coord))
+            {
+                continue;
+    }
+
+            var age = Stopwatch.GetElapsedTime(timestamp);
+            if (true || age.TotalSeconds > 2)
+            {
+                agedTiles.Add(coord);
+            }
+            else
+            {
+                // tilesStandbyList.Add(age, (coord, surface.Surface));
+            }
+        }
+
+        foreach (var tile in agedTiles)
+        {
+            _tileMap.Remove(tile);
+        }
+
+        //var tilesToFree = new List<(TileIndex, SKSurface)>();
+        //var tilesStandbyList = new SortedDictionary<TimeSpan, (TileIndex, SKSurface)>(
+        //    Comparer<TimeSpan>.Create((l, r) => -l.CompareTo(r)));
+
+        //foreach (var (coord, surface) in tileMap)
+        //{
+        //    if (visibleTiles.Contains(coord))
+        //    {
+        //        continue;
+        //    }
+
+        //    var age = Stopwatch.GetElapsedTime(timestamp);
+        //    if (age.TotalSeconds > 2)
+        //    {
+        //        tilesToFree.Add((coord, surface.Surface));
+        //    }
+        //    else
+        //    {
+        //        tilesStandbyList.Add(age, (coord, surface.Surface));
+        //    }
+        //}
+
+        //int count = tilesStandbyList.Count;
+        //foreach (var tile in tilesStandbyList)
+        //{
+        //    var (age, (coord, surface)) = tile;
+        //    surface?.Dispose();
+        //    tileMap.Remove(coord);
+
+        //    if (++count > 16)
+        //    {
+        //        break;
+        //    }
+        //}
+
+        var o = new VirtualSurfaceRenderOperation(Bounds, Pan, Scale, dpiScale, _surfaceMap, dirtyTiles, agedTiles);
+        Debug.WriteLine($"Creating render operation {o.GetHashCode()}");
+        context.Custom(o);
     }
 
     private class VirtualSurfaceRenderOperation(
@@ -154,8 +221,9 @@ internal abstract class VirtualSurfaceControl : Control
         Point pan,
         double scale,
         double dpiScale,
-        Dictionary<TileIndex, Tile> tileMap,
-        Dictionary<TileIndex, SKPicture> dirtyTiles) : ICustomDrawOperation
+        Dictionary<TileIndex, SKSurface> surfaceMap,
+        Dictionary<TileIndex, SKPicture> dirtyTiles,
+        List<TileIndex> agedTiles) : ICustomDrawOperation
     {
         public Rect Bounds => renderBounds;
 
@@ -178,27 +246,25 @@ internal abstract class VirtualSurfaceControl : Control
             using var lease = leaseFeature.Lease();
             var canvas = lease.SkCanvas;
 
-            var (panX, panY) = pan * scale * dpiScale;
-            var visibleTiles = GetTileExtents(Bounds, pan, scale, dpiScale);
-
             canvas.Save();
 
             var undoDpiScale = canvas.TotalMatrix.PostConcat(SKMatrix.CreateScale((float)dpiScale, (float)dpiScale).Invert());
             canvas.SetMatrix(undoDpiScale);
 
-            var timestamp = Stopwatch.GetTimestamp();
-
+            var (panX, panY) = pan * scale * dpiScale;
+            var visibleTiles = GetTileExtents(renderBounds, pan, scale, dpiScale);
             var (topLeftTile, bottomRightTile) = visibleTiles;
+
             for (var x = topLeftTile.X; x <= bottomRightTile.X; x++)
             {
                 for (var y = topLeftTile.Y; y <= bottomRightTile.Y; y++)
                 {
                     var tileIndex = new TileIndex(x, y);
-                    ref var tile = ref CollectionsMarshal.GetValueRefOrNullRef(tileMap, tileIndex);
+                    ref var tile = ref CollectionsMarshal.GetValueRefOrAddDefault(surfaceMap, tileIndex, out bool created);
 
                     if (dirtyTiles.TryGetValue(tileIndex, out var dirtyTilePicture))
                     {
-                        var surface = tile.Surface ??= SKSurface.Create(lease.GrContext, false, new SKImageInfo(TileSide, TileSide));
+                        var surface = tile ??= SKSurface.Create(lease.GrContext, false, new SKImageInfo(TileSide, TileSide));
                         var surfaceCanvas = surface.Canvas;
 
                         surfaceCanvas.Save();
@@ -208,48 +274,21 @@ internal abstract class VirtualSurfaceControl : Control
                         dirtyTilePicture.Dispose();
                     }
 
-                    tile.Timestamp = timestamp;
-                    canvas.DrawSurface(tile.Surface, new SKPoint((tileIndex.X << TileSideExponent) - (float)panX, (tileIndex.Y << TileSideExponent) - (float)panY));
+                    canvas.DrawSurface(tile, new SKPoint((tileIndex.X << TileSideExponent) - (float)panX, (tileIndex.Y << TileSideExponent) - (float)panY));
                 }
             }
 
             canvas.Restore();
 
-            //var tilesToFree = new List<(TileIndex, SKSurface)>();
-            //var tilesStandbyList = new SortedDictionary<TimeSpan, (TileIndex, SKSurface)>(
-            //    Comparer<TimeSpan>.Create((l, r) => -l.CompareTo(r)));
+            foreach (var tile in agedTiles)
+            {
+                if (surfaceMap.Remove(tile, out var surface))
+                {
+                    surface.Dispose();
+                }
 
             //foreach (var (coord, surface) in tileMap)
-            //{
-            //    if (visibleTiles.Contains(coord))
-            //    {
-            //        continue;
-            //    }
-
-            //    var age = Stopwatch.GetElapsedTime(timestamp);
-            //    if (age.TotalSeconds > 2)
-            //    {
-            //        tilesToFree.Add((coord, surface.Surface));
-            //    }
-            //    else
-            //    {
-            //        tilesStandbyList.Add(age, (coord, surface.Surface));
-            //    }
-            //}
-
-            //foreach (var (coord, surface) in tilesToFree)
-            //{
-            //    surface.Dispose();
-            //    tileMap.Remove(coord);
-            //}
-
-            
-            //while (tilesStandbyList.Count > 16)
-            //{
-            //    var (coord, surface) = tilesStandbyList.Values.First();
-            //    surface.Dispose();
-            //    tileMap.Remove(coord);
-            //}
+            }
         }
     }
 }
