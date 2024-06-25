@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Media;
+using Avalonia.Rendering;
 using Avalonia.Skia;
 
 using BnbnavNetClient.Controls;
@@ -9,6 +9,8 @@ using BnbnavNetClient.Models;
 using BnbnavNetClient.ViewModels;
 
 using SkiaSharp;
+
+using System.Reflection;
 
 namespace BnbnavNetClient.Views;
 
@@ -24,6 +26,11 @@ internal partial class VirtualMapView : VirtualSurfaceControl
     protected override void OnInitialized()
     {
         base.OnInitialized();
+
+        if (VisualRoot is TopLevel tl)
+        {
+            tl.RendererDiagnostics.DebugOverlays |= RendererDebugOverlays.Fps;
+        }
 
         //<LinearGradientBrush StartPoint="-100%,0%" EndPoint="100%, 0%">
         //    <GradientStop Color="#640000" Offset="0"/>
@@ -97,12 +104,18 @@ internal partial class VirtualMapView : VirtualSurfaceControl
 
     public MapViewModel MapViewModel { get; set; }
 
+    private static SKColor[] colors = typeof(SKColors)
+        .GetFields(BindingFlags.Public | BindingFlags.Static)
+        .Where(p => p.FieldType == typeof(SKColor))
+        .Select(p => (SKColor)p.GetValue(null)!)
+        .ToArray();
+
     public override void DrawTile(TileSurface surface, Rect worldCoordinates)
     {
         ThemeResources = (IResourceDictionary)this.FindResource(ActualThemeVariant.ToString())!;
 
         var canvas = surface.Canvas;
-        canvas.Clear();
+        canvas.Clear(/*colors[int.Abs(worldCoordinates.GetHashCode()) % colors.Length]*/);
 
         var noRender = new List<MapItem>();
         noRender.AddRange(MapViewModel.MapEditorService.EditController.ItemsNotToRender);
