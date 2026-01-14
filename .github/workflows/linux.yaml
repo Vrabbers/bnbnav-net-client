@@ -33,7 +33,7 @@ jobs:
           ln -s BnbnavNetClient.Linux bnbnav.AppDir/AppRun
       - name: "Create AppImage"
         run: |
-          curl https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -o appimagetool-x86_64.AppImage -L
+          curl https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -o appimagetool-x86_64.AppImage -L
           chmod +x appimagetool-x86_64.AppImage
           ./appimagetool-x86_64.AppImage --appimage-extract-and-run bnbnav.AppDir
       - uses: actions/upload-artifact@v4
