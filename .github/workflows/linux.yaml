@@ -56,3 +56,4 @@ jobs:
         with:
           files: bnbnav-x86_64.AppImage
 
+
